@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <script src="https://www.paypal.com/sdk/js?client-id=<%= clientId %>&vault=true&intent=subscription"></script>
+  <div id="paypal-button-container"></div>
+  <script>
+    paypal.Buttons({
+      createSubscription: function(data, actions) {
+        return actions.subscription.create({
+          'plan_id': '<%= planId %>'
+        });
+      },
+      onApprove: function(data, actions) {
+        alert('You have successfully subscribed to ' + data.subscriptionID);
+        
+        // Send a POST request to your server to update the user's subscription
+        fetch('/submit-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            subscriptionId: data.subscriptionID,
+            subscriptionType: 'advanced',
+            subscriptionStatus: 'approved' // or other relevant data
+          })
+        })
+        .then(response => response.json())
+        .then(result => {
+          console.log('Success:', result);
+          alert('Subscription updated successfully.');
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Failed to update subscription.');
+        });
+      }
+    }).render('#paypal-button-container');
+  </script>
+</body>
+</html>

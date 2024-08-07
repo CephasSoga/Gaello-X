@@ -1,0 +1,51 @@
+import os
+from PyQt5.QtWidgets import QFrame, QHBoxLayout, QLabel
+from PyQt5.QtGui import QMovie
+from PyQt5.QtCore import Qt
+from PyQt5 import uic
+
+currentDir = os.path.dirname(__file__)
+parentDir = os.path.dirname(currentDir)
+os.chdir(parentDir)
+
+class Waiter(QFrame):
+    def __init__(self, parent=None):
+        super(Waiter, self).__init__(parent)
+        path = os.path.join("UI", "waiter.ui")  # Using os.path.join for cross-platform compatibility
+        if os.path.exists(path):
+            uic.loadUi(path, self)
+        else:
+            exit()
+
+        self.initUI()
+
+    def initUI(self):
+        self.setWFlags()
+        self.setContents()
+
+    def setWFlags(self):
+        self.setWindowFlags(Qt.FramelessWindowHint)
+
+    def setContents(self):
+        self.Hlayout = QHBoxLayout()
+        self.Hlayout.setAlignment(Qt.AlignTop)
+        self.Hlayout.setContentsMargins(10, 0, 10, 10)
+        self.container.setLayout(self.Hlayout)
+
+        self.loadingMovie = QMovie("rsrc/videos/loading.gif")  # Corrected the file path
+        self.loadingMovie.start()
+        self.loadingLabel = QLabel(self)
+        self.loadingLabel.setFixedSize(100, 20)  # Corrected the method usage
+        self.loadingLabel.setMovie(self.loadingMovie)
+
+        self.Hlayout.addWidget(self.loadingLabel, alignment=Qt.AlignRight)
+
+# Example usage
+if __name__ == '__main__':
+    import sys
+    from PyQt5.QtWidgets import QApplication
+    
+    app = QApplication(sys.argv)
+    waiter = Waiter()
+    waiter.show()
+    sys.exit(app.exec_())
