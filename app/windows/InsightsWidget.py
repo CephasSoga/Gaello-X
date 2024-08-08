@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QWidget, QApplication, QGridLayout
 
 from app.windows.Fonts import RobotoRegular, MontserratRegular
 from app.windows.InsightItems import InsightItem
-from app.Inferential.ExportInsights import insights
+from app.inferential.ExportInsights import insights
 
 
 currentDir = os.path.dirname(__file__)
