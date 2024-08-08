@@ -10,11 +10,11 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame, QTextEdit
 from utils.databases import mongoGet
 from app.windows.Spinner import Spinner
 from app.assets.Patterns import Index, Symbol
-from app.windows.AssetFocusLogic import fetch, spinnerWork
 from app.windows.Fonts import loadFont
 from app.windows.Styles import chatScrollBarStyle
 from utils.logs import Logger
 from utils.appHelper import clearLayout
+from utils.workers import spinnerWork
 
 currentDir = os.path.dirname(__file__)
 parentDir = os.path.dirname(currentDir)

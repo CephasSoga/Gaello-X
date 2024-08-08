@@ -1,7 +1,9 @@
 .env
 build
 dist
+node_modules
 app/__pycache__
+app/windows/__pycache__
 client/__pycache__
 database/__pycache__
 database/mongodb/__pycache__
