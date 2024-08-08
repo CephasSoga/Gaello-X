@@ -5,11 +5,41 @@ import platform
 import audioread
 
 def getAudioLength(file_path):
+    """
+    Calculate the duration of an audio file.
+
+    Args:
+        file_path (str): The path to the audio file.
+
+    Returns:
+        float: The duration of the audio file in seconds.
+
+    Raises:
+        audioread.NoBackendError: If no suitable audio backend is found.
+        audioread.DecodeError: If there is an error decoding the audio file.
+
+    Example:
+        >>> getAudioLength("path/to/audio.mp3")
+        123.456
+    """
     with audioread.audio_open(file_path) as f:
         duration = f.duration
         return duration
 
 def hideFolder(folder_path):
+    """
+    Hides a folder based on the current operating system.
+
+    Args:
+        folder_path (str): The path to the folder to be hidden.
+
+    Raises:
+        ctypes.WinError: If the folder cannot be hidden on Windows.
+        NotImplementedError: If the operating system is not supported.
+
+    Returns:
+        None
+    """
     system = platform.system()
     
     if system == 'Windows':

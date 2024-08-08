@@ -8,6 +8,23 @@ from utils.envHandler import getenv
 APP_BASE_PATH = getenv('APP_BASE_PATH')
 
 class Logger(object):
+    """
+    A class to handle logging functionality with support for console and file handlers.
+
+    Attributes:
+    ----------
+    name (str): The name of the logger.
+    logger (logging.Logger): The actual logger object.
+    formatter (logging.Formatter): The formatter for log messages.
+
+    Methods:
+    -------
+    __init__(self, name: str = None): Initializes the logger with the given name.
+    _add_console_handler(self): Adds a console handler to the logger.
+    _add_file_handler(self): Adds a file handler to the logger.
+    get_logger(self) -> logging.Logger: Returns the logger object.
+    log(self, level: str, message: str, error: Any = None, params: Any = None): Logs a message with the given level, error, and params.
+    """
     def __init__(self, name: str = None):
         self.name = name
         self.logger = logging.getLogger(name)
@@ -20,11 +37,13 @@ class Logger(object):
             self._add_file_handler()
 
     def _add_console_handler(self):
+        """Adds a console handler to the logger."""
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(self.formatter)
         self.logger.addHandler(console_handler)
 
     def _add_file_handler(self):
+        """Adds a file handler to the logger."""
         log_dir = constructPath(Path(APP_BASE_PATH), 'logs')
         log_dir.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
         log_file_path = log_dir / f"{self.name}.log"
@@ -33,9 +52,22 @@ class Logger(object):
         self.logger.addHandler(file_handler)
 
     def get_logger(self):
+        """Returns the logger object."""
         return self.logger
     
     def log(self, level: str, message: str, error: Any = None, params: Any = None):
+        """
+        Logs a message with the given level, error, and params.
+
+        Parameters:
+        level (str): The log level (e.g., 'info', 'warning', 'error').
+        message (str): The main log message.
+        error (Any, optional): The error associated with the log message. Defaults to None.
+        params (Any, optional): Additional parameters related to the log message. Defaults to None.
+
+        Returns:
+        None
+        """
         if error:
             message = f"{message} | Error: {error}"
         if params:

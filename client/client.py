@@ -12,6 +12,9 @@ INIT_TIMEOUT = 3
 SLEEP_SEC = 1
 
 class WorkerThread(QThread):
+    """
+    A worker thread that emits signals to start and finish loading tasks.
+    """
     loadingStarted = pyqtSignal()
     loadingFinished = pyqtSignal()
 
@@ -20,11 +23,17 @@ class WorkerThread(QThread):
         self.loaded = False
 
     def run(self):
+        """
+        Emits loadingStarted signal, initializes the main window, and emits loadingFinished signal.
+        """
         self.loadingStarted.emit()
         self.initializeMainWindow()
         self.loadingFinished.emit()
 
     def initializeMainWindow(self):
+        """
+        Simulates a heavy loading task by sleeping for a specified duration and keeping the UI responsive.
+        """
         # Simulating heavy loading task
         for _ in range(INIT_TIMEOUT):
             QThread.sleep(SLEEP_SEC)  # Simulates long task
@@ -32,6 +41,9 @@ class WorkerThread(QThread):
         self.loaded = True
 
 class Client(QObject):
+    """
+    The main client class that initializes the application, handles connection errors, and starts the worker thread.
+    """
     def __init__(self):
         super().__init__()
         self.app = QAsyncApplication(sys.argv)
@@ -44,10 +56,16 @@ class Client(QObject):
         self.worker_thread.loadingFinished.connect(self.showMainWindow)
 
     def showMainWindow(self):
+        """
+        Shows the main window.
+        """
         self.window = MainWindow()
         self.window.show()
 
     def raiseConnectionError(self):
+        """
+        Raises a connection error warning.
+        """
         self.warningBox = Warning()
         self.warningBox.warning(
             "Connection Error.",
@@ -56,6 +74,10 @@ class Client(QObject):
         self.warningBox.show()
 
     def run(self):
+        """
+        Checks if the device is connected. If not, raises a connection error warning.
+        If the device is connected, starts the worker thread and runs the application's event loop.
+        """
         if not deviceIsConnected():
             self.raiseConnectionError()
             self.installEventFilter(self)

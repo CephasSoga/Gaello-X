@@ -7,7 +7,7 @@ const appPath = process.env.APP_BASE_PATH;
 // Path to your JSON file
 const filePath = path.join(appPath, 'credentials', 'credentials.json');
 
-// Function to read JSON file and extract fields
+// Function to read JSON file and extract `email` field
 async function readEmailFromJsonFile(filePath) {
     try {
         // Read the file synchronously

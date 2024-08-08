@@ -14,6 +14,28 @@ from utils.fileHelper import hideFolder
 from utils.paths import constructPath
 
 class UserCredentials:
+    """
+    A class representing user credentials.
+
+    Attributes:
+    -----------
+    userField : Dict[str, str]
+        A dictionary containing user information such as first name, last name, and email.
+    companyField : Dict[str, str]
+        A dictionary containing company information.
+    accountTypeField : Dict[str, str]
+        A dictionary containing account type information.
+    prospectedField : Dict[str, str]
+        A dictionary containing prospected information.
+
+    Methods:
+    --------
+    integratePswdHash(pswdHash: bytes) -> Self
+        Integrates a password hash into the user field of the object.
+
+    toDict() -> dict
+        Returns a dictionary representation of the object.
+    """
     def __init__(self, **fields):
         self.userField: Dict[str, str] = fields.get('user', {})
         self.companyField: Dict[str, str] = fields.get('company', {})
@@ -21,6 +43,15 @@ class UserCredentials:
         self.prospectedField: Dict[str, str] = fields.get('prospected', {})
 
     def integratePswdHash(self, pswdHash: bytes):
+        """
+        Integrates a password hash into the user field of the object.
+
+        Args:
+            pswdHash (bytes): The password hash to be integrated.
+
+        Returns:
+            Self: The updated object with the password hash integrated into the user field.
+        """
         self.userField = {
             "firstName": self.userField.get('firstName'),
             "lastName": self.userField.get('lastName'),
@@ -30,6 +61,16 @@ class UserCredentials:
         return self
     
     def toDict(self):
+        """
+        Returns a dictionary representation of the object.
+
+        Returns:
+            dict: A dictionary containing the following keys:
+                - "user" (dict): The user field.
+                - "company" (dict): The company field.
+                - "accountType" (dict): The account type field.
+                - "prospected" (dict): The prospected field.
+        """
         return {
             "user": self.userField,
             "company": self.companyField,
@@ -39,6 +80,31 @@ class UserCredentials:
 
 
 class UserAuthentification:
+    """
+    A class representing user authentication and registration functionality.
+
+    Attributes:
+    -----------
+    client : MongoClient
+        A MongoDB client instance for connecting to the database.
+    database : Database
+        The MongoDB database instance for storing user credentials.
+    users : Collection
+        The MongoDB collection for storing user credentials.
+    hasher : Hasher
+        An instance of the Hasher class for hashing and matching passwords.
+
+    Methods:
+    --------
+    login(email: str, password: str) -> bool
+        Authenticates a user with the provided email and password.
+    register(credentials: UserCredentials) -> bool
+        Registers a new user with the given credentials.
+    save(cred: Dict) -> None
+        Saves the given credentials to a local persistent file.
+    delete_user(email: str) -> bool
+        Deletes a user from the database based on their email.
+    """
     def __init__(self, connection_str: str):
         self.client = MongoClient(connection_str, server_api=ServerApi('1'))
         self.database: Database = self.client.UsersAuth
@@ -47,6 +113,16 @@ class UserAuthentification:
         self.hasher = Hasher()
 
     def login(self, email: str, password: str) -> bool:
+        """
+        Authenticates a user with the provided email and password.
+
+        Args:
+            email (str): The email of the user to authenticate.
+            password (str): The password of the user to authenticate.
+
+        Returns:
+            bool: True if the user's credentials are valid, False otherwise.
+        """
         user = self.users.find_one({"user.email": email})
         if user:
             credentials = UserCredentials(**user)
@@ -58,6 +134,23 @@ class UserAuthentification:
         return False
 
     def register(self, credentials: UserCredentials) -> bool:
+        """
+        Register a new user with the given credentials.
+
+        Args:
+            credentials (UserCredentials): The user credentials containing the user's email and password.
+
+        Returns:
+            bool: True if the user was successfully registered, False otherwise.
+
+        Raises:
+            ValueError: If the user's email or password is empty.
+
+        Side Effects:
+            - Inserts the user's credentials into the database.
+            - Dumps none-sensible fields into a local persistent file.
+
+        """
         email = credentials.userField.get('email')
         if not email:
             raise ValueError('UserCredentials.UserField: Email is empty')
@@ -80,12 +173,27 @@ class UserAuthentification:
                 "id": uuid.uuid4().hex,
                 "loggedIn": True,
                 "presistentLoggedIn": True,
-                "authorisationLevel": 0
+                "authorizationLevel": 0
             }
         )
         return True
 
     def save(self, cred: Dict):
+        """
+        Save the given credentials to a local persistent file.
+
+        Args:
+            cred (Dict): A dictionary containing the credentials to be saved.
+
+        Returns:
+            None
+
+        Raises:
+            FileNotFoundError: If the 'APP_BASE_PATH' environment variable is not set.
+            Exception: If there is an error while hiding the credentials folder.
+
+        This function saves the given credentials to a local persistent file. It first retrieves the base folder path from the 'APP_BASE_PATH' environment variable. It then constructs the path to the credentials file and creates the necessary directories if they don't exist. The credentials are then saved to the file using the 'json.dump' function. Finally, it attempts to hide the credentials folder, but if there is an error, it prints the exception.
+        """
         baseFolder = Path(os.getenv('APP_BASE_PATH'))
         credentialsPath = constructPath(baseFolder,  r'credentials\credentials.json')
         credentialsPath.parent.mkdir(parents=True, exist_ok=True)
@@ -102,6 +210,15 @@ class UserAuthentification:
             print(e)
 
     def delete_user(self, email: str) -> bool:
+        """
+        Deletes a user from the database based on their email.
+
+        Args:
+            email (str): The email of the user to be deleted.
+
+        Returns:
+            bool: True if the user was successfully deleted, False otherwise.
+        """
         result = self.users.delete_one({"user.email": email})
         return result.deleted_count > 0
 

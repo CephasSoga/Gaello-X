@@ -1,15 +1,19 @@
 import os
+import json
 from pathlib import Path
 
 from PyQt5 import uic
 
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QFrame
+from PyQt5.QtWidgets import QFrame, QMessageBox
 
 from utils.appHelper import *
+from utils.databases import mongoUpdate
+from utils.envHandler import getenv
 from app.windows.Fonts import loadFont
 from app.windows.PaymentForm import PaymentForm
+from app.windows.NewAccountOk import AccountAllSet,  AccountInitFailure
 
 currentDir = os.path.dirname(__file__)
 parentDir = os.path.dirname(currentDir)
@@ -47,16 +51,53 @@ class NewAccountPlan(QFrame):
         self.standardTierButton.clicked.connect(self.submitStandardTier)
         self.advancedTierButton.clicked.connect(self.submitAdvancedTier)
 
+    def getEmail(self):
+        base_path = getenv("APP_BASE_PATH")
+        credentials_path = os.path.join(base_path, "credentials", "credentials.json")
+        try:
+            with open(credentials_path, 'r') as credentials_file:
+                credentials = json.load(credentials_file)
+
+            email: str = credentials.get('email', '')
+            return email
+        except FileNotFoundError:
+            QMessageBox.warning(self, "Credentials were deleted.", "Error: Credentials were deleted. Login again to recreate the file.")
+            self.close()
+            return
+        
+        except json.JSONDecodeError:
+            QMessageBox.warning(self, "Credentials file is corrupted.", "Error: Credentials file is corrupted. Please, try again.")
+            self.close()
+            return
+
+        except Exception as e:
+            QMessageBox.warning(self, "Error retrieving user's email.", f"Error: {str(e)}")
+            self.close()
+            return
+        
     def submitFreeTier(self):
         parent = self.parent()
-        self.paymentForm = PaymentForm(serverPath=Path('server/free.js'))
-        if self.paymentForm:
-            self.paymentForm.hide()
-            if parent:
-                setRelativeToMainWindow(self.paymentForm, parent, 'center')
+        email = self.getEmail()
+        if email:
+            res = mongoUpdate(
+                database='UsersAuth', 
+                collection='users', 
+                query={'user.email': email}, 
+                update={'$set': {'subscription': 'free', 'status': 'ACTIVE', 'AuthorizationLevel': 1}}
+            )
+            if res:
+                allSet = AccountAllSet()
+                allSet.hide()
+                setRelativeToMainWindow(allSet, parent, 'center')
+                self.close()
             else:
-                self.paymentForm.show()
-            self.hide()
+                paymentFailed = AccountInitFailure()
+                paymentFailed.hide()
+                setRelativeToMainWindow(paymentFailed, parent, 'center')
+                self.close()
+        else:
+            QMessageBox.warning(self, "Missing Credentials", "Close this App and retry creating an account.")
+        
 
     def submitStandardTier(self):
         parent = self.parent()

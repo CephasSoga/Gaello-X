@@ -45,14 +45,14 @@
      <x>10</x>
      <y>70</y>
      <width>780</width>
-     <height>80</height>
+     <height>100</height>
     </rect>
    </property>
    <property name="styleSheet">
     <string notr="true">color: rgb(255, 255, 255);</string>
    </property>
    <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;You are all set! Enjoy using Gaello.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;You are all set!&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Restart the app and enjoy using Gaello&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
  </widget>

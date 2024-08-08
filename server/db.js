@@ -21,6 +21,14 @@ const subscriptionLevels = {
     advanced: 3,
 };
 
+/**
+ * Creates an index on a MongoDB collection.
+ *
+ * @param {string} collectionName - The name of the collection to create the index on.
+ * @param {object} index - The index specification.
+ * @return {Promise<void>} - A promise that resolves when the index is created.
+ * @throws {Error} - If there is an error creating the index.
+ */
 const createIndex = async (collectionName, index) => {
     try {
         const collection = await getCollection(collectionName);
@@ -32,6 +40,13 @@ const createIndex = async (collectionName, index) => {
     }
 };
 
+/**
+ * Connects to the MongoDB database and returns the database client. If the client is already connected,
+ * it returns the existing client. If the index on the 'users' collection does not exist, it creates the index.
+ *
+ * @return {Promise<MongoClient>} The database client.
+ * @throws {Error} If there is an error connecting to the database or creating the index.
+ */
 async function connect() {
     if (dbClient) return dbClient;
     try {
@@ -56,6 +71,13 @@ async function connect() {
     }
 }
 
+/**
+ * Retrieves a MongoDB collection by its name.
+ *
+ * @param {string} collectionName - The name of the collection to retrieve.
+ * @return {Promise<Collection>} A Promise that resolves to the MongoDB collection.
+ * @throws {Error} If there is an error connecting to the database or retrieving the collection.
+ */
 async function getCollection(collectionName) {
     try {
         const db = await connect();
@@ -66,12 +88,21 @@ async function getCollection(collectionName) {
     }
 }
 
+/**
+ * Updates a user's subscription details in the specified collection.
+ *
+ * @param {string} userEmail - The email of the user to update.
+ * @param {string} collection - The name of the collection to update.
+ * @param {string} subscription - The new subscription level.
+ * @return {Promise<boolean>} A Promise that resolves to true if the update was successful, false otherwise.
+ * @throws {Error} If there was an error updating the user.
+ */
 async function updateUser(userEmail, collection, subscription) {
     try {
         const authorizationLevel = subscriptionLevels[subscription] || 0;
         const subscriptionField = {
-            authorizationLevel,
-            subscription,
+            authorizationLevel: authorizationLevel,
+            subscription: subscription,
             status: 'ACTIVE',
         };
 
@@ -89,6 +120,11 @@ async function updateUser(userEmail, collection, subscription) {
     }
 }
 
+/**
+ * Updates the current user's subscription based on the provided subscription level.
+ *
+ * @param {string} subscription - The new subscription level to update.
+ */
 async function updateCurrentUser(subscription) {
     try {
         const credentials = await readEmailFromJsonFile(filePath);

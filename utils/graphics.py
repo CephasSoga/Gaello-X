@@ -8,6 +8,35 @@ from utils .envHandler import getenv
 APP_BASE_PATH = getenv('APP_BASE_PATH')
 
 def chartWithSense(dates: list[str], values: list[int], width=120, height=60):
+    """
+    Generates a line chart with a sense of trend based on the given dates and values.
+
+    Args:
+        dates (list[str]): A list of dates in string format.
+        values (list[int]): A list of corresponding values.
+        width (int, optional): The width of the chart in pixels. Defaults to 120.
+        height (int, optional): The height of the chart in pixels. Defaults to 60.
+
+    Returns:
+        Path: The path to the saved chart image.
+
+    Raises:
+        None
+
+    Description:
+        This function generates a line chart with a sense of trend based on the given dates and values.
+        The color of the line is determined by the trend of the last two values. If the second last value
+        is greater than the last value, the line is colored red, otherwise it is colored green.
+
+        The chart is saved as a PNG image with the name "chart_with_sense" in the "static/charts" directory
+        of the APP_BASE_PATH. The directory is created if it does not exist.
+
+        The chart has no axis labels, tick labels, or grid lines. The background is transparent.
+
+        The chart is saved with the specified width and height.
+
+        The function returns the path to the saved chart image.
+    """
     color = "red" if values[-2] > values[-1] else "green"
     
     trace = go.Scatter(
