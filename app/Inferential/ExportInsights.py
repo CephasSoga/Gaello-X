@@ -1,4 +1,4 @@
-from app.Inferential.Insights import Insight
+from app.inferential.Insights import Insight
 
 
 def generate_insights(data: list[dict])->list[Insight]:
