@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QFrame, QVBoxLayout,QSlider, QLabel, QSizePolicy, QW
 from app.windows.Types import *
 from utils.time import time_, date
 from app.windows.Styles import userMessageBackground, chatScrollBarStyle
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import RobotoRegular, Exo2Light
 
 currentDir = os.path.dirname(__file__)
 parentDir = os.path.dirname(currentDir)
@@ -20,11 +20,11 @@ os.chdir(parentDir)
 class ChatTextMessage(QFrame):
     def __init__(self, message:Message, parent=None):
         super(ChatTextMessage, self).__init__(parent)
-        path = os.path.join(r"UI/text_message.ui")
+        path = os.path.join("UI", "text_message.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
         self.content = message.content
         if isinstance(self.content, TextMessage):
             self.textMessage = self.content.text
@@ -67,18 +67,8 @@ class ChatTextMessage(QFrame):
             obj.setFont(font)
 
     def setFonts(self):
-        regularFontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf")
-        if regularFontFam:
-            regularFont = QFont(regularFontFam, 10)
-        else:
-            regularFont = QFont("Arial", 10)
-
-        tinyFontFam = loadFont(r"rsrc/fonts/Exo_2/static/Exo2-Light.ttf")
-        if tinyFontFam:
-            tinyFont = QFont(tinyFontFam, 8)
-        else:
-            tinyFont = QFont("Arial", 8)
-
+        regularFont = RobotoRegular(10) or QFont("Arial", 10)
+        tinyFont = Exo2Light(8) or QFont("Arial", 8)
         self.setFontOnObjects(regularFont, [self.text])
         self.setFontOnObjects(tinyFont, [self.originLabel, self.date, self.time])
 
@@ -100,11 +90,11 @@ class ChatTextMessage(QFrame):
 class ChatVoiceMail(QFrame):
     def __init__(self, message:Message, parent=None):
         super(ChatVoiceMail, self).__init__(parent)
-        path = os.path.join(r"UI/voicemail.ui")
+        path = os.path.join("UI", "voicemail.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
         self.content = message.content
         if isinstance(self.content, VoiceMail):
             self.filePath = self.content.filePath
@@ -140,12 +130,7 @@ class ChatVoiceMail(QFrame):
             obj.setFont(font)
 
     def setFonts(self):
-        tinyFontFam = loadFont(r"rsrc/fonts/Exo_2/static/Exo2-Light.ttf")
-        if tinyFontFam:
-            tinyFont = QFont(tinyFontFam, 8)
-        else:
-            tinyFont = QFont("Arial", 8)
-
+        tinyFont = Exo2Light(8) or QFont("Arial", 8)
         self.setFontOnObjects(tinyFont, [self.originLabel, self.date, self.time])
     
     def setupLayout(self):
@@ -235,11 +220,11 @@ class ChatMultimedia(QWidget):
             raise TypeError("ChatMultimedia requires a Multimedia instance")
         self.origin = self.content.origin
 
-        path = os.path.join(r"UI/multimedia_.ui")
+        path = os.path.join("UI", "multimedia_.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.initUI()
         
@@ -266,18 +251,8 @@ class ChatMultimedia(QWidget):
             obj.setFont(font)
 
     def setFonts(self):
-        regularFontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf")
-        if regularFontFam:
-            regularFont = QFont(regularFontFam, 10)
-        else:
-            regularFont = QFont("Arial", 10)
-
-        tinyFontFam = loadFont(r"rsrc/fonts/Exo_2/static/Exo2-Light.ttf")
-        if tinyFontFam:
-            tinyFont = QFont(tinyFontFam, 8)
-        else:
-            tinyFont = QFont("Arial", 8)
-
+        regularFont = RobotoRegular(10) or QFont("Arial", 10)
+        tinyFont = Exo2Light(8) or QFont("Arial", 8)
         self.setFontOnObjects(regularFont, [self.textLabel])
         self.setFontOnObjects(tinyFont, [self.label, self.date, self.time])
 

@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5 import uic
 
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import RobotoRegular
 
 currentDir = os.path.dirname(__file__)
 parentDir = os.path.dirname(currentDir)
@@ -14,10 +14,11 @@ os.chdir(parentDir)
 class JanineCommunity(QWidget):
     def __init__(self, parent=None):
         super(JanineCommunity, self).__init__(parent)
-        if os.path.exists("UI/community.ui"):
-            uic.loadUi("UI/community.ui", self)
+        path = os.path.join("UI", "community.ui")
+        if os.path.exists(path):
+            uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.initUI()
     
@@ -30,12 +31,7 @@ class JanineCommunity(QWidget):
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
 
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf")
-        if fontFam:
-            font = QFont(fontFam)
-            font.setPointSize(14)
-        else:
-            font = QFont("Arial", 14)
+        font = RobotoRegular(14) or QFont("Arial", 14)
         for item in self.children():
             item.setFont(font)
 

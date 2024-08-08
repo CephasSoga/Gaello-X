@@ -22,7 +22,12 @@ class MainWindow(QMainWindow):
     finishedLoading = pyqtSignal()
     def __init__(self):
         super(MainWindow, self).__init__()
-        uic.loadUi('UI/mainwindow.ui', self)
+        path = os.path.join("UI", "mainwindow.ui")
+        if os.path.exists(path):
+            uic.loadUi(path, self)
+        else:
+            raise FileNotFoundError(f"{path} not found")
+        
         self.initUI()
 
     def initUI(self):

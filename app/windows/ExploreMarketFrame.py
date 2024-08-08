@@ -25,11 +25,11 @@ os.chdir(parentDir)
 class ExploreMarket(QFrame):
     def __init__(self, parent=None):
         super(ExploreMarket, self).__init__(parent)
-        path = os.path.join(r"UI/exploreMarket.ui")
+        path = os.path.join("UI", "exploreMarket.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.flagsSource = "https://flagcdn.com"
         self.chartDisplayWidth, self.chartDisplayHeigth = 120, 60

@@ -12,8 +12,8 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame, QTextEdit
 from utils.databases import mongoGet
 from app.windows.Spinner import Spinner
 from app.assets.Patterns import Index, Symbol
-from app.windows.AssetFocusLogic import spinnerWork
-from app.windows.Fonts import loadFont
+from utils.workers import spinnerWork
+from app.windows.Fonts import RobotoRegular
 from app.windows.Styles import chatScrollBarStyle
 from utils.logs import Logger
 from utils.appHelper import clearLayout
@@ -26,11 +26,11 @@ os.chdir(parentDir)
 class SingleFocus(QWidget):
     def __init__(self, symbol:str, targetCollection: str, parent=None):
         super().__init__(parent)
-        path = os.path.join(r"UI/singleFocus.ui")
+        path = os.path.join("UI", "singleFocus.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.symbol = symbol
         self.targetCollection = targetCollection
@@ -98,10 +98,8 @@ class SingleFocus(QWidget):
         item = QTextEdit()
         item.clear()
         item.setStyleSheet(f"color: rgb(255, 255, 255)")
-        item.setFont(QFont(
-                loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf"), 
-                10
-            )
+        item.setFont(
+            RobotoRegular(10) or QFont ('Arial', 10)
         )
         item.setReadOnly(True)
         try:

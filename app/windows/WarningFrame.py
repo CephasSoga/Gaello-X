@@ -11,7 +11,12 @@ os.chdir(parentDir)
 class Warning(QFrame):
     def __init__(self, parent=None):
         super(Warning, self).__init__(parent)
-        uic.loadUi(r"UI/warnings.ui", self)
+        path = os.path.join("UI", "warnings.ui")
+        if os.path.exists(path):
+            uic.loadUi(path, self)
+        else:
+            raise FileNotFoundError(f"{path} not found")
+        
         self.initUI()
 
     def initUI(self):

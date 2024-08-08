@@ -11,7 +11,7 @@ from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QEvent
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFrame, QMessageBox
 
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import RobotoBold
 from app.windows.NewAccountOk import AccountAllSet, AccountInitFailure
 from utils.appHelper import stackOnCurrentWindow, setRelativeToMainWindow
 from utils.databases import mongoGet
@@ -33,12 +33,12 @@ class PaymentForm(QFrame):
     failure = pyqtSignal()
 
     def __init__(self, execPath: Path | str = rootDir, serverPath: Path = Path('server/server.js'), parent=None):
-        path = os.path.join(parentDir, "UI/paymentForm.ui")
+        path = os.path.join(parentDir, "UI", "paymentForm.ui")
         super(PaymentForm, self).__init__(parent)
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            raise FileNotFoundError("File %s not found" % path)
+            raise FileNotFoundError(f"{path} not found")
 
         self.execPath = execPath
         self.serverPath = serverPath
@@ -62,13 +62,7 @@ class PaymentForm(QFrame):
 
 
     def setFonts(self):
-        fontFam = loadFont(f'{parentDir}' + "/" + r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Bold.ttf")
-        if fontFam:
-            font = QFont(fontFam)
-            font.setPointSize(9)
-        else:
-            font = QFont("Arial", 9)
-
+        font = RobotoBold(9) or QFont('Arial', 9)
         for item in self.children():
             item.setFont(font)
 

@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFrame, QLayout
 
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import RobotoRegular
 
 
 currentDir = os.path.dirname(__file__)
@@ -17,11 +17,11 @@ os.chdir(parentDir)
 class AccountAllSet(QFrame):
     def __init__(self, parent=None):
         super(AccountAllSet, self).__init__(parent)
-        path = os.path.join(r"UI/accountOk.ui")
+        path = os.path.join("UI", "accountOk.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.initUI()
 
@@ -38,17 +38,10 @@ class AccountAllSet(QFrame):
         pass
 
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf")
-        if fontFam:
-            font = QFont(fontFam)
-            font.setPointSize(16)
-        else:
-            font = QFont("Arial", 16)
-
+        font = RobotoRegular(16) or QFont("Arial", 16)
         for item in self.children():
             if not isinstance(item, QLayout):
                 item.setFont(font)
-
             elif isinstance(item, QFrame):
                 for subItem in item.children():
                     subItem.setFont(font)
@@ -64,11 +57,11 @@ class AccountAllSet(QFrame):
 class AccountInitFailure(QFrame):
     def __init__(self, parent=None):
         super(AccountInitFailure, self).__init__(parent)
-        path = os.path.join(r"UI/accountNotOk.ui")
+        path = os.path.join("UI", "accountNotOk.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.initUI()
 
@@ -85,17 +78,10 @@ class AccountInitFailure(QFrame):
         pass
 
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf")
-        if fontFam:
-            font = QFont(fontFam)
-            font.setPointSize(16)
-        else:
-            font = QFont("Arial", 16)
-
+        font = RobotoRegular(16) or QFont("Arial", 16)
         for item in self.children():
             if not isinstance(item, QLayout):
                 item.setFont(font)
-
             elif isinstance(item, QFrame):
                 for subItem in item.children():
                     subItem.setFont(font)

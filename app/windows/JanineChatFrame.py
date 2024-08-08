@@ -20,6 +20,7 @@ from databases.mongodb.JanineDB import janineDB
 from utils.fileHelper import getAudioLength
 from utils.envHandler import getenv
 from utils.paths import rawPathStr
+from app.windows.Fonts import  QuicksandBold, Exo2Medium
 from app.windows.WaiterFrame import Waiter
 
 currentDir = os.path.dirname(__file__)
@@ -29,11 +30,11 @@ os.chdir(parentDir)
 class JanineChat(QFrame):
     def __init__(self, parent=None):
         super(JanineChat, self).__init__(parent)
-        path = os.path.join(r"UI/chat_.ui")
+        path = os.path.join("UI", "chat_.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.waiter = Waiter()
 
@@ -73,18 +74,8 @@ class JanineChat(QFrame):
             obj.setFont(font)
 
     def setFonts(self):
-        regularFontFam = loadFont(r"rsrc/fonts/Montserrat/static/Montserrat-Regular.ttf")
-        if regularFontFam:
-            regularFont = QFont(regularFontFam, 10)
-        else:
-            regularFont = QFont("Arial", 10)
-
-        discreteFontFam = loadFont(r"rsrc/fonts/Exo_2/static/Exo2-Light.ttf")
-        if discreteFontFam:
-            discreteFont = QFont(discreteFontFam, 9)
-        else:
-            discreteFont = QFont("Arial", 9)
-
+        regularFont = QuicksandBold(10) or QFont("Arial", 10)
+        discreteFont = Exo2Medium(9) or QFont("Arial", 9)
         self.setFontOnObjects(regularFont, [self.newChat, self.message, self.caution])
         self.setFontOnObjects(discreteFont, [self.caution])
 

@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame, QTextEdit
 from utils.databases import mongoGet
 from app.windows.Spinner import Spinner
 from app.assets.Patterns import Index, Symbol
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import RobotoSemiBold, RobotoRegular
 from app.windows.Styles import chatScrollBarStyle
 from utils.logs import Logger
 from utils.appHelper import clearLayout
@@ -23,11 +23,11 @@ os.chdir(parentDir)
 class AssetFocusItem(QFrame):
     def __init__(self, parent=None):
         super(AssetFocusItem, self).__init__(parent)
-        path = os.path.join(r"UI/assetFocusItem.ui")
+        path = os.path.join(r"UI", "assetFocusItem.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.initUI()
 
@@ -49,12 +49,7 @@ class AssetFocusItem(QFrame):
         )
 
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Quicksand/static/Quicksand-Semibold.ttf")
-        if fontFam:
-            font = QFont(fontFam)
-            font.setPointSize(12)
-        else:
-            font = QFont("Arial", 12)
+        font = RobotoSemiBold(12) or QFont("Arial", 12)
         self.name.setFont(font)
         self.value.setFont(font)
 
@@ -142,10 +137,8 @@ class AssetFocus(QWidget):
         item = QTextEdit()
         item.clear()
         item.setStyleSheet(f"color: rgb(255, 255, 255)")
-        item.setFont(QFont(
-                loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf"), 
-                10
-            )
+        item.setFont(
+            RobotoRegular(10) or QFont("Arial", 10)
         )
         item.setReadOnly(True)
         item.setPlainText(json.dumps(result, indent=4, separators=(',\n', ': ')))

@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QApplication, QGridLayout
 
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import RobotoRegular, MontserratRegular
 from app.windows.InsightItems import InsightItem
 from app.Inferential.ExportInsights import insights
 
@@ -17,11 +17,11 @@ class JanineInsights(QWidget):
 
     def __init__(self, parent=None):
         super(JanineInsights, self).__init__(parent)
-        path = os.path.join(r"UI/insightsWidget.ui")
+        path = os.path.join("UI" , "insightsWidget.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.initUI()
 
@@ -70,30 +70,16 @@ class JanineInsights(QWidget):
 
 
     def setFonts(self):
-        regularFontFam = loadFont(r"rsrc\fonts\Roboto_Mono\static\RobotoMono-Regular.ttf")
-        if regularFontFam:
-            regularfont = QFont(regularFontFam)
-            regularfont.setPointSize(10)
-        else:
-            regularfont = QFont("Arial", 10)
-
-        tinyFontFam = loadFont(r"rsrc\fonts\Montserrat\static\Montserrat-Regular.ttf")
-        if tinyFontFam:
-            tinyfont = QFont(tinyFontFam)
-            tinyfont.setPointSize(8)
-        else:
-            tinyfont = QFont("Arial", 8)
-
-        self.filterLabel.setFont(regularfont)
-        self.tuneLabel.setFont(regularfont)
-
-        self.temperatureLabel.setFont(tinyfont)
-        self.audacityLabel.setFont(tinyfont)
-        self.cycleLabel.setFont(tinyfont)
-
-        self.subjectsCombo.setFont(tinyfont)
-        self.locationsCombo.setFont(tinyfont)
-        self.assetsCombo.setFont(tinyfont)
+        regularFont = RobotoRegular(10) or QFont("Arial", 10)
+        tinyFont = MontserratRegular(8) or QFont("Arial", 8)
+        self.filterLabel.setFont(regularFont)
+        self.tuneLabel.setFont(regularFont)
+        self.temperatureLabel.setFont(tinyFont)
+        self.audacityLabel.setFont(tinyFont)
+        self.cycleLabel.setFont(tinyFont)
+        self.subjectsCombo.setFont(tinyFont)
+        self.locationsCombo.setFont(tinyFont)
+        self.assetsCombo.setFont(tinyFont)
 
 
 if __name__ == "__main__":

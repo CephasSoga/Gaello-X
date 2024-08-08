@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow, QLineEdit, QMessageBox, QLayout
 
 from utils.appHelper import *
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import RobotoRegular
 from app.windows.NewAccountSetup import NewAccountSetup
 
 from databases.mongodb.UsersAuth import UserCredentials, userAuthInstance
@@ -23,11 +23,11 @@ class SignInFrame(QMainWindow):
     def __init__(self, parent=None):
         super(SignInFrame, self).__init__(parent)
         self.newAccountSetupWidget = None  # Initialize as None
-        path = os.path.join(r"UI/login.ui")
+        path = os.path.join("UI", "login.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.parent_ = self.parent()
         self.userAuth = userAuthInstance
@@ -135,9 +135,7 @@ class SignInFrame(QMainWindow):
         self.hide()
     
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf")
-        font = QFont(fontFam, 9) or QFont("Arial", 9)
-        
+        font = RobotoRegular(9) or QFont("Arial", 9)
         for obj in [self.emailEdit, self.passwordEdit, self.loginButton, self.createNewAccount]:
             if not isinstance(obj, QLayout):
                 obj.setFont(font)

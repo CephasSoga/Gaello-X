@@ -6,6 +6,7 @@ from PyQt5.QtGui import QMovie, QFont
 from PyQt5.QtWidgets import QFrame, QMainWindow
 
 from utils.appHelper import *
+from utils.paths import resourcePath
 from app.windows.JanineChatFrame import JanineChat
 from app.windows.MarketSummaryFrame import MarketSummary
 from app.windows.ExploreAssetsFrame import ExploreAsset
@@ -17,7 +18,7 @@ from app.windows.LoginFrame import SignInFrame
 from app.windows.NotificationsFrame import Notifications
 from app.windows.HelpFrame import Help
 from app.windows.MenuFrame import Menu
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import *
 
 currentDir = os.path.dirname(__file__)
 parentDir = os.path.dirname(currentDir)
@@ -67,11 +68,11 @@ class PressExploreFrame(QFrame):
 class Header(QMainWindow):
     def __init__(self, parent=None):
         super(Header, self).__init__(parent)
-        path = os.path.join(r"UI/header.ui")
+        path = os.path.join("UI", "header.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.aboutUsUrl = 'example.com'
         self.demoUrl =  'example.com'
@@ -86,19 +87,8 @@ class Header(QMainWindow):
         self.installEventFilters()
 
     def setFonts(self):
-        labelFontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf")
-        if labelFontFam:
-            labelFont = QFont(labelFontFam)
-            labelFont.setPointSize(10)
-        else:
-            labelFont = QFont("Arial", 10)
-            
-        titleFontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Bold.ttf")
-        if titleFontFam:
-            titleFont = QFont(titleFontFam)
-            titleFont.setPointSize(11)
-        else:
-            titleFont = QFont("Arial", 11)
+        labelFont = RobotoRegular(10) or QFont('Arial', 10)
+        titleFont = RobotoBold(11) or QFont('Arial', 11)
 
         self.exploreForexLabel.setFont(labelFont)
         self.exploreStocksLabel.setFont(labelFont)
@@ -106,16 +96,20 @@ class Header(QMainWindow):
         self.exploreForexTitle.setFont(titleFont)
         self.exploreStocksTitle.setFont(titleFont)
 
-        tinyFontFam = loadFont(r"rsrc/fonts/Quicksand/static/Quicksand-Bold.ttf")
-        self.chat_p.setFont(QFont(tinyFontFam, 9))
-        self.explore_p.setFont(QFont(tinyFontFam, 9))
+        tinyFont = QuicksandBold(9) or QFont('Arial', 9)
+        self.chat_p.setFont(tinyFont)
+        self.explore_p.setFont(tinyFont)
 
     def setupMovies(self):
-        marketMovie = QMovie(r"rsrc/videos/marketChart.gif")
+        marketMovie = QMovie(resourcePath(
+            os.path.join('rsrc', 'videos', 'marketChart.gif')#r"rsrc/videos/marketChart.gif"
+        ))
         self.marketGif.setMovie(marketMovie)
         marketMovie.start()
 
-        stocktMovie = QMovie(r"rsrc/videos/stockChart.gif")
+        stocktMovie = QMovie(resourcePath(
+            os.path.join('rsrc', 'videos', 'stockChart.gif')#r"rsrc/videos/stockChart.gif"
+        ))
         self.stockGif.setMovie(stocktMovie)
         stocktMovie.start()
 

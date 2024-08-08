@@ -6,7 +6,7 @@ from PyQt5.QtGui import QIcon, QFont, QPixmap
 from PyQt5.QtCore import Qt, QSize, pyqtSignal
 from PyQt5.QtWidgets import QFrame
 
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import RobotoSemiBold
 
 currentDir = os.path.dirname(__file__)
 parentDir = os.path.dirname(currentDir)
@@ -24,11 +24,11 @@ class AssetPreview(QFrame):
                 chartPixmap: Optional[QPixmap] = None,
                 parent = None):
         super(AssetPreview, self).__init__(parent)
-        path = os.path.join(r"UI\assetPreview.ui")
+        path = os.path.join(r"UI", "assetPreview.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.symbol = symbol
         self.name = name
@@ -88,12 +88,6 @@ class AssetPreview(QFrame):
 
 
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Semibold.ttf")
-        if fontFam:
-            font = QFont(fontFam)
-            font.setPointSize(9)
-        else:
-            font = QFont("Arial", 9)
-
+        font = RobotoSemiBold(9) or QFont("Arial", 9)
         for obj in self.children():
             obj.setFont(font)

@@ -6,7 +6,7 @@ from PyQt5 import uic
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFrame
 
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import QuicksandRegular
 from utils.databases import mongoGet
 from utils.logs import Logger
 
@@ -42,11 +42,11 @@ class MarketOutliner:
 class Outline(QFrame):
     def __init__(self, parent=None):
         super(Outline, self).__init__(parent)
-        path = os.path.join(r"UI\outline.ui")
+        path = os.path.join("UI", "outline.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.initUI()
 
@@ -54,13 +54,7 @@ class Outline(QFrame):
         self.setFonts()
 
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Quicksand/static/Quicksand-Regular.ttf")
-        if fontFam:
-            font = QFont(fontFam, 10)
-
-        else:
-            font = QFont("Arial", 10)
-
+        font = QuicksandRegular(10) or QFont('Arial', 10)
         self.symbolLabel.setFont(font)
         self.nameLabel.setFont(font)
         self.priceLabel.setFont(font)
@@ -70,11 +64,11 @@ class Outline(QFrame):
 class OutlineTitle(QFrame):
     def __init__(self, parent=None):
         super(OutlineTitle, self).__init__(parent)
-        path = os.path.join(r"UI\outlineTitle.ui")
+        path = os.path.join("UI", "outlineTitle.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.initUI()
 
@@ -83,13 +77,7 @@ class OutlineTitle(QFrame):
         self.setFonts()
 
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Quicksand/static/Quicksand-Regular.ttf")
-        if fontFam:
-            font = QFont(fontFam, 12)
-
-        else:
-            font = QFont("Arial", 12)
-
+        font = QuicksandRegular(12) or QFont('Arial', 12)
         self.titleLabel.setFont(font)
 
 async def main():

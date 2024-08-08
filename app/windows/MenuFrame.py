@@ -15,11 +15,11 @@ os.chdir(parentDir)
 class Menu(QFrame):
     def __init__(self, parent=None):
         super(Menu, self).__init__(parent)
-        path = os.path.join(r"UI\menu.ui")
+        path = os.path.join("UI", "menu.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.initUI()
 

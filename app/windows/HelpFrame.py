@@ -11,11 +11,11 @@ os.chdir(parentDir)
 class Help(QFrame):
     def __init__(self, parent=None):
         super(Help, self).__init__(parent)
-        path = os.path.join(r"UI\help.ui")
+        path = os.path.join("UI", "help.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseButtonPress:

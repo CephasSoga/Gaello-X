@@ -10,11 +10,11 @@ os.chdir(parentDir)
 class Notifications(QtWidgets.QFrame):
     def __init__(self, parent=None):
         super(Notifications, self).__init__(parent)
-        path = r"UI\notifications.ui"
+        path = os.path.join("UI", "notifications.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.initUI()
 

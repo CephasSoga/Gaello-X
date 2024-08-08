@@ -7,7 +7,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFrame
 
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import QuicksandBold, QuicksandRegular
 
 
 currentDir = os.path.dirname(__file__)
@@ -17,11 +17,11 @@ os.chdir(parentDir)
 class InsightItem(QFrame):
     def __init__(self, imagePathOrUrl: Union[Path, str] = None, title:str = None, text: str = None, parent=None):
         super(InsightItem, self).__init__(parent)
-        path = os.path.join(r'UI/insightItem.ui')
+        path = os.path.join('UI', 'insightItem.ui')
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-           exit()
+           raise FileNotFoundError(f"{path} not found")
 
         self.title = title
         self.text = text
@@ -48,23 +48,10 @@ class InsightItem(QFrame):
         self.insightPreview.setText(self.text)
 
     def setFonts(self):
-        regularFontFam = loadFont(r"rsrc/fonts/Quicksand/static/Quicksand-Regular.ttf")
-        if regularFontFam:
-            regularfont = QFont(regularFontFam)
-            regularfont.setPointSize(10)
-        else:
-            regularfont = QFont("Arial", 10)
-
-        boldFontFam = loadFont(r"rsrc/fonts/Quicksand/static/Quicksand-Bold.ttf")
-        if boldFontFam:
-            boldfont = QFont(boldFontFam)
-            boldfont.setPointSize(12)
-        else:
-            boldfont = QFont("Arial", 12)
-
-
-        self.insightTitle.setFont(boldfont)
-        self.insightPreview.setFont(regularfont)
+        boldFont = QuicksandBold(12) or QFont("Arial", 12)
+        regularFont = QuicksandRegular(10) or QFont("Arial", 10)
+        self.insightTitle.setFont(boldFont)
+        self.insightPreview.setFont(regularFont)
 
     def style(self):
         pass

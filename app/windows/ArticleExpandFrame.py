@@ -6,7 +6,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFrame
 
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import *
 from app.windows.Styles import chatScrollBarStyle
 
 currentDir = os.path.dirname(__file__)
@@ -25,11 +25,11 @@ class ArticleExpand(QFrame):
         parent = None
         ):
         super().__init__(parent)
-        path = os.path.join(r'UI/articleExpand.ui')
+        path = os.path.join('UI', 'articleExpand.ui')
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.title = title
         self.author = author
@@ -69,34 +69,15 @@ class ArticleExpand(QFrame):
         self.refTextEdit.setHtml(self.link)
     
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf")
-        if fontFam:
-            font = QFont(fontFam)
-            font.setPointSize(10)
-        else:
-            font = QFont("Arial", 10)
-
+        font = RobotoRegular(10) or QFont("Arial", 10)
         for obj in [self.mainTextEdit]:
             obj.setFont(font)
 
-        titleFontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-SemiBold.ttf")
-        if titleFontFam:
-            titleFont = QFont(titleFontFam)
-            titleFont.setPointSize(12)
-        else:
-            titleFont = QFont("Arial", 12)
-
+        titleFont = RobotoSemiBold(12) or QFont("Arial", 12)
         if self.title:
-            font.setPointSize(12)
             self.titleLabel.setFont(titleFont)
 
-        tinyFontFam = loadFont(r"rsrc/fonts/Exo_2/static/Exo2-Light.ttf")
-        if tinyFontFam:
-            tinyFont = QFont(tinyFontFam)
-            tinyFont.setPointSize(9)
-        else:
-            tinyFont = QFont("Arial", 9)
-        
+        tinyFont = Exo2Light(9) or QFont("Arial", 9)
         for obj in [self.authorLabel, self.sourceLabel, self.dateLabel, self.tagLabel]:
             obj.setFont(tinyFont)
 

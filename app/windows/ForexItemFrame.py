@@ -8,7 +8,7 @@ from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtWidgets import QFrame
 
 from app.windows.AuthHandler import handleAuth
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import RobotoBold, Exo2Light
 from app.windows.SingleFocusFrame import SingleFocus
 from utils.appHelper import setRelativeToMainWindow
 
@@ -29,11 +29,11 @@ class ForexItem(QFrame):
                 historicalPixmap: Optional[QPixmap], 
                 parent=None):
         super(ForexItem, self).__init__(parent)
-        path = os.path.join(r"UI/forexItem.ui")
+        path = os.path.join("UI", "forexItem.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         #self.symbol = symbol
         self.flag1Pixmap = flag1Pixmap
@@ -84,19 +84,11 @@ class ForexItem(QFrame):
             self.growthLabel.setStyleSheet("color: red; border: none; border-radius: 0;")
 
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Bold.ttf")
-        font = QFont(fontFam, 9) or QFont("Arial", 9)
-         
+        font = RobotoBold(9) or QFont("Arial", 9)
         for obj in self.children():
             obj.setFont(font)
 
-        tinyFontFam = loadFont(r"rsrc/fonts/Exo_2/static/Exo2-Light.ttf")
-        if tinyFontFam:
-            tinyFont = QFont(tinyFontFam)
-            tinyFont.setPointSize(8)
-        else:
-            font = QFont("Arial", 8)
-
+        tinyFont = Exo2Light(8) or QFont("Arial", 8)
         self.tagLabel.setFont(tinyFont)
 
     def connectSlots(self):

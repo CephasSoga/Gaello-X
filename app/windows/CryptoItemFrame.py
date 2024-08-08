@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QFrame
 
 from app.windows.AuthHandler import handleAuth
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import RobotoBold, Exo2Light
 from app.windows.SingleFocusFrame import SingleFocus
 from utils.appHelper import setRelativeToMainWindow
 
@@ -20,11 +20,11 @@ class CryptoItem(QFrame):
     clicked = pyqtSignal()
     def __init__(self, symbol: str, name: str, price: float, growth: float, imagePixmap: Optional[QPixmap], historicalPixmap: Optional[QPixmap], parent=None):
         super().__init__(parent)
-        path = os.path.join(r"UI/cryptoItem.ui")
+        path = os.path.join(r"UI", "cryptoItem.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
         self.symbol = symbol
         self.name = name
         self.price = price
@@ -67,24 +67,12 @@ class CryptoItem(QFrame):
             self.growthLabel.setStyleSheet("color: red; border: none; border-radius: 0;")
 
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Bold.ttf")
-        if fontFam:
-            font = QFont(fontFam)
-            font.setPointSize(9)
-        else:
-            font = QFont("Arial", 9)
-
+        font = RobotoBold(9) or QFont("Arial", 9)
         self.nameLabel.setFont(font)
         self.priceLabel.setFont(font)
         self.growthLabel.setFont(font)
 
-        tinyFontFam = loadFont(r"rsrc/fonts/Exo_2/static/Exo2-Light.ttf")
-        if tinyFontFam:
-            tinyFont = QFont(tinyFontFam)
-            tinyFont.setPointSize(8)
-        else:
-            font = QFont("Arial", 8)
-
+        tinyFont = Exo2Light(8) or QFont("Arial", 8)
         self.tagLabel.setFont(tinyFont)
 
     def connectSlots(self):

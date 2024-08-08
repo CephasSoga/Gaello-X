@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFrame, QLayout, QLineEdit, QMessageBox
 
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import RobotoRegular
 from app.windows.NewAccountPlan import NewAccountPlan
 from utils.appHelper import setRelativeToMainWindow, showWindow
 
@@ -21,11 +21,11 @@ os.chdir(parentDir)
 class NewAccountSetup(QFrame):
     def __init__(self, parent=None):
         super(NewAccountSetup, self).__init__(parent)
-        path = os.path.join(r"UI/newAccountSetup.ui")
+        path = os.path.join("UI", "newAccountSetup.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.userAuth = userAuthInstance
 
@@ -201,13 +201,7 @@ class NewAccountSetup(QFrame):
         pass
 
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf")
-        if fontFam:
-            font = QFont(fontFam)
-            font.setPointSize(9)
-        else:
-            font = QFont("Arial", 9)
-
+        font = RobotoRegular(9) or QFont("Arial", 9)
         for item in self.children():
             if not isinstance(item, QLayout):
                 item.setFont(font)

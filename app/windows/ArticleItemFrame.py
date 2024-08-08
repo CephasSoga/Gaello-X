@@ -5,7 +5,7 @@ from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QFrame
 
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import *
 from app.windows.ArticleExpandFrame import ArticleExpand
 from utils.appHelper import *
 
@@ -27,11 +27,11 @@ class ArticleItem(QFrame):
         parent = None
         ):
         super().__init__(parent)
-        path = os.path.join(r'UI/articleItem.ui')
+        path = os.path.join(r'UI', 'articleItem.ui')
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.title = title
         self.imagePixmap = imagePixmap
@@ -62,23 +62,11 @@ class ArticleItem(QFrame):
         self.sourceLabel.setText(self.source)
     
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Semibold.ttf")
-        if fontFam:
-            font = QFont(fontFam)
-            font.setPointSize(9)
-        else:
-            font = QFont("Arial", 9)
-
+        font = RobotoSemiBold(9) or QFont('Arial', 9)
         for obj in [self.titleLabel]:
             obj.setFont(font)
-
-        tinyFontFam = loadFont(r"rsrc/fonts/Exo_2/static/Exo2-Light.ttf")
-        if tinyFontFam:
-            tinyFont = QFont(tinyFontFam)
-            tinyFont.setPointSize(9)
-        else:
-            tinyFont = QFont("Arial", 9)
         
+        tinyFont = Exo2Light(9) or QFont("Arial", 9)
         for obj in [self.authorLabel, self.sourceLabel]:
             obj.setFont(tinyFont)
 

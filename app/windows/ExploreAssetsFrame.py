@@ -25,11 +25,11 @@ os.chdir(parentDir)
 class ExploreAsset(QFrame):
     def __init__(self, parent=None):
         super(ExploreAsset, self).__init__(parent)
-        path = os.path.join(r"UI/exploreAsset.ui")
+        path = os.path.join("UI", "exploreAsset.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.symbols = [symbol for symbol in symbolList]
         self.assetPreviews: list[AssetPreview] = []

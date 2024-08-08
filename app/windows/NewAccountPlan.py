@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QFrame, QMessageBox
 from utils.appHelper import *
 from utils.databases import mongoUpdate
 from utils.envHandler import getenv
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import RobotoMedium, RobotoBold, QuicksandMedium, RobotoLight
 from app.windows.PaymentForm import PaymentForm
 from app.windows.NewAccountOk import AccountAllSet,  AccountInitFailure
 
@@ -24,11 +24,11 @@ os.chdir(rootDir)
 class NewAccountPlan(QFrame):
     def __init__(self, parent=None):
         super(NewAccountPlan, self).__init__(parent)
-        path = os.path.join(parentDir, "UI/newAccountPlan.ui")
+        path = os.path.join(parentDir, "UI" , "newAccountPlan.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.paymentForm = None
 
@@ -122,44 +122,20 @@ class NewAccountPlan(QFrame):
             self.hide()
 
     def setFonts(self):
-        boldFontFam = loadFont(f'{parentDir}' "/" + r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Bold.ttf")
-        if boldFontFam:
-            boldFont = QFont(boldFontFam)
-            boldFont.setPointSize(9)
-        else:
-            boldFont = QFont("Arial", 9)
-
+        boldFont = RobotoBold(9) or QFont("Arial", 9)
         for titleItem in [self.FreeTierTitle, self.StandardTierTitle, self.AdvancedTierTitle]:
             titleItem.setFont(boldFont)
 
-        mediumFontFam = loadFont(f'{parentDir}' "/" + r"rsrc\fonts\Quicksand\static\Quicksand-Medium.ttf")
-        if mediumFontFam:
-            mediumFont = QFont(mediumFontFam)
-            mediumFont.setPointSize(9)
-        else:
-            mediumFont = QFont("Arial", 9)
-
+        mediumFont = QuicksandMedium(9) or QFont("Arial", 9)
         for priceItem in [self.FreeTierPrice, self.StandardTierPrice, self.AdvancedTierPrice]:
             priceItem.setFont(mediumFont)
 
-        lightFontFam = loadFont(f'{parentDir}' "/" + r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Bold.ttf")
-        if lightFontFam:
-            lightFont = QFont(lightFontFam)
-            lightFont.setPointSize(9)
-        else:
-            lightFont = QFont("Arial", 9)
-
+        lightFont = RobotoLight(9) or QFont("Arial", 9)
         for label in [self.freelabel1, self.freelabel2, self.freelabel3, self.stdlabel1, self.stdlabel2, self.stdlabel3,
                       self.advlabel1, self.advlabel2]:
             label.setFont(lightFont)
 
-        buttonFontFam = loadFont(f'{parentDir}' "/" + r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Medium.ttf")
-        if buttonFontFam:
-            buttonFont = QFont(buttonFontFam)
-            buttonFont.setPointSize(9)
-        else:
-            buttonFont = QFont("Arial", 9)
-
+        buttonFont = RobotoMedium(9) or QFont("Arial", 9)
         for button in [self.freeTierButton, self.standardTierButton, self.advancedTierButton]:
             button.setFont(buttonFont)
 

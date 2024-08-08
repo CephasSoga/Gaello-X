@@ -28,11 +28,11 @@ class MarketSummary(QFrame):
 
     def __init__(self, parent=None):
         super(MarketSummary, self).__init__(parent)
-        path = os.path.join(r"UI/marketSummary.ui")
+        path = os.path.join("UI", "marketSummary.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.outliner = MarketOutliner()
         self.initUI()

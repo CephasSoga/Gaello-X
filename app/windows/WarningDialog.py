@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QDialog
 
-from app.windows.Fonts import loadFont
+from app.windows.Fonts import RobotoBold
 
 currentDir = os.path.dirname(__file__)
 parentDir = os.path.dirname(currentDir)
@@ -15,11 +15,11 @@ class Warning(QDialog):
     def __init__(self, title: str, message: str,  parent=None):
         super().__init__(parent)
 
-        path = os.path.join(r"UI/warning.ui")
+        path = os.path.join("UI", "warning.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
 
         self.title = title
         self.message = message
@@ -45,12 +45,6 @@ class Warning(QDialog):
 
 
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Bold.ttf")
-        if fontFam:
-            font = QFont(fontFam)
-            font.setPointSize(9)
-        else:
-            font = QFont("Arial", 9)
-
+        font = RobotoBold(9) or QFont("Arial", 9)
         for item in self.children():
             item.setFont(font)

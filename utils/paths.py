@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import glob
 from pathlib import Path
@@ -117,4 +118,30 @@ def rawPathStr(pathStr: str):
         str: The modified string with double backslashes.
     """
     return pathStr.replace("\\", "\\\\")
+
+def resourcePath(relative_path):
+    """
+    Ref: https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file
+    
+    Returns the absolute path of a resource file.
+
+    Parameters:
+        relative_path (str): The relative path of the resource file.
+
+    Returns:
+        str: The absolute path of the resource file.
+
+    Raises:
+        Exception: If the base path cannot be determined.
+
+    Example:
+        >>> resource_path('config.ini')
+        '/path/to/config.ini'
+    """
+    try:
+        base_path = sys._MEIPASS2 # or sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 

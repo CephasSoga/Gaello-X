@@ -9,7 +9,8 @@ from PyQt5.QtWidgets import QWidget, QMainWindow, QVBoxLayout, QSizePolicy, QFra
 
 from app.windows.AuthHandler import  handleAuth
 from utils.appHelper import *
-from app.windows.Fonts import loadFont
+from utils.paths import resourcePath
+from app.windows.Fonts import RobotoRegular
 from app.windows.InsightsWidget import JanineInsights
 from app.windows.CommunityWidget import JanineCommunity
 from app.windows.PlusWidget import ProjectHome
@@ -84,11 +85,11 @@ class PressPlusFrame(QFrame):
 class Bottom(QMainWindow):
     def __init__(self, parent=None):
         super(Bottom, self).__init__(parent)
-        path = os.path.join(r"UI/bottom.ui")
+        path = os.path.join(r"UI","bottom.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
         
         self.exploreProjectUrl = 'https://www.janine.ai'
         self.kickstartUrl = 'https://www.janine.ai/start'
@@ -104,13 +105,7 @@ class Bottom(QMainWindow):
         self.installEventFilters()
 
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf")
-        if fontFam:
-            font = QFont(fontFam)
-            font.setPointSize(10)
-        else:
-            font = QFont("Arial", 10)
-
+        font = RobotoRegular(10) or QFont("Arial", 10)
         self.exploreProject.setFont(font)
         self.kickstart.setFont(font)
         self.insights.setFont(font)
@@ -148,13 +143,19 @@ class Bottom(QMainWindow):
             mediaPlayer.play()
 
     def setupMovies(self):
-        insigthMoviePath = r"rsrc/videos/chipset.mp4"
+        insigthMoviePath = resourcePath(
+            os.path.join("rsrc", "videos", "chipset.mp4")#r"rsrc/videos/chipset.mp4"
+        )
         self.createMediaPlayer(insigthMoviePath, self.insightsWidget)
 
-        communityMoviePath = r"rsrc/videos/network.mp4"
+        communityMoviePath = resourcePath(
+            os.path.join("rsrc", "videos", "network.mp4")#r"rsrc/videos/network.mp4"
+        )
         self.createMediaPlayer(communityMoviePath, self.communityWidget)
 
-        plusMoviePath = r"rsrc/videos/bwwave.mp4"
+        plusMoviePath = resourcePath(
+            os.path.join("rsrc", "videos", "bwwave.mp4")#r"rsrc/videos/bwwave.mp4"
+        )
         self.createMediaPlayer(plusMoviePath, self.plusWidget)
 
     def connectSlots(self):

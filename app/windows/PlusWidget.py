@@ -17,10 +17,11 @@ os.chdir(parentDir)
 class ProjectHome(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        if os.path.exists("UI/plusWidget.ui"):
-            uic.loadUi("UI/plusWidget.ui", self)
+        path = os.path.join("UI", "plusWidget.ui")
+        if os.path.exists(path):
+            uic.loadUi(path, self)
         else:
-            exit()
+            raise FileNotFoundError(f"{path} not found")
         
         self.initUI()
 
