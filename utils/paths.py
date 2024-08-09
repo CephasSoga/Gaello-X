@@ -139,9 +139,25 @@ def resourcePath(relative_path):
         '/path/to/config.ini'
     """
     try:
-        base_path = sys._MEIPASS2 # or sys._MEIPASS
+        base_path = sys._MEIPASS # or sys._MEIPASS2
     except Exception:
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
+
+def getPath(filename: str):
+    """
+    Returns the full path to a given filename, taking into account the _MEIPASS attribute 
+    if it exists in the sys module, which is typically the case for frozen applications.
+
+    Parameters:
+        filename (str): The name of the file for which to retrieve the full path.
+
+    Returns:
+        str: The full path to the given filename.
+    """
+    if hasattr(sys, "_MEIPASS"): # or sys._MEIPASS2
+        return os.path.join(sys._MEIPASS, filename)
+    else:
+        return filename
 

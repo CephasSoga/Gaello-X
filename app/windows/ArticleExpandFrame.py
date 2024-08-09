@@ -9,9 +9,9 @@ from PyQt5.QtWidgets import QFrame
 from app.windows.Fonts import *
 from app.windows.Styles import chatScrollBarStyle
 
+
 currentDir = os.path.dirname(__file__)
 parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
 
 class ArticleExpand(QFrame):
     def __init__(self,
@@ -25,7 +25,7 @@ class ArticleExpand(QFrame):
         parent = None
         ):
         super().__init__(parent)
-        path = os.path.join('UI', 'articleExpand.ui')
+        path = os.path.join(parentDir, 'UI', 'articleExpand.ui')
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

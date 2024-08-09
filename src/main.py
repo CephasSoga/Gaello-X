@@ -1,7 +1,25 @@
 import os
 import subprocess
 
+# Help pyinstaller detect used packages
+# 1- Pypi packages
+import asyncio, PyQt5, qasync, pyqtspinner, json, pathlib, requests, aiohttp, audioread, bcrypt, numpy, plotly, pymongo, pyaudio, waitress, dotenv, flask
+# 2- Custom packages
+import janine
+import client
+import app
+import databases
+import models
+import utils
+# 3- Dispatched imports for pyqt5
+from PyQt5.QtMultimediaWidgets import QVideoWidget
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+#4 - Dispatched imports from janine
+from janine import RichText, RichAudio, RichFile, RichVision, BaseRemote, BaseUtility
+
+
 from client.client import Client
+from utils.system import restoreSystemPath
 
 #Switch to rootDir, then to app Dir to handle relative paths
 currentDir = os.path.dirname(__file__)
@@ -29,6 +47,8 @@ def exec_api():
     This function does not return any values.
     """
     subprocess.Popen(['python', f'{rootDir}/models/api/app.py'])
+    # Ensure the system’s default DLL search path on Windows systems is restored
+    restoreSystemPath()
 
 def exec_all():
     """

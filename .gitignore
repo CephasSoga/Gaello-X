@@ -6,12 +6,14 @@ node_modules
 app/__pycache__
 app/assets/__pycache__
 app/inferential/__pycache__
+app/Temp
 app/windows/__pycache__
 client/__pycache__
-database/__pycache__
-database/mongodb/__pycache__
+databases/__pycache__
+databases/mongodb/__pycache__
 models/__pycache__
 models/api/__pycache__
 models/janine/__pycache__
+packages
 utils/__pycache__
 pyproject.toml

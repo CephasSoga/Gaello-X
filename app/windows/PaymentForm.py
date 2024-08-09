@@ -13,10 +13,11 @@ from PyQt5.QtWidgets import QFrame, QMessageBox
 
 from app.windows.Fonts import RobotoBold
 from app.windows.NewAccountOk import AccountAllSet, AccountInitFailure
-from utils.appHelper import stackOnCurrentWindow, setRelativeToMainWindow
+from utils.appHelper import setRelativeToMainWindow
 from utils.databases import mongoGet
 from utils.envHandler import getenv
 from utils.appHelper import browse
+from utils.system import restoreSystemPath
 
 currentDir = os.path.dirname(__file__)
 parentDir = os.path.dirname(currentDir)
@@ -187,6 +188,9 @@ class PaymentForm(QFrame):
             except Exception as e:
                 self.failure.emit()
                 QMessageBox.warning(self, "Server Error", f"Unable to start server. Error: {str(e)}")
+            finally:
+                # Ensure the system’s default DLL search path on Windows systems is restored
+                restoreSystemPath()
 
     def stop_node_server(self):
         if self.nodeProcess is not None:

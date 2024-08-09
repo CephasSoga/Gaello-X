@@ -19,18 +19,17 @@ from models.janine.JanineModel import janineInstance
 from databases.mongodb.JanineDB import janineDB
 from utils.fileHelper import getAudioLength
 from utils.envHandler import getenv
-from utils.paths import rawPathStr
+from utils.paths import rawPathStr, getPath
 from app.windows.Fonts import  QuicksandBold, Exo2Medium
 from app.windows.WaiterFrame import Waiter
 
 currentDir = os.path.dirname(__file__)
 parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
 
 class JanineChat(QFrame):
     def __init__(self, parent=None):
         super(JanineChat, self).__init__(parent)
-        path = os.path.join("UI", "chat_.ui")
+        path = getPath(os.path.join(parentDir, "UI", "chat_.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
