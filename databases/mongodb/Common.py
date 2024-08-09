@@ -1,5 +1,4 @@
 import os
-from urllib.parse import quote_plus
 
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi

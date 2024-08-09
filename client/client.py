@@ -1,6 +1,6 @@
 import sys
 import asyncio
-from PyQt5.QtCore import pyqtSignal, QObject, QThread, pyqtSlot
+from PyQt5.QtCore import pyqtSignal, QObject, QThread
 from qasync import QEventLoop, QApplication as QAsyncApplication
 
 from app.windows.Spinner import Spinner
