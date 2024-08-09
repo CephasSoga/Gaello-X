@@ -15,9 +15,9 @@ parentDir = os.path.dirname(currentDir)
 rootDir = os.path.dirname(parentDir)
 os.chdir(rootDir)
 
-app = Flask(__name__)
+app = Flask("Janine-Endpoint")
 
-logger = Logger(__name__)
+logger = Logger("Janine-Endpoint")
 
 MAX_QUEUE_SIZE = 1000
 successfulRequetsQueue = deque(maxlen=MAX_QUEUE_SIZE)

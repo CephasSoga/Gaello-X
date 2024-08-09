@@ -11,7 +11,7 @@ from utils.envHandler import getenv
 from utils.logs import Logger
 
 
-logger = Logger(__name__)
+logger = Logger("MongoDB-Janine")
 
 def read_user_endpoint() -> Tuple[str, str] | None:
     """

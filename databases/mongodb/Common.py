@@ -8,7 +8,7 @@ from pymongo.database import Database
 
 from utils.logs import Logger
 
-logger = Logger(__name__)
+logger = Logger("MongoDB-Common")
 
 uri = os.getenv("MONGO_URI")
 

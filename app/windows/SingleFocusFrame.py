@@ -15,7 +15,6 @@ from app.assets.Patterns import Index, Symbol
 from utils.workers import spinnerWork
 from app.windows.Fonts import RobotoRegular
 from app.windows.Styles import chatScrollBarStyle
-from utils.logs import Logger
 from utils.appHelper import clearLayout
 
 currentDir = os.path.dirname(__file__)

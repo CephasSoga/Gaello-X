@@ -10,7 +10,7 @@ from pymongo.database import Database
 from utils.logs import Logger
 from utils.envHandler import getenv
 
-logger = Logger(__name__)
+logger = Logger("Utils-Databases")
 
 uri = getenv("MONGO_URI")
 

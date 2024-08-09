@@ -1,6 +1,6 @@
 import dotenv
 from datetime import datetime, timedelta
-from typing import Union, Optional, List, Dict
+from typing import Union, Optional, Dict
 
 from utils.databases import mongoGet
 

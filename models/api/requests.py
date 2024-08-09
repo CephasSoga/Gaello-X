@@ -7,7 +7,7 @@ from utils.logs import Logger
 from utils.envHandler import getenv
 
 
-logger = Logger(__name__)
+logger = Logger("Request-Manager")
 
 def read_user_endpoint() -> Tuple[str, str] | None:
     """
