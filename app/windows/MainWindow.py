@@ -18,7 +18,7 @@ class MainWindow(QMainWindow):
     finishedLoading = pyqtSignal()
     def __init__(self):
         super(MainWindow, self).__init__()
-        path = os.path.join("assets", "UI", "mainwindow.ui")
+        path = getFrozenPath(os.path.join("assets", "UI", "mainwindow.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

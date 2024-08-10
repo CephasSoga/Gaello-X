@@ -18,6 +18,18 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 from janine import RichText, RichAudio, RichFile, RichVision, BaseRemote, BaseUtility
 #5 - Dispatched imports from utils
 from utils.logs import Logger
+#6- Dispatched imports from databases
+from databases.mongodb import Common,  UsersAuth, Operations, JanineDB
+#7- Dispatched imports from models
+from models.janine import JanineModel
+from models.api.requests import RequestManager
+from models.api import app
+#8- Dispatched imports from app
+from app.windows import *
+from app.handlers import HashWorker, ExportAssets, Patterns, ShortLiveSeries
+from app.inferential import ExportInsights, Insights
+#9- Dispatched imports from api
+
 
 
 from client.client import Client

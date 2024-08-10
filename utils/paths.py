@@ -145,7 +145,31 @@ def resourcePath(relative_path):
 
     return os.path.join(base_path, relative_path)
 
-def getFrozenPath(filename: str):
+def getFrozenPath(relative_path: str):
+    """
+    Ref: https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file
+    
+    Returns the absolute path of a resource file.
+
+    Notes:
+        Same as `resourcePath` but `explictly` states its uses for frozen applications.
+
+    Parameters:
+        relative_path (str): The relative path of the resource file.
+
+    Returns:
+        str: The absolute path of the resource file.
+
+    Raises:
+        Exception: If the base path cannot be determined.
+
+    Example:
+        >>> resource_path('config.ini')
+        '/path/to/config.ini'
+    """
+    return resourcePath(relative_path)
+
+def getFrozenPath2(filename: str):
     """
     Returns the full path to a given filename, taking into account the _MEIPASS attribute 
     if it exists in the sys module, which is typically the case for frozen applications.

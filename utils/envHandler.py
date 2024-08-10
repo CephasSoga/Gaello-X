@@ -6,9 +6,9 @@ import  os
 import  dotenv
 from typing import Optional
 
-from utils.paths import getFrozenPath
+from utils.paths import resourcePath
 
-envFilePath = getFrozenPath(os.path.join(os.path.dirname(".env"), ".env"))
+envFilePath = resourcePath(relative_path=".env")
 dotenv.load_dotenv(dotenv_path=envFilePath, verbose=True)
 
 def getenv(key: str, default=None) -> Optional[str]:
