@@ -4,14 +4,13 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtWidgets import QFrame
 
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
+from utils.paths import getPath
+
 
 class Warning(QFrame):
     def __init__(self, parent=None):
         super(Warning, self).__init__(parent)
-        path = os.path.join("UI", "warnings.ui")
+        path = getPath(os.path.join("assets", "UI", "warnings.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

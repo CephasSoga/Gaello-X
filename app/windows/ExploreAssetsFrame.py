@@ -9,23 +9,21 @@ from PyQt5.QtWidgets import QFrame, QWidget, QGridLayout, QApplication
 from qasync import QEventLoop, asyncSlot
 
 from app.windows.AuthHandler import handleAuth
-from app.assets.ShortLiveSeries import Series
-from app.assets.ExportAssets import symbolList
+from app.handlers.ShortLiveSeries import Series
+from app.handlers.ExportAssets import symbolList
 from app.windows.AssetPreviewFrame import AssetPreview
 from app.windows.AssetFocusFrame import AssetFocus
 from utils.appHelper import setRelativeToMainWindow
 from utils.databases import mongoGet
 from utils.asyncJobs import quickFetchBytes
 from utils.graphics import chartWithSense
+from utils.paths import getPath
 
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
 
 class ExploreAsset(QFrame):
     def __init__(self, parent=None):
         super(ExploreAsset, self).__init__(parent)
-        path = os.path.join("UI", "exploreAsset.ui")
+        path = getPath(os.path.join("assets", "UI", "exploreAsset.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

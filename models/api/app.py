@@ -10,10 +10,6 @@ from waitress import serve
 from utils.logs import Logger
 from utils.envHandler import getenv
 
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-rootDir = os.path.dirname(parentDir)
-os.chdir(rootDir)
 
 app = Flask("Janine-Endpoint")
 
@@ -36,7 +32,7 @@ def read_user_endpoint() -> Tuple[str, str] | None:
         Tuple[str, str] | None: A tuple containing the user ID and email, or None if the file is not found.
     """
     base_path = getenv("APP_BASE_PATH")
-    credentials_path = os.path.join(base_path, "credentials/credentials.json")
+    credentials_path = os.path.join(base_path, "credentials", "credentials.json")
     try:
         with open(credentials_path, 'r') as credentials_file:
             credentials = json.load(credentials_file)

@@ -11,11 +11,8 @@ from app.windows.AuthHandler import handleAuth
 from app.windows.Fonts import RobotoBold, Exo2Light
 from app.windows.SingleFocusFrame import SingleFocus
 from utils.appHelper import setRelativeToMainWindow
+from utils.paths import getPath
 
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
 
 class ForexItem(QFrame):
     clicked = pyqtSignal()
@@ -29,7 +26,7 @@ class ForexItem(QFrame):
                 historicalPixmap: Optional[QPixmap], 
                 parent=None):
         super(ForexItem, self).__init__(parent)
-        path = os.path.join("UI", "forexItem.ui")
+        path = getPath(os.path.join("assets", "UI", "forexItem.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

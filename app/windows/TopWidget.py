@@ -19,10 +19,7 @@ from app.windows.NotificationsFrame import Notifications
 from app.windows.HelpFrame import Help
 from app.windows.MenuFrame import Menu
 from app.windows.Fonts import *
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
+from utils.paths import getPath
 
 class PressChatFrame(QFrame):
     def __init__(self, frame: QFrame, parent=None):
@@ -68,7 +65,7 @@ class PressExploreFrame(QFrame):
 class Header(QMainWindow):
     def __init__(self, parent=None):
         super(Header, self).__init__(parent)
-        path = os.path.join("UI", "header.ui")
+        path = getPath(os.path.join("assets", "UI", "header.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
@@ -102,13 +99,13 @@ class Header(QMainWindow):
 
     def setupMovies(self):
         marketMovie = QMovie(resourcePath(
-            os.path.join('rsrc', 'videos', 'marketChart.gif')#r"rsrc/videos/marketChart.gif"
+            os.path.join("assets", 'videos', 'marketChart.gif')#r"rsrc/videos/marketChart.gif"
         ))
         self.marketGif.setMovie(marketMovie)
         marketMovie.start()
 
         stocktMovie = QMovie(resourcePath(
-            os.path.join('rsrc', 'videos', 'stockChart.gif')#r"rsrc/videos/stockChart.gif"
+            os.path.join("assets", 'videos', 'stockChart.gif')#r"rsrc/videos/stockChart.gif"
         ))
         self.stockGif.setMovie(stocktMovie)
         stocktMovie.start()

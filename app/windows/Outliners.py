@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QFrame
 from app.windows.Fonts import QuicksandRegular
 from utils.databases import mongoGet
 from utils.logs import Logger
+from utils.paths import getPath
 
 class MarketOutliner:
     def __init__(self):
@@ -24,7 +25,7 @@ class MarketOutliner:
             return target[endpoint]
         except Exception as e:
             self.logger.log("error", "Asset:: Outline Creation error ", e)
-            return self.default_outline_data
+            return []
 
     async def gainers(self):
         return await self.get("biggestGainers")
@@ -42,7 +43,7 @@ class MarketOutliner:
 class Outline(QFrame):
     def __init__(self, parent=None):
         super(Outline, self).__init__(parent)
-        path = os.path.join("UI", "outline.ui")
+        path = getPath(os.path.join("assets", "UI", "outline.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
@@ -64,7 +65,7 @@ class Outline(QFrame):
 class OutlineTitle(QFrame):
     def __init__(self, parent=None):
         super(OutlineTitle, self).__init__(parent)
-        path = os.path.join("UI", "outlineTitle.ui")
+        path = getPath(os.path.join("assets", "UI" , "outlineTitle.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

@@ -7,17 +7,13 @@ from PyQt5.QtWidgets import QWidget, QApplication, QGridLayout
 from app.windows.Fonts import RobotoRegular, MontserratRegular
 from app.windows.InsightItems import InsightItem
 from app.inferential.ExportInsights import insights
-
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
+from utils.paths import getPath
 
 class JanineInsights(QWidget):
 
     def __init__(self, parent=None):
         super(JanineInsights, self).__init__(parent)
-        path = os.path.join("UI" , "insightsWidget.ui")
+        path = getPath(os.path.join("assets", "UI" , "insightsWidget.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

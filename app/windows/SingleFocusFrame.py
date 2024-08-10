@@ -11,21 +11,18 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame, QTextEdit
 
 from utils.databases import mongoGet
 from app.windows.Spinner import Spinner
-from app.assets.Patterns import Index, Symbol
+from app.handlers.Patterns import Index, Symbol
 from utils.workers import spinnerWork
 from app.windows.Fonts import RobotoRegular
 from app.windows.Styles import chatScrollBarStyle
 from utils.appHelper import clearLayout
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
+from utils.paths import getPath
 
 
 class SingleFocus(QWidget):
     def __init__(self, symbol:str, targetCollection: str, parent=None):
         super().__init__(parent)
-        path = os.path.join("UI", "singleFocus.ui")
+        path = getPath(os.path.join("assets", "UI" , "singleFocus.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

@@ -18,11 +18,7 @@ from utils.databases import mongoGet
 from utils.envHandler import getenv
 from utils.appHelper import browse
 from utils.system import restoreSystemPath
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-rootDir = os.path.dirname(parentDir)
-os.chdir(rootDir)
+from utils.paths import getPath
 
 PORT = 8888
 IP = 'http://localhost'
@@ -33,8 +29,8 @@ class PaymentForm(QFrame):
     success = pyqtSignal()
     failure = pyqtSignal()
 
-    def __init__(self, execPath: Path | str = rootDir, serverPath: Path = Path('server/server.js'), parent=None):
-        path = os.path.join(parentDir, "UI", "paymentForm.ui")
+    def __init__(self, execPath: Path | str = ".", serverPath: Path = Path('server/server.js'), parent=None):
+        path = getPath(os.path.join("assets", "UI", "paymentForm.ui"))
         super(PaymentForm, self).__init__(parent)
         if os.path.exists(path):
             uic.loadUi(path, self)

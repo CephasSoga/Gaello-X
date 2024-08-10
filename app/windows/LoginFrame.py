@@ -8,22 +8,21 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow, QLineEdit, QMessageBox, QLayout
 
-from utils.appHelper import *
+from utils.paths import getPath
+from utils.envHandler import getenv
+from utils.appHelper import setRelativeToMainWindow, showWindow
 from app.windows.Fonts import RobotoRegular
 from app.windows.NewAccountSetup import NewAccountSetup
 
 from databases.mongodb.UsersAuth import UserCredentials, userAuthInstance
 from databases.mongodb.Common import mongoGet
 
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
 
 class SignInFrame(QMainWindow):
     def __init__(self, parent=None):
         super(SignInFrame, self).__init__(parent)
         self.newAccountSetupWidget = None  # Initialize as None
-        path = os.path.join("UI", "login.ui")
+        path = getPath(os.path.join("assets", "UI", "login.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
@@ -97,7 +96,7 @@ class SignInFrame(QMainWindow):
 
 
     def readPersistentSessionManager(self):
-        credentials_path = Path('C:/Temp/app/credentials/credentials.json')
+        credentials_path = Path(os.path.join(getenv('APP_BASE_PATH'), 'credentials', 'credentials.json'))
         if not credentials_path.exists():
             return None
         else:
@@ -120,7 +119,7 @@ class SignInFrame(QMainWindow):
                 "id": uuid.uuid4().hex,
                 "loggedIn": True,
                 "presistentLoggedIn": True,
-                "authorisationLevel": 0
+                "authorisationLevel": 'defined',
             }
         )
 

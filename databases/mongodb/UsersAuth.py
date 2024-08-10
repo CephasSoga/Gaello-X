@@ -9,7 +9,7 @@ from pymongo.server_api import ServerApi
 from pymongo.collection import Collection
 from pymongo.database import Database
 
-from app.assets.HashWorker import Hasher
+from app.handlers.HashWorker import Hasher
 from utils.fileHelper import hideFolder
 from utils.paths import constructPath
 

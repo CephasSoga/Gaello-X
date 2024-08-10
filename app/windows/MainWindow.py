@@ -11,18 +11,13 @@ from app.windows.LoginFrame import SignInFrame
 from app.windows.TopWidget import Header
 from app.windows.BottomWidget import Bottom
 from utils.appHelper import stackOnCurrentWindow
-from utils.paths import constructPath
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
-
+from utils.paths import constructPath, getPath
 
 class MainWindow(QMainWindow):
     finishedLoading = pyqtSignal()
     def __init__(self):
         super(MainWindow, self).__init__()
-        path = os.path.join("UI", "mainwindow.ui")
+        path = os.path.join("assets", "UI", "mainwindow.ui")
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
@@ -43,7 +38,8 @@ class MainWindow(QMainWindow):
         self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.FramelessWindowHint)
 
     def setWIcon(self):
-        self.setWindowIcon(QIcon(r"rsrc/logo/cube-log-big.png"))
+        iconPath = getPath(os.path.join("assets", "logo", "cube-log-big.png"))
+        self.setWindowIcon(QIcon(iconPath))
 
     def setLayout(self):
         screenGeometry = QApplication.primaryScreen().availableGeometry()

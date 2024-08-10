@@ -7,17 +7,13 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFrame, QLayout
 
 from app.windows.Fonts import RobotoRegular
-
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
+from utils.paths import getPath
 
 
 class AccountAllSet(QFrame):
     def __init__(self, parent=None):
         super(AccountAllSet, self).__init__(parent)
-        path = os.path.join("UI", "accountOk.ui")
+        path = getPath(os.path.join("assets",  "UI", "accountOk.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
@@ -57,7 +53,7 @@ class AccountAllSet(QFrame):
 class AccountInitFailure(QFrame):
     def __init__(self, parent=None):
         super(AccountInitFailure, self).__init__(parent)
-        path = os.path.join("UI", "accountNotOk.ui")
+        path = getPath(os.path.join("assets",  "UI", "accountNotOk.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

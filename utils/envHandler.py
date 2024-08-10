@@ -6,10 +6,10 @@ import  os
 import  dotenv
 from typing import Optional
 
-currentDir = os.path.dirname(__file__)
-rootDir = os.path.dirname(currentDir)
+from utils.paths import getPath
 
-dotenv.load_dotenv(dotenv_path=f'{rootDir}/.env', verbose=True)
+envFilePath = getPath(os.path.join(os.path.dirname(".env"), ".env"))
+dotenv.load_dotenv(dotenv_path=envFilePath, verbose=True)
 
 def getenv(key: str, default=None) -> Optional[str]:
     """

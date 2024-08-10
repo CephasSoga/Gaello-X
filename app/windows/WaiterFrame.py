@@ -4,14 +4,12 @@ from PyQt5.QtGui import QMovie
 from PyQt5.QtCore import Qt
 from PyQt5 import uic
 
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
+from utils.paths import getPath
 
 class Waiter(QFrame):
     def __init__(self, parent=None):
         super(Waiter, self).__init__(parent)
-        path = os.path.join("UI", "waiter.ui")  # Using os.path.join for cross-platform compatibility
+        path = getPath(os.path.join("assets", "UI", "waiter.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

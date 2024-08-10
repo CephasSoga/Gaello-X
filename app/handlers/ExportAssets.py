@@ -1,5 +1,5 @@
-from app.assets.Patterns import SymbolPattern, Symbol, Index
-from app.assets.Assets import Assets
+from app.handlers.Patterns import SymbolPattern, Symbol, Index
+from app.handlers.Assets import Assets
 from typing import List, Any
 import asyncio
 

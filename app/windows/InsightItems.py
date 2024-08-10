@@ -8,16 +8,12 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFrame
 
 from app.windows.Fonts import QuicksandBold, QuicksandRegular
-
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
+from utils.paths import getPath
 
 class InsightItem(QFrame):
     def __init__(self, imagePathOrUrl: Union[Path, str] = None, title:str = None, text: str = None, parent=None):
         super(InsightItem, self).__init__(parent)
-        path = os.path.join('UI', 'insightItem.ui')
+        path = getPath(os.path.join("assets", 'UI', 'insightItem.ui'))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

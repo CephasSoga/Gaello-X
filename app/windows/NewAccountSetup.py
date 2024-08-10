@@ -10,18 +10,13 @@ from PyQt5.QtWidgets import QFrame, QLayout, QLineEdit, QMessageBox
 from app.windows.Fonts import RobotoRegular
 from app.windows.NewAccountPlan import NewAccountPlan
 from utils.appHelper import setRelativeToMainWindow, showWindow
-
+from utils.paths import getPath
 from databases.mongodb.UsersAuth import UserCredentials, userAuthInstance
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
-
 
 class NewAccountSetup(QFrame):
     def __init__(self, parent=None):
         super(NewAccountSetup, self).__init__(parent)
-        path = os.path.join("UI", "newAccountSetup.ui")
+        path = getPath(os.path.join("assets", "UI", "newAccountSetup.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

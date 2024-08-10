@@ -12,15 +12,11 @@ from PyQt5.QtWidgets import QFrame, QVBoxLayout, QGridLayout, QWidget, QApplicat
 
 from app.windows.Spinner import Spinner, Worker
 from app.windows.ArticleItemFrame import ArticleItem
-from app.assets.Outliners import MarketOutliner, Outline, OutlineTitle
-from app.assets.ExportAssets import IndexList
+from app.windows.Outliners import MarketOutliner, Outline, OutlineTitle
+from app.handlers.ExportAssets import IndexList
 from utils.databases import mongoGet
 from utils.asyncJobs import quickFetchBytes
-
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
+from utils.paths import getPath
 
 class MarketSummary(QFrame):
     dataFetched = pyqtSignal(str, list)
@@ -28,7 +24,7 @@ class MarketSummary(QFrame):
 
     def __init__(self, parent=None):
         super(MarketSummary, self).__init__(parent)
-        path = os.path.join("UI", "marketSummary.ui")
+        path = getPath(os.path.join("assets", "UI", "marketSummary.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
@@ -107,7 +103,7 @@ class MarketSummary(QFrame):
         title.titleLabel.setText("Market Gainers")
         self.vboxScrollLayout.addWidget(title)
 
-        if len(gainers) == 0:
+        if not gainers or len(gainers) == 0:
             return
 
         for gainer in gainers:
@@ -125,7 +121,7 @@ class MarketSummary(QFrame):
         title.titleLabel.setText("Market Losers")
         self.vboxScrollLayout.addWidget(title)
 
-        if len(losers) == 0:
+        if not losers or len(losers) == 0:
             return
 
         for loser in losers:
@@ -143,7 +139,7 @@ class MarketSummary(QFrame):
         title.titleLabel.setText("Most Actives")
         self.vboxScrollLayout.addWidget(title)
 
-        if len(actives) == 0:
+        if not actives or len(actives) == 0:
             return
 
         for active in actives:
@@ -161,7 +157,7 @@ class MarketSummary(QFrame):
         title.titleLabel.setText("Sector Performances")
         self.vboxScrollLayout.addWidget(title)
 
-        if len(sectors) == 0:
+        if not sectors or len(sectors) == 0:
             return
 
         for sector in sectors:

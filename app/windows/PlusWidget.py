@@ -8,16 +8,13 @@ from PyQt5.QtGui import QFont
 from PyQt5 import uic
 
 from app.windows.Fonts import loadFont
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
+from utils.paths import getPath
 
 # Load the UI file into a QUiLoader object
 class ProjectHome(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        path = os.path.join("UI", "plusWidget.ui")
+        path = getPath(os.path.join("assets", "UI", "plusWidget.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

@@ -16,16 +16,18 @@ from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 #4 - Dispatched imports from janine
 from janine import RichText, RichAudio, RichFile, RichVision, BaseRemote, BaseUtility
+#5 - Dispatched imports from utils
+from utils.logs import Logger
 
 
 from client.client import Client
 from utils.system import restoreSystemPath
+from utils.paths import getPath
 
-#Switch to rootDir, then to app Dir to handle relative paths
-currentDir = os.path.dirname(__file__)
-parentDir = currentDir #os.path.dirname(currentDir)
-rootDir = os.path.dirname(parentDir)
-os.chdir(os.path.join(rootDir, 'app')) #os.chdir(rootDir)
+_cwd = os.getcwd()
+main_logger = Logger("Main")
+main_logger.log("info", "Starting the application...")
+main_logger.log("info", f"Current working directory: {_cwd}")
 
 def exec_client():
     """
@@ -46,9 +48,14 @@ def exec_api():
 
     This function does not return any values.
     """
-    subprocess.Popen(['python', f'{rootDir}/models/api/app.py'])
-    # Ensure the system’s default DLL search path on Windows systems is restored
-    restoreSystemPath()
+    try:
+        cwd = getPath(os.path.join("models", "api", "app.py"))
+        subprocess.Popen(['python', f'{cwd}'])
+    except Exception as e:
+        main_logger.log("error", "Error executing the API", e)
+    finally:
+        # Ensure the system’s default DLL search path on Windows systems is restored
+        restoreSystemPath()
 
 def exec_all():
     """

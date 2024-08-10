@@ -14,10 +14,7 @@ from app.windows.Fonts import RobotoRegular
 from app.windows.InsightsWidget import JanineInsights
 from app.windows.CommunityWidget import JanineCommunity
 from app.windows.PlusWidget import ProjectHome
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
+from utils.paths import getPath
 
 class PressInsigthsFrame(QFrame):
     def __init__(self, widget: QWidget, parent=None):
@@ -85,7 +82,7 @@ class PressPlusFrame(QFrame):
 class Bottom(QMainWindow):
     def __init__(self, parent=None):
         super(Bottom, self).__init__(parent)
-        path = os.path.join(r"UI","bottom.ui")
+        path = getPath(os.path.join("assets", "UI", "bottom.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
@@ -144,17 +141,17 @@ class Bottom(QMainWindow):
 
     def setupMovies(self):
         insigthMoviePath = resourcePath(
-            os.path.join("rsrc", "videos", "chipset.mp4")#r"rsrc/videos/chipset.mp4"
+            os.path.join("assets", "videos", "chipset.mp4") #os.path.join("rsrc", "videos", "chipset.mp4")
         )
         self.createMediaPlayer(insigthMoviePath, self.insightsWidget)
 
         communityMoviePath = resourcePath(
-            os.path.join("rsrc", "videos", "network.mp4")#r"rsrc/videos/network.mp4"
+            os.path.join("assets", "videos", "network.mp4") #os.path.join("rsrc", "videos", "network.mp4")#r"rsrc/videos/network.mp4"
         )
         self.createMediaPlayer(communityMoviePath, self.communityWidget)
 
         plusMoviePath = resourcePath(
-            os.path.join("rsrc", "videos", "bwwave.mp4")#r"rsrc/videos/bwwave.mp4"
+            os.path.join("assets", "videos", "bwwave.mp4")#os.path.join("rsrc", "videos", "bwwave.mp4")#r"rsrc/videos/bwwave.mp4"
         )
         self.createMediaPlayer(plusMoviePath, self.plusWidget)
 

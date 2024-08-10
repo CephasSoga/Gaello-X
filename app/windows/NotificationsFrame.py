@@ -2,15 +2,12 @@ import os
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import *
 
-currentDir = os.path.dirname(__file__)  
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
-
+from utils.paths import getPath
 
 class Notifications(QtWidgets.QFrame):
     def __init__(self, parent=None):
         super(Notifications, self).__init__(parent)
-        path = os.path.join("UI", "notifications.ui")
+        path = getPath(os.path.join("assets", "UI" , "notifications.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

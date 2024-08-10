@@ -91,7 +91,7 @@ class Series:
 
 
 def main():
-    from app.assets.ExportAssets import symbolList as l
+    from app.handlers.ExportAssets import symbolList as l
     asset = l[0]
     series = Series(asset)
     historical_data = series.historical()

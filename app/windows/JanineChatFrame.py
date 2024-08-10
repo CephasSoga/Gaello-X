@@ -9,7 +9,6 @@ from PyQt5.QtCore import Qt, QEvent, pyqtSlot
 from PyQt5.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox
 from qasync import asyncSlot, QApplication, QEventLoop
 
-import app.rsrc.images.backgrounds
 from app.windows.Messages import *
 from app.windows.Types import Recorder
 from app.windows.Styles import scrollBarStyle
@@ -22,14 +21,12 @@ from utils.envHandler import getenv
 from utils.paths import rawPathStr, getPath
 from app.windows.Fonts import  QuicksandBold, Exo2Medium
 from app.windows.WaiterFrame import Waiter
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
+from utils.paths import getPath
 
 class JanineChat(QFrame):
     def __init__(self, parent=None):
         super(JanineChat, self).__init__(parent)
-        path = getPath(os.path.join(parentDir, "UI", "chat_.ui"))
+        path = getPath(os.path.join("assets", "UI", "chat_.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

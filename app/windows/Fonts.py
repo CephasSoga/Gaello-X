@@ -3,11 +3,6 @@ import os
 from PyQt5.QtGui import QFontDatabase, QFont
 from utils.paths import resourcePath
 
-# Change the working directory to the parent directory of the script
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
-
 def loadFont(fontPath):
     fontId = QFontDatabase.addApplicationFont(fontPath)
     if fontId == -1:
@@ -18,26 +13,111 @@ def loadFont(fontPath):
 
 # staticly load fonts
 # Roboto Mono
-robotoLight = resourcePath(os.path.join("rsrc", "fonts", "Roboto_Mono", "static", "RobotoMono-Light.ttf"))
-robotoRegular = resourcePath(os.path.join("rsrc", "fonts", "Roboto_Mono", "static", "RobotoMono-Regular.ttf"))
-robotoMedium = resourcePath(os.path.join("rsrc", "fonts", "Roboto_Mono", "static", "RobotoMono-Medium.ttf"))
-robotoSemiBold = resourcePath(os.path.join("rsrc", "fonts", "Roboto_Mono", "static", "RobotoMono-SemiBold.ttf"))
-robotoBold = resourcePath(os.path.join("rsrc", "fonts", "Roboto_Mono", "static", "RobotoMono-Bold.ttf"))
+robotoLight = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Roboto_Mono", "static", "RobotoMono-Light.ttf"
+    )
+)
+robotoRegular = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Roboto_Mono", "static", "RobotoMono-Regular.ttf"
+    )
+)
+robotoMedium = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Roboto_Mono", "static", "RobotoMono-Medium.ttf"
+    )
+)
+robotoSemiBold = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Roboto_Mono", "static", "RobotoMono-SemiBold.ttf"
+    )
+)
+robotoBold = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Roboto_Mono", "static", "RobotoMono-Bold.ttf"
+    )
+)
 # Montserrat
-montserratLight = resourcePath(os.path.join("rsrc", "fonts", "Montserrat", "static", "Montserrat-Light.ttf"))
-montserratRegular = resourcePath(os.path.join("rsrc", "fonts", "Montserrat", "static", "Montserrat-Regular.ttf"))
-montserratMedium = resourcePath(os.path.join("rsrc", "fonts", "Montserrat", "static", "Montserrat-Medium.ttf"))
-montserratBold = resourcePath(os.path.join("rsrc", "fonts", "Montserrat", "static", "Montserrat-Bold.ttf"))
+montserratLight = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Montserrat", "static", "Montserrat-Light.ttf"
+    )
+)
+montserratRegular = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Montserrat", "static", "Montserrat-Regular.ttf"
+    )
+)
+montserratMedium = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Montserrat", "static", "Montserrat-Medium.ttf"
+    )
+)
+montserratBold = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Montserrat", "static", "Montserrat-Bold.ttf"
+    )
+)
 # Quicksand
-quicksandLight = resourcePath(os.path.join("rsrc", "fonts", "Quicksand", "static", "Quicksand-Light.ttf"))
-quicksandRegular = resourcePath(os.path.join("rsrc", "fonts", "Quicksand", "static", "Quicksand-Regular.ttf"))
-quicksandMedium = resourcePath(os.path.join("rsrc", "fonts", "Quicksand", "static", "Quicksand-Medium.ttf"))
-quicksandBold = resourcePath(os.path.join("rsrc", "fonts", "Quicksand", "static", "Quicksand-Bold.ttf"))
+quicksandLight = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Quicksand", "static", "Quicksand-Light.ttf"
+    )
+)
+quicksandRegular = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Quicksand", "static", "Quicksand-Regular.ttf"
+    )
+)
+quicksandMedium = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Quicksand", "static", "Quicksand-Medium.ttf"
+    )
+)
+quicksandBold = resourcePath(
+    os.path.join(
+        "assets",
+        "fonts", "Quicksand", "static", "Quicksand-Bold.ttf"
+    )
+)
 #Exo2
-exo2Light = resourcePath(os.path.join("rsrc", "fonts", "Exo_2", "static", "Exo2-Light.ttf"))
-exo2Regular = resourcePath(os.path.join("rsrc", "fonts", "Exo_2", "static", "Exo2-Regular.ttf"))
-exo2Medium = resourcePath(os.path.join("rsrc", "fonts", "Exo_2", "static", "Exo2-Medium.ttf"))
-exo2Bold = resourcePath(os.path.join("rsrc", "fonts", "Exo_2", "static", "Exo2-Bold.ttf"))
+exo2Light = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Exo_2", "static", "Exo2-Light.ttf"
+    )
+)
+exo2Regular = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Exo_2", "static", "Exo2-Regular.ttf"
+    )
+)
+exo2Medium = resourcePath(
+    os.path.join(
+        "assets",
+        "fonts", "Exo_2", "static", "Exo2-Medium.ttf"
+    )
+)
+exo2Bold = resourcePath(
+    os.path.join(
+        "assets", 
+        "fonts", "Exo_2", "static", "Exo2-Bold.ttf"
+    )
+)
 
 class Font(QFont):
     def __init__(self, fontPath, pointSize):
@@ -113,6 +193,3 @@ class Exo2Bold(Font):
     def __init__(self, pointSize):
         super().__init__(loadFont(exo2Bold), pointSize)
 
-
-
-q = QFont('Roboto Mono', 10)

@@ -6,16 +6,12 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QDialog
 
 from app.windows.Fonts import RobotoBold
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
+from utils.paths import getPath
 
 class Warning(QDialog):
     def __init__(self, title: str, message: str,  parent=None):
         super().__init__(parent)
-
-        path = os.path.join("UI", "warning.ui")
+        path = getPath(os.path.join("assets", "UI", "warning.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

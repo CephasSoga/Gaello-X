@@ -7,15 +7,12 @@ from PyQt5.QtWidgets import QFrame
 from app.windows.AuthHandler import read_user_id
 from app.windows.NewAccountPlan import NewAccountPlan
 from utils.appHelper import setRelativeToMainWindow
-
-currentDir = os.path.dirname(__file__)
-parentDir = os.path.dirname(currentDir)
-os.chdir(parentDir)
+from utils.paths import getPath
 
 class Menu(QFrame):
     def __init__(self, parent=None):
         super(Menu, self).__init__(parent)
-        path = os.path.join("UI", "menu.ui")
+        path = getPath(os.path.join("assets", "UI", "menu.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
