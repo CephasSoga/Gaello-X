@@ -10,14 +10,14 @@ from PyQt5.QtWidgets import QFrame, QVBoxLayout,QSlider, QLabel, QSizePolicy, QW
 
 from app.windows.Types import *
 from utils.time import time_, date
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 from app.windows.Styles import userMessageBackground, chatScrollBarStyle
 from app.windows.Fonts import RobotoRegular, Exo2Light
 
 class ChatTextMessage(QFrame):
     def __init__(self, message:Message, parent=None):
         super(ChatTextMessage, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "text_message.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "text_message.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
@@ -87,7 +87,7 @@ class ChatTextMessage(QFrame):
 class ChatVoiceMail(QFrame):
     def __init__(self, message:Message, parent=None):
         super(ChatVoiceMail, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "voicemail.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "voicemail.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
@@ -171,12 +171,12 @@ class ChatVoiceMail(QFrame):
     def mediaStateChanged(self, state):
         side = 64
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
-            iconPath = getPath(os.path.join("assets",  "icons", "pause-button.png"))
+            iconPath = getFrozenPath(os.path.join("assets",  "icons", "pause-button.png"))
             icon = QtGui.QIcon(iconPath)
             self.play.setIcon(icon)
             self.play.setIconSize(QSize(side, side))
         else:
-            iconPath = getPath(os.path.join("assets",  "icons", "play-button.png"))
+            iconPath = getFrozenPath(os.path.join("assets",  "icons", "play-button.png"))
             icon = QtGui.QIcon(iconPath)
             self.play.setIcon(icon)
             self.play.setIconSize(QSize(side, side))
@@ -219,7 +219,7 @@ class ChatMultimedia(QWidget):
             raise TypeError("ChatMultimedia requires a Multimedia instance")
         self.origin = self.content.origin
 
-        path = getPath(os.path.join("assets", "UI", "multimedia_.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "multimedia_.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
@@ -338,12 +338,12 @@ class ChatMultimedia(QWidget):
     def mediaStateChanged(self, state):
         side = 64
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
-            iconPath = getPath(os.path.join("assets",  "icons", "pause.png"))
+            iconPath = getFrozenPath(os.path.join("assets",  "icons", "pause.png"))
             icon = QtGui.QIcon(iconPath)
             self.play.setIcon(icon)
             self.play.setIconSize(QSize(side, side))
         else:
-            iconPath = getPath(os.path.join("assets",  "icons", "play2.png"))
+            iconPath = getFrozenPath(os.path.join("assets",  "icons", "play2.png"))
             icon = QtGui.QIcon(r"icons/play2.png")
             self.play.setIcon(icon)
             self.play.setIconSize(QSize(side, side))

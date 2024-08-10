@@ -16,13 +16,13 @@ from utils.workers import spinnerWork
 from app.windows.Fonts import RobotoRegular
 from app.windows.Styles import chatScrollBarStyle
 from utils.appHelper import clearLayout
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 
 class SingleFocus(QWidget):
     def __init__(self, symbol:str, targetCollection: str, parent=None):
         super().__init__(parent)
-        path = getPath(os.path.join("assets", "UI" , "singleFocus.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI" , "singleFocus.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

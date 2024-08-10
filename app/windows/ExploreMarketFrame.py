@@ -17,12 +17,12 @@ from app.windows.IndexItemFrame import IndexItem
 from app.windows.CryptoItemFrame import CryptoItem
 from app.windows.CommodityItemFrame import CommodityItem
 from app.windows.Styles import scrollBarStyle
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 class ExploreMarket(QFrame):
     def __init__(self, parent=None):
         super(ExploreMarket, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "exploreMarket.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "exploreMarket.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

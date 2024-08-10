@@ -18,7 +18,7 @@ from utils.databases import mongoGet
 from utils.envHandler import getenv
 from utils.appHelper import browse
 from utils.system import restoreSystemPath
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 PORT = 8888
 IP = 'http://localhost'
@@ -30,7 +30,7 @@ class PaymentForm(QFrame):
     failure = pyqtSignal()
 
     def __init__(self, execPath: Path | str = ".", serverPath: Path = Path('server/server.js'), parent=None):
-        path = getPath(os.path.join("assets", "UI", "paymentForm.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "paymentForm.ui"))
         super(PaymentForm, self).__init__(parent)
         if os.path.exists(path):
             uic.loadUi(path, self)

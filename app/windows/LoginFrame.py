@@ -8,7 +8,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow, QLineEdit, QMessageBox, QLayout
 
-from utils.paths import getPath
+from utils.paths import getFrozenPath, getFileSystemPath
 from utils.envHandler import getenv
 from utils.appHelper import setRelativeToMainWindow, showWindow
 from app.windows.Fonts import RobotoRegular
@@ -22,7 +22,7 @@ class SignInFrame(QMainWindow):
     def __init__(self, parent=None):
         super(SignInFrame, self).__init__(parent)
         self.newAccountSetupWidget = None  # Initialize as None
-        path = getPath(os.path.join("assets", "UI", "login.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "login.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
@@ -96,7 +96,8 @@ class SignInFrame(QMainWindow):
 
 
     def readPersistentSessionManager(self):
-        credentials_path = Path(os.path.join(getenv('APP_BASE_PATH'), 'credentials', 'credentials.json'))
+        base_path = getFileSystemPath(getenv("APP_BASE_PATH"))
+        credentials_path = Path(os.path.join(base_path, 'credentials', 'credentials.json'))
         if not credentials_path.exists():
             return None
         else:

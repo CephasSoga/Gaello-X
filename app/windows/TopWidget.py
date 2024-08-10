@@ -19,7 +19,7 @@ from app.windows.NotificationsFrame import Notifications
 from app.windows.HelpFrame import Help
 from app.windows.MenuFrame import Menu
 from app.windows.Fonts import *
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 class PressChatFrame(QFrame):
     def __init__(self, frame: QFrame, parent=None):
@@ -65,7 +65,7 @@ class PressExploreFrame(QFrame):
 class Header(QMainWindow):
     def __init__(self, parent=None):
         super(Header, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "header.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "header.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

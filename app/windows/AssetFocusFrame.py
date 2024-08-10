@@ -15,12 +15,12 @@ from app.windows.Styles import chatScrollBarStyle
 from utils.logs import Logger
 from utils.appHelper import clearLayout
 from utils.workers import spinnerWork
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 class AssetFocusItem(QFrame):
     def __init__(self, parent=None):
         super(AssetFocusItem, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "assetFocusItem.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "assetFocusItem.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

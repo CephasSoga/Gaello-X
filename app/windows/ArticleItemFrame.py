@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QFrame
 from app.windows.Fonts import *
 from app.windows.ArticleExpandFrame import ArticleExpand
 from utils.appHelper import setRelativeToMainWindow
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 class ArticleItem(QFrame):
     clicked = pyqtSignal()
@@ -24,7 +24,7 @@ class ArticleItem(QFrame):
         parent = None
         ):
         super().__init__(parent)
-        path = getPath(os.path.join("assets", 'UI', 'articleItem.ui'))
+        path = getFrozenPath(os.path.join("assets", 'UI', 'articleItem.ui'))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

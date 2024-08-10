@@ -22,7 +22,7 @@ from utils.logs import Logger
 
 from client.client import Client
 from utils.system import restoreSystemPath
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 _cwd = os.getcwd()
 main_logger = Logger("Main")
@@ -49,7 +49,7 @@ def exec_api():
     This function does not return any values.
     """
     try:
-        cwd = getPath(os.path.join("models", "api", "app.py"))
+        cwd = getFrozenPath(os.path.join("models", "api", "app.py"))
         subprocess.Popen(['python', f'{cwd}'])
     except Exception as e:
         main_logger.log("error", "Error executing the API", e)

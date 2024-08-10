@@ -2,7 +2,7 @@ import logging
 from typing import Any
 from pathlib import Path
 
-from utils.paths import constructPath
+from utils.paths import getFileSystemPath
 from utils.envHandler import getenv
 
 APP_BASE_PATH = getenv('APP_BASE_PATH')
@@ -44,7 +44,8 @@ class Logger(object):
 
     def _add_file_handler(self):
         """Adds a file handler to the logger."""
-        log_dir = constructPath(Path(APP_BASE_PATH), 'logs')
+        base_path = getFileSystemPath(base_directory=APP_BASE_PATH)
+        log_dir = Path(base_path, 'logs')
         log_dir.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
         log_file_path = log_dir / f"{self.name}.log"
         file_handler = logging.FileHandler(log_file_path)

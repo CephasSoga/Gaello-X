@@ -6,12 +6,12 @@ from PyQt5.QtGui import QFont
 from PyQt5 import uic
 
 from app.windows.Fonts import RobotoRegular
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 class JanineCommunity(QWidget):
     def __init__(self, parent=None):
         super(JanineCommunity, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "community.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "community.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

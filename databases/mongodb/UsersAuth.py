@@ -11,7 +11,8 @@ from pymongo.database import Database
 
 from app.handlers.HashWorker import Hasher
 from utils.fileHelper import hideFolder
-from utils.paths import constructPath
+from utils.paths import constructPath, getFileSystemPath
+from utils.envHandler import getenv
 
 class UserCredentials:
     """
@@ -194,8 +195,10 @@ class UserAuthentification:
 
         This function saves the given credentials to a local persistent file. It first retrieves the base folder path from the 'APP_BASE_PATH' environment variable. It then constructs the path to the credentials file and creates the necessary directories if they don't exist. The credentials are then saved to the file using the 'json.dump' function. Finally, it attempts to hide the credentials folder, but if there is an error, it prints the exception.
         """
-        baseFolder = Path(os.getenv('APP_BASE_PATH'))
-        credentialsPath = constructPath(baseFolder,  r'credentials\credentials.json')
+        baseFolder = Path(
+            getFileSystemPath(getenv('APP_BASE_PATH'))
+        )
+        credentialsPath = constructPath(baseFolder,  'credentials', 'credentials.json')
         credentialsPath.parent.mkdir(parents=True, exist_ok=True)
 
         with credentialsPath.open('w') as f:

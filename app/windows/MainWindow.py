@@ -11,7 +11,8 @@ from app.windows.LoginFrame import SignInFrame
 from app.windows.TopWidget import Header
 from app.windows.BottomWidget import Bottom
 from utils.appHelper import stackOnCurrentWindow
-from utils.paths import constructPath, getPath
+from utils.paths import constructPath, getFrozenPath, getFileSystemPath
+from utils.envHandler import getenv
 
 class MainWindow(QMainWindow):
     finishedLoading = pyqtSignal()
@@ -38,7 +39,7 @@ class MainWindow(QMainWindow):
         self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.FramelessWindowHint)
 
     def setWIcon(self):
-        iconPath = getPath(os.path.join("assets", "logo", "cube-log-big.png"))
+        iconPath = getFrozenPath(os.path.join("assets", "logo", "cube-log-big.png"))
         self.setWindowIcon(QIcon(iconPath))
 
     def setLayout(self):
@@ -81,8 +82,10 @@ class MainWindow(QMainWindow):
         self.finishedLoading.connect(self.onLoadingFinished)
 
     def onLoadingFinished(self):
-        baseFolder = Path(os.getenv('APP_BASE_PATH'))
-        credentialsPath = constructPath(baseFolder,  r'credentials\credentials.json')
+        basePath = Path(
+            getFileSystemPath(getenv("APP_BASE_PATH"))
+        )
+        credentialsPath = constructPath(basePath,  'credentials', 'credentials.json')
         if not os.path.exists(credentialsPath):
             self.spawnAccountSettings()
         else:

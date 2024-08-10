@@ -14,7 +14,7 @@ from app.windows.Fonts import RobotoRegular
 from app.windows.InsightsWidget import JanineInsights
 from app.windows.CommunityWidget import JanineCommunity
 from app.windows.PlusWidget import ProjectHome
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 class PressInsigthsFrame(QFrame):
     def __init__(self, widget: QWidget, parent=None):
@@ -82,7 +82,7 @@ class PressPlusFrame(QFrame):
 class Bottom(QMainWindow):
     def __init__(self, parent=None):
         super(Bottom, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "bottom.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "bottom.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

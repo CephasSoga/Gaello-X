@@ -5,6 +5,7 @@ from typing import Any, List, Dict, Tuple
 
 from utils.logs import Logger
 from utils.envHandler import getenv
+from utils.paths import getFileSystemPath
 
 
 logger = Logger("Request-Manager")
@@ -22,7 +23,7 @@ def read_user_endpoint() -> Tuple[str, str] | None:
     Returns:
         Tuple[str, str] | None: A tuple containing the user ID and email, or None if the file is not found.
     """
-    base_path = getenv("APP_BASE_PATH")
+    base_path = getFileSystemPath(getenv("APP_BASE_PATH"))
     credentials_path = os.path.join(base_path, "credentials", "credentials.json")
     try:
         with open(credentials_path, 'r') as credentials_file:

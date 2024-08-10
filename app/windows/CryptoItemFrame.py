@@ -10,13 +10,13 @@ from app.windows.AuthHandler import handleAuth
 from app.windows.Fonts import RobotoBold, Exo2Light
 from app.windows.SingleFocusFrame import SingleFocus
 from utils.appHelper import setRelativeToMainWindow
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 class CryptoItem(QFrame):
     clicked = pyqtSignal()
     def __init__(self, symbol: str, name: str, price: float, growth: float, imagePixmap: Optional[QPixmap], historicalPixmap: Optional[QPixmap], parent=None):
         super().__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "cryptoItem.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "cryptoItem.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

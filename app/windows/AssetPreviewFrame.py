@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, QSize, pyqtSignal
 from PyQt5.QtWidgets import QFrame
 
 from app.windows.Fonts import RobotoSemiBold
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 class AssetPreview(QFrame):
     clicked = pyqtSignal()
@@ -20,7 +20,7 @@ class AssetPreview(QFrame):
                 chartPixmap: Optional[QPixmap] = None,
                 parent = None):
         super(AssetPreview, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "assetPreview.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "assetPreview.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

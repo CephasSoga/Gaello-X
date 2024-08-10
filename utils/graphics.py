@@ -3,9 +3,10 @@ import plotly.graph_objs as go
 import plotly.io as pio
 
 from utils.paths import constructPath
-from utils .envHandler import getenv
+from utils.envHandler import getenv
+from utils.paths import getFileSystemPath
 
-APP_BASE_PATH = getenv('APP_BASE_PATH')
+APP_BASE_PATH = getFileSystemPath(getenv('APP_BASE_PATH'))
 
 def chartWithSense(dates: list[str], values: list[int], width=120, height=60):
     """
@@ -80,7 +81,7 @@ def chartWithSense(dates: list[str], values: list[int], width=120, height=60):
     name = "chart_with_sense"
     suffix = ""
     extension = ".png"
-    outputPath = constructPath(Path(APP_BASE_PATH), 'static/charts/', f"{name}{suffix}{extension}")
+    outputPath = constructPath(Path(APP_BASE_PATH), 'static', 'charts',f"{name}{suffix}{extension}")
     outputPath.parent.mkdir(parents=True, exist_ok=True)
 
     # Save the image with specified dimensions

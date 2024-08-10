@@ -4,12 +4,12 @@ from PyQt5.QtGui import QMovie
 from PyQt5.QtCore import Qt
 from PyQt5 import uic
 
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 class Waiter(QFrame):
     def __init__(self, parent=None):
         super(Waiter, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "waiter.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "waiter.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

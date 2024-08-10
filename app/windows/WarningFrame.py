@@ -4,13 +4,13 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtWidgets import QFrame
 
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 
 class Warning(QFrame):
     def __init__(self, parent=None):
         super(Warning, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "warnings.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "warnings.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

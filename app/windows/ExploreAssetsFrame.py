@@ -17,13 +17,13 @@ from utils.appHelper import setRelativeToMainWindow
 from utils.databases import mongoGet
 from utils.asyncJobs import quickFetchBytes
 from utils.graphics import chartWithSense
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 
 class ExploreAsset(QFrame):
     def __init__(self, parent=None):
         super(ExploreAsset, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "exploreAsset.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "exploreAsset.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

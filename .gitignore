@@ -4,7 +4,7 @@ build
 dist
 node_modules
 app/__pycache__
-app/assets/__pycache__
+app/handlers/__pycache__
 app/inferential/__pycache__
 app/Temp
 app/windows/__pycache__

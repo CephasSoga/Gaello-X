@@ -16,7 +16,7 @@ from app.windows.Outliners import MarketOutliner, Outline, OutlineTitle
 from app.handlers.ExportAssets import IndexList
 from utils.databases import mongoGet
 from utils.asyncJobs import quickFetchBytes
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 class MarketSummary(QFrame):
     dataFetched = pyqtSignal(str, list)
@@ -24,7 +24,7 @@ class MarketSummary(QFrame):
 
     def __init__(self, parent=None):
         super(MarketSummary, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "marketSummary.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "marketSummary.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

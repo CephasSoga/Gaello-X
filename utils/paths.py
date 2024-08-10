@@ -145,7 +145,7 @@ def resourcePath(relative_path):
 
     return os.path.join(base_path, relative_path)
 
-def getPath(filename: str):
+def getFrozenPath(filename: str):
     """
     Returns the full path to a given filename, taking into account the _MEIPASS attribute 
     if it exists in the sys module, which is typically the case for frozen applications.
@@ -161,3 +161,47 @@ def getPath(filename: str):
     else:
         return filename
 
+import sys
+import os
+
+def getFileSystemPath(base_directory=None, file_name=''):
+    """
+    Provides the full path to a file based on a predefined base directory or the application's execution context.
+
+    If the base directory is not provided, the function determines the path based on whether the application is 
+    frozen, running as a script, or running interactively.
+
+    If the file name is not provided, the function points:
+    - If the base directory is providesd, the function points to the directory.
+    - Otherwise, the function uses the application's execution context:
+        - If the application is frozen (bundled executable), the function uses the directory of the executable.
+        - If the application is not frozen, the function uses the current working directory.
+
+    Parameters:
+    - base_directory (str): The base directory where files are located. Defaults to None.
+    - file_name (str): The name of the file. Defaults to an empty string.
+
+    Returns:
+    - str: The full path to the file.
+    """
+    if base_directory is None:
+        # Use default behavior if no base directory is provided
+        if getattr(sys, 'frozen', False):
+            # If the application is frozen (bundled executable)
+            application_path = os.path.dirname(sys.executable)
+        else:
+            try:
+                # If running from a script
+                app_full_path = os.path.realpath(__file__)
+                application_path = os.path.dirname(app_full_path)
+            except NameError:
+                # If running interactively
+                application_path = os.getcwd()
+
+        # Construct the file full path
+        file_full_path = os.path.join(application_path, file_name)
+    else:
+        # Use the specified base directory
+        file_full_path = os.path.join(base_directory, file_name)
+
+    return file_full_path

@@ -2,12 +2,12 @@ import os
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import *
 
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 class Notifications(QtWidgets.QFrame):
     def __init__(self, parent=None):
         super(Notifications, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI" , "notifications.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI" , "notifications.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

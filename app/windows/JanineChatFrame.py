@@ -18,15 +18,14 @@ from models.janine.JanineModel import janineInstance
 from databases.mongodb.JanineDB import janineDB
 from utils.fileHelper import getAudioLength
 from utils.envHandler import getenv
-from utils.paths import rawPathStr, getPath
+from utils.paths import rawPathStr, getFrozenPath, getFileSystemPath
 from app.windows.Fonts import  QuicksandBold, Exo2Medium
 from app.windows.WaiterFrame import Waiter
-from utils.paths import getPath
 
 class JanineChat(QFrame):
     def __init__(self, parent=None):
         super(JanineChat, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "chat_.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "chat_.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
@@ -63,7 +62,7 @@ class JanineChat(QFrame):
         self.historyWidget = QWidget()
         self.messageBox = QMessageBox()
 
-        self.basePath = getenv("APP_BASE_PATH")
+        self.basePath = getFileSystemPath(getenv("APP_BASE_PATH"))
 
     def setFontOnObjects(self, font, objects:list):
         for obj in objects:

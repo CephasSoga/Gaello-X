@@ -3,7 +3,7 @@ import os
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 class DocWebEngineView():
     def __init__(self) -> None:
@@ -17,6 +17,5 @@ class DocWebEngineView():
         )
 
         self.web.setFixedSize(800, 600)
-        path = getPath(os.path.join("assets", "html", "docs.html"))  
-        path = path = os.path.join(r"html\test.html")
+        path = getFrozenPath(os.path.join("assets", "html", "docs.html"))  
         self.web.load(QUrl.fromLocalFile(path))

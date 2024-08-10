@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QFrame, QMessageBox
 from utils.appHelper import setRelativeToMainWindow
 from utils.databases import mongoUpdate
 from utils.envHandler import getenv
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 from app.windows.Fonts import RobotoMedium, RobotoBold, QuicksandMedium, RobotoLight
 from app.windows.PaymentForm import PaymentForm
 from app.windows.NewAccountOk import AccountAllSet,  AccountInitFailure
@@ -20,7 +20,7 @@ from app.windows.NewAccountOk import AccountAllSet,  AccountInitFailure
 class NewAccountPlan(QFrame):
     def __init__(self, parent=None):
         super(NewAccountPlan, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI" , "newAccountPlan.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI" , "newAccountPlan.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
@@ -97,7 +97,7 @@ class NewAccountPlan(QFrame):
 
     def submitStandardTier(self):
         parent = self.parent()
-        serverPathStr = getPath(os.path.join('server', 'standard.js'))
+        serverPathStr = getFrozenPath(os.path.join('server', 'standard.js'))
         self.paymentForm = PaymentForm(serverPath=Path(serverPathStr))
         if self.paymentForm:
             self.paymentForm.hide()
@@ -109,7 +109,7 @@ class NewAccountPlan(QFrame):
 
     def submitAdvancedTier(self):
         parent = self.parent()
-        serverPathStr = getPath(os.path.join('server', 'advanced.js'))
+        serverPathStr = getFrozenPath(os.path.join('server', 'advanced.js'))
         self.paymentForm = PaymentForm(serverPath=Path(serverPathStr))
         if self.paymentForm:
             self.paymentForm.hide()

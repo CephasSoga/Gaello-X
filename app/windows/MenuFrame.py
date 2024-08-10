@@ -7,12 +7,12 @@ from PyQt5.QtWidgets import QFrame
 from app.windows.AuthHandler import read_user_id
 from app.windows.NewAccountPlan import NewAccountPlan
 from utils.appHelper import setRelativeToMainWindow
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 
 class Menu(QFrame):
     def __init__(self, parent=None):
         super(Menu, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "menu.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "menu.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

@@ -9,11 +9,11 @@ import pyaudio
 from PyQt5.QtCore import QThread, pyqtSignal
 
 from utils.time import time_, date
-from utils.paths import constructPath
+from utils.paths import constructPath, getFileSystemPath
 from models.janine.JanineModel import janineInstance
 from utils .envHandler import getenv
 
-APP_BASE_PATH = getenv('APP_BASE_PATH')
+APP_BASE_PATH = getFileSystemPath(getenv('APP_BASE_PATH'))
 
 class TextMessage:
     """

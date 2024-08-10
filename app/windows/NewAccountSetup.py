@@ -10,13 +10,13 @@ from PyQt5.QtWidgets import QFrame, QLayout, QLineEdit, QMessageBox
 from app.windows.Fonts import RobotoRegular
 from app.windows.NewAccountPlan import NewAccountPlan
 from utils.appHelper import setRelativeToMainWindow, showWindow
-from utils.paths import getPath
+from utils.paths import getFrozenPath
 from databases.mongodb.UsersAuth import UserCredentials, userAuthInstance
 
 class NewAccountSetup(QFrame):
     def __init__(self, parent=None):
         super(NewAccountSetup, self).__init__(parent)
-        path = getPath(os.path.join("assets", "UI", "newAccountSetup.ui"))
+        path = getFrozenPath(os.path.join("assets", "UI", "newAccountSetup.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

@@ -4,6 +4,8 @@ from typing import Callable
 
 from app.windows.WarningDialog import Warning
 from databases.mongodb.Common import mongoGet
+from utils.paths import getFileSystemPath
+from utils.envHandler import getenv
 
 def read_user_id() -> str:
     """
@@ -18,8 +20,8 @@ def read_user_id() -> str:
         FileNotFoundError: If the credentials file is not found.
         Exception: If any other exception occurs during the process.
     """
-    base_path = os.getenv("APP_BASE_PATH")
-    credentials_path = os.path.join(base_path, "credentials/credentials.json")
+    base_path = getFileSystemPath(getenv("APP_BASE_PATH"))
+    credentials_path = os.path.join(base_path, "credentials", "credentials.json")
     try:
         with open(credentials_path, 'r') as credentials_file:
             credentials = json.load(credentials_file)
@@ -46,8 +48,8 @@ def read_auth_level() -> int:
     Returns:
         int: The authorization level of the user, or 0 if no user email is found or if the credentials file is not found.
     """
-    base_path = os.getenv("APP_BASE_PATH")
-    credentials_path = os.path.join(base_path, "credentials/credentials.json")
+    base_path = getFileSystemPath(getenv("APP_BASE_PATH"))
+    credentials_path = os.path.join(base_path, "credentials", "credentials.json")
     try:
         with open(credentials_path, 'r') as credentials_file:
             credentials = json.load(credentials_file)
