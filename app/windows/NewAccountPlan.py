@@ -79,7 +79,7 @@ class NewAccountPlan(QFrame):
                 database='UsersAuth', 
                 collection='users', 
                 query={'user.email': email}, 
-                update={'$set': {'subscription': 'free', 'status': 'ACTIVE', 'AuthorizationLevel': 1}}
+                update={'$set': {'subscription': 'free', 'status': 'ACTIVE', 'authorizationLevel': 1}}
             )
             if res:
                 allSet = AccountAllSet()

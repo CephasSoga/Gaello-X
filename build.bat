@@ -4,7 +4,7 @@ pyinstaller --onefile --name Gaello --icon=icon.ico --splash=splash.png ^
     --add-data "assets/fonts/Exo_2/static/*;assets/fonts/Exo_2/static" ^
     --add-data "assets/fonts/Montserrat/static/*;assets/fonts/Montserrat/static" ^
     --add-data "assets/fonts/Quicksand/static/*;assets/fonts/Quicksand/static" ^
-    --add-data "assets/fonts/Roboto_Mono/static/*;assets/fonts/Robot_Mono/static" ^
+    --add-data "assets/fonts/Roboto_Mono/static/*;assets/fonts/Roboto_Mono/static" ^
     --add-data "assets/images/*;assets/images" ^
     --add-data "assets/icons/*;assets/icons" ^
     --add-data "assets/spinners/*;assets/spinners" ^

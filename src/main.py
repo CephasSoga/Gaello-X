@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 
 # Help pyinstaller detect used packages
@@ -77,6 +78,10 @@ def exec_all():
         exec_api()
     finally:
         exec_client()
+    if getattr(sys, 'frozen', False):
+        # If the application is frozen (bundled executable) the pyinstall bootloader will close the splash screen
+        import pyi_splash
+        pyi_splash.close()
 
 if __name__ == "__main__":
 
