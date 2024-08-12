@@ -61,6 +61,10 @@ class Client(QObject):
         """
         self.window = MainWindow()
         self.window.show()
+        if getattr(sys, 'frozen', False):
+            # If the application is frozen (bundled executable) the pyinstall bootloader will close the splash screen
+            import pyi_splash
+            pyi_splash.close()
 
     def raiseConnectionError(self):
         """
@@ -72,6 +76,10 @@ class Client(QObject):
             "Device is not connected."
         )
         self.warningBox.show()
+        if getattr(sys, 'frozen', False):
+            # If the application is frozen (bundled executable) the pyinstall bootloader will close the splash screen
+            import pyi_splash
+            pyi_splash.close()
 
     def run(self):
         """

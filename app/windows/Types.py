@@ -1,4 +1,5 @@
-import  time
+import os
+import time
 import mimetypes
 import asyncio
 from pathlib import Path
@@ -105,7 +106,7 @@ class Recorder(QThread):
         suffix = random.randint(0, int(1e6))
         name = "user-voicemail"
         basePath = Path(APP_BASE_PATH)
-        relativePath = f"static/exchanges/{name}{suffix}{extension}"
+        relativePath = os.path.join("static", "exchanges", f"{name}{suffix}{extension}")#f"static/exchanges/{name}{suffix}{extension}"
         self.outputFilePath = constructPath(basePath, relativePath)
         self.outputFilePath.parent.mkdir(parents=True, exist_ok=True)
 

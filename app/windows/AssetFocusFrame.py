@@ -53,7 +53,7 @@ class AssetFocusItem(QFrame):
 class AssetFocus(QWidget):
     def __init__(self, symbol:str, parent=None):
         super(AssetFocus, self).__init__(parent)
-        path = os.path.join(r"UI/assetFocus.ui")
+        path = getFrozenPath(os.path.join("assets", "UI", "assetFocus.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:

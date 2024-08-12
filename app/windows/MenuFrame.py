@@ -21,6 +21,26 @@ class Menu(QFrame):
         self.initUI()
 
     def initUI(self):
+        pass
+
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.MouseButtonPress:
+            if not self.geometry().contains(event.globalPos()):
+                self.hide()
+        return super().eventFilter(obj, event)
+
+class AccountMenu(QFrame):
+    def __init__(self, parent=None):
+        super(AccountMenu, self).__init__(parent)
+        path = getFrozenPath(os.path.join("assets", "UI", "accountMenu.ui"))
+        if os.path.exists(path):
+            uic.loadUi(path, self)
+        else:
+            raise FileNotFoundError(f"{path} not found")
+
+        self.initUI()
+
+    def initUI(self):
         self.setContents()
         self.connectSlots()
 

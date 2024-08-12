@@ -4,7 +4,7 @@ from PyQt5.QtGui import QMovie
 from PyQt5.QtCore import Qt
 from PyQt5 import uic
 
-from utils.paths import getFrozenPath
+from utils.paths import getFrozenPath, resourcePath
 
 class Waiter(QFrame):
     def __init__(self, parent=None):
@@ -30,7 +30,9 @@ class Waiter(QFrame):
         self.Hlayout.setContentsMargins(10, 0, 10, 10)
         self.container.setLayout(self.Hlayout)
 
-        self.loadingMovie = QMovie("rsrc/videos/loading.gif")  # Corrected the file path
+        self.loadingMovie = QMovie(
+            resourcePath(os.path.join("assets", "videos", "loading.gif"))#"rsrc/videos/loading.gif"
+        )  # Corrected the file path
         self.loadingMovie.start()
         self.loadingLabel = QLabel(self)
         self.loadingLabel.setFixedSize(100, 20)  # Corrected the method usage

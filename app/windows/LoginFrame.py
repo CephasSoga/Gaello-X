@@ -66,7 +66,7 @@ class SignInFrame(QMainWindow):
             if not persistentSessionKey:
                 #TODO: ...
                 if self.userAuth.login(email, password):
-                    #TODO: Allow access to restricted windows
+                    #TODO: Allow access to restricted windows:  Cleared!
                     QMessageBox.information(self, "Success", "You are now logged in.")
 
                     # Recreate persistent login file

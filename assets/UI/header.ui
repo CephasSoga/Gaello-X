@@ -300,7 +300,7 @@ border-radius: 36px;</string>
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>../rsrc/logo/cube-logo-big.png</normaloff>../rsrc/logo/cube-logo-big.png</iconset>
+          <normaloff>../logo/cube-logo-big.png</normaloff>../logo/cube-logo-big.png</iconset>
         </property>
         <property name="iconSize">
          <size>

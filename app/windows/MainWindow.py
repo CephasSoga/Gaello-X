@@ -8,9 +8,10 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QMainWindow, QApplication, QVBoxLayout
 
 from app.windows.LoginFrame import SignInFrame
+from app.windows.MenuFrame import AccountMenu
 from app.windows.TopWidget import Header
 from app.windows.BottomWidget import Bottom
-from utils.appHelper import stackOnCurrentWindow
+from utils.appHelper import stackOnCurrentWindow, setRelativeToMainWindow
 from utils.paths import constructPath, getFrozenPath, getFileSystemPath
 from utils.envHandler import getenv
 
@@ -89,7 +90,17 @@ class MainWindow(QMainWindow):
         if not os.path.exists(credentialsPath):
             self.spawnAccountSettings()
         else:
-            self.header.account.setEnabled(False)
+            self.header.account.clicked.disconnect()
+            self.header.account.clicked.connect(self.spawnAccountDetails)
+            self.header.account.setStyleSheet(
+            """
+                QPushButton {
+                    background-color: rgb(135, 206, 235);
+                    border-radius: 24px;
+                    border-style: none;
+                }
+            """
+            )
             with credentialsPath.open('r') as f:
                 credentials = json.load(f)
                 # Optionally add more checks for credential validity here
@@ -102,3 +113,7 @@ class MainWindow(QMainWindow):
     def spawnAccountSettings(self):
         self.accountConnector = SignInFrame(self)
         stackOnCurrentWindow(self.accountConnector)
+    
+    def spawnAccountDetails(self):
+        self.accountMenu = AccountMenu()
+        setRelativeToMainWindow(self.accountMenu, self.header, 'right')
