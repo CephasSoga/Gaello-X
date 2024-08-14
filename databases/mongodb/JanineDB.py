@@ -125,8 +125,16 @@ class JanineMongoDatabase:
         if self.chatHistory is None:
             raise Exception("Chat history collection not initialized")
         elif self.chatCollections:
-            return [fetchAll(self.database[collection]) for collection in self.chatCollections]
-        elif not self.chatCollections and self.chatHistory:
+            history = []
+            hist_list =[fetchAll(self.database[collection]) for collection in self.chatCollections]
+            for hist in hist_list:
+                if isinstance(hist, list):
+                    for item in hist:
+                        history.append(item)
+                else:
+                    history.append(hist)
+            return history
+        elif not self.chatCollections and self.chatHistory is not None:
             return fetchAll(self.chatHistory)
         else:
             return []

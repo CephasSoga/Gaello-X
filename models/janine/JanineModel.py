@@ -16,7 +16,7 @@ class Janine(TextCompletion, AudioStreamCompletion, VisionCompletion, FileComple
     A class that integrates various completion capabilities for different message types.
     It inherits from TextCompletion, AudioStreamCompletion, VisionCompletion, and FileCompletion.
     """
-    def __init__(self, database: JanineMongoDatabase | Any):
+    def __init__(self, database: JanineMongoDatabase):
         """
         Initializes a new instance of the Janine class, inheriting from TextCompletion, 
         AudioStreamCompletion, VisionCompletion, and FileCompletion. It sets up the 

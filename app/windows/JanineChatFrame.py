@@ -279,7 +279,7 @@ class JanineChat(QFrame):
                 self, "Invalid Voice Message", "No voice input found.",
             )
             return
-        voicemail = VoiceMail(model=self.janine, path=path, origin=origin)
+        voicemail = VoiceMail(model=self.janine, filePath=path, origin=origin)
         voicemailStr = await voicemail.toString()
         await self.requestManager.post(message=voicemailStr)
         self.db.insert(item=voicemailStr)
