@@ -1,11 +1,13 @@
 import os
 from typing import Optional, Callable
 
+from pymongo.database import Database
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, pyqtSignal, QEvent
-from PyQt5.QtWidgets import QFrame
+from PyQt5.QtWidgets import QFrame, QDialog
 
 from utils.paths import getFrozenPath
+from utils.appHelper import setRelativeToMainWindow
 
 class ChatTitleSelector(QFrame):
     titleSet = pyqtSignal(str)
@@ -48,7 +50,7 @@ class ChatTitleSelector(QFrame):
 
 
 class ChatTitle(QFrame):
-    def __init__(self, title: str,  func: Optional[Callable[[str], None]] = None, parent = None):
+    def __init__(self, title: str, db: Database, func: Optional[Callable[[str], None]] = None, parent = None, gdparent = None):
         super(ChatTitle, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "chatTitle.ui"))
         if os.path.exists(path):
@@ -57,13 +59,16 @@ class ChatTitle(QFrame):
             raise FileNotFoundError(f"{path} not found")
         
         self.title = title
+        self.db = db
         self.func = func
+        self.parent_ = parent
 
         self.initUI()
     
     def initUI(self):
         self.setWFlags()
         self.setContents()
+        self.connectSlots()
         self.installEventFilter(self)  # Install the event filter
 
     def setWFlags(self):
@@ -105,3 +110,62 @@ class ChatTitle(QFrame):
                 )  # No focus
                 return True
         return super().eventFilter(obj, event)
+    
+    def connectSlots(self):
+        self.deleteButton.clicked.connect(self.deleteConfirm)
+        self.editButton.clicked.connect(self.editChatTitle)
+
+    def deleteConfirm(self):
+        confirmation = ConfirmDrop()
+        setRelativeToMainWindow(confirmation, self.parent_, "center")
+        confirmation.yes.connect(self.deleteSelf)
+        confirmation.no.connect(self.close)
+
+    def deleteSelf(self):
+        self.db.drop_collection(self.title)
+        self.db['metadata'].delete_one({'chat.title': self.title})
+        self.deleteLater()
+
+    def editChatTitle(self):
+        titleSelector = ChatTitleSelector()
+        setRelativeToMainWindow(titleSelector, self.parent_, "center")
+        titleSelector.titleSet.connect(self.editTitle)
+        titleSelector.show()
+
+    def editTitle(self, title: str):
+        self.db['metadata'].update_one({'chat.title': self.title}, {'$set': {'chat.title': title}})
+        self.db[self.title].rename(title)
+        self.title = title
+        self.setContents()
+
+class ConfirmDrop(QDialog):
+    yes = pyqtSignal()
+    no = pyqtSignal()
+    def __init__(self, parent=None):
+        super(ConfirmDrop, self).__init__(parent)
+        path = getFrozenPath(os.path.join("assets", "UI", "confirmDrop.ui"))
+        if os.path.exists(path):
+            uic.loadUi(path, self)
+        else:
+            raise FileNotFoundError(f"{path} not found")
+        
+        self.initUI()
+
+    def initUI(self):
+        self.setWFlags()
+        self.connectSlots()
+
+    def setWFlags(self):
+        self.setWindowFlag(Qt.FramelessWindowHint)
+
+    def connectSlots(self):
+        self.yesButton.clicked.connect(self.yesFunc)
+        self.noButton.clicked.connect(self.noFunc)
+
+    def yesFunc(self):
+        self.yes.emit()
+        self.close()
+
+    def noFunc(self):
+        self.no.emit()
+        self.close()

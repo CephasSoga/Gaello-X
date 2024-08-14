@@ -343,14 +343,19 @@ class JanineChat(QFrame):
 
     def newChatTitleSelected(self, title: str):
         if title:
-            chatTitle = ChatTitle(title=title, func=self.showFullChat, parent=self)
+            chatTitle = ChatTitle(
+                title=title,
+                db=self.db.database, 
+                func=self.showFullChat, 
+                parent=self,
+            )
             chatTitle.setStyleSheet(
                 "background-color: rgba(10, 10, 10, 200);"
             )
             self.historyLayout.addWidget(chatTitle)
             self.historyWidget.setLayout(self.historyLayout)
             self.historyScrollArea.setWidget(self.historyWidget)
-            self.installEventFilter(chatTitle)
+            self.historyWidget.installEventFilter(chatTitle)
         
             #mongoUpdate(database=self.db.user, collection='chatHistory', update={'$set': {'chat': {'title': title, 'time': now()}}})
             self.db.createChat(title=title)
@@ -370,15 +375,23 @@ class JanineChat(QFrame):
         self.db.connect()
         collections = self.db.getCollections()
         print("collections: ", collections)
-        self.gatheredChats.emit(collections)
+        if collections and len(collections) > 0:
+            self.gatheredChats.emit(collections)
+        else:
+            self.gatheredChats.emit([])
 
     def gatherChatHistory(self, collectionNames: List[str]):
         for collection in collectionNames:
-            chat  = ChatTitle(title=collection, func=self.showFullChat, parent=self)
+            chat = ChatTitle(
+                db=self.db.database,
+                title=collection, 
+                func=self.showFullChat, 
+                parent=self,
+            )
             self.historyLayout.addWidget(chat)
             self.historyWidget.setLayout(self.historyLayout)
             self.historyScrollArea.setWidget(self.historyWidget)
-            self.installEventFilter(chat)
+            self.historyWidget.installEventFilter(chat)
 
     def showFullChat(self, collection: str):
         try:

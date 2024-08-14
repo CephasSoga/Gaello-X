@@ -7,7 +7,6 @@ from utils.logs import Logger
 
 logger = Logger("Request-Manager")
 
-print("Req: Credentials: ", cached_credentials)
 PROTOCOL = 'http'
 IP = '127.0.0.1'
 PORT = '5000'

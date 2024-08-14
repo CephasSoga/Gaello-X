@@ -11,7 +11,6 @@ from models.reader.cache import cached_credentials
 app = Flask("Janine-Endpoint")
 
 logger = Logger("Janine-Endpoint")
-print("API: Credentials: ", cached_credentials)
 
 MAX_QUEUE_SIZE = 1000
 successfulRequetsQueue = deque(maxlen=MAX_QUEUE_SIZE)

@@ -13,7 +13,6 @@ from utils.logs import Logger
 from utils.time import now
 from models.reader.cache import cached_credentials
 
-print("DB: Credentials: ", cached_credentials)
 connectionStr = getenv("MONGO_URI")
 logger = Logger("MongoDB-Janine")
 MAX_DOCS = 50
