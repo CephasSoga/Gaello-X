@@ -1,59 +1,27 @@
-import os
-import json
 from collections import deque
-from typing import Tuple
 
 from flask import Flask, render_template, request, jsonify
 from waitress import serve
 
 #from app.windows.AuthHandler import read_user_id
 from utils.logs import Logger
-from utils.envHandler import getenv
-from utils.paths import getFileSystemPath
+from models.reader.cache import cached_credentials
 
 
 app = Flask("Janine-Endpoint")
 
 logger = Logger("Janine-Endpoint")
+print("API: Credentials: ", cached_credentials)
 
 MAX_QUEUE_SIZE = 1000
 successfulRequetsQueue = deque(maxlen=MAX_QUEUE_SIZE)
+ID = cached_credentials.get('id', '')
+EMAIL = cached_credentials.get('email', '')
 
-def read_user_endpoint() -> Tuple[str, str] | None:
-    """
-    Reads the user endpoint from the credentials file.
+if not ID or not EMAIL:
+    logger.log('error', 'Empty user credentials.', ValueError('User credentials not found in cache.'))
 
-    This function retrieves the base path using the "APP_BASE_PATH" environment variable.
-    It then constructs the path to the credentials file and attempts to open it.
-    If the file is found, it loads the JSON data and returns the user ID and email.
-    If the file is not found, it returns None.
-    If any other exception occurs during the process, it is re-raised.
-
-    Returns:
-        Tuple[str, str] | None: A tuple containing the user ID and email, or None if the file is not found.
-    """
-    base_path = getFileSystemPath(getenv("APP_BASE_PATH"))
-    credentials_path = os.path.join(base_path, "credentials", "credentials.json")
-    try:
-        with open(credentials_path, 'r') as credentials_file:
-            credentials = json.load(credentials_file)
-
-        return credentials.get('id', ''), credentials.get('email', '')
-    except FileNotFoundError:
-        return None
-    except Exception as e:
-        raise(e)
-
-creds_details = read_user_endpoint()
-
-if not creds_details:
-    logger.log('error', "Empty credentials", ValueError("Empty credentials"))
-    id, email = '', ''
-else:
-    id, email = creds_details
-
-
-@app.route(f'/janine/index/{id}-{email}', methods=['POST'])
+@app.route(f'/janine/index/{ID}-{EMAIL}', methods=['POST'])
 def post():
     """
     Handle a POST request to the '/janine/index/{id}-{email}' endpoint.
@@ -78,7 +46,7 @@ def post():
     else:
         return jsonify({"error": "No data provided in the request body"}), 400
 
-@app.route(f'/janine/index/{id}-{email}', methods=['GET'])
+@app.route(f'/janine/index/{ID}-{EMAIL}', methods=['GET'])
 def get():
     """
     Handle a GET request to the '/janine/index/{id}-{email}' endpoint.
@@ -112,7 +80,19 @@ class Application:
 
     @staticmethod
     def run():
-        app.run(debug=True)
+        try:
+            logger.log('info', 'Starting Janine-Endpoint on plain Flask...')
+            app.run(debug=True)
+        except Exception as e:
+            logger.log('error', f'Error starting Janine-Endpoint: {e}', ValueError('Error starting Janine-Endpoint'))
+            logger.log("info", "Shifting to waitress server")
+            try:
+                serve(app, host="0.0.0.0", port=5000)
+                logger.log("info", "Successfully shifted to waitress server")
+            except Exception as e:
+                logger.log('error', f'Error starting waitress server: {e}', ValueError('Error starting waitress server'))
+                logger.log('error', 'Error starting Janine-Endpoint. Please check the logs for more information.')
+
 
 if __name__ == "__main__":
     Application.run()

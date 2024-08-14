@@ -1,98 +1,108 @@
-import os
-import json
-from typing import Dict, Any, Tuple
+from typing import Dict, Any
 
-from pymongo import MongoClient
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 from pymongo.database import Database
 from pymongo.collection import Collection
+from pymongo import DESCENDING
+from pymongo.errors import ConnectionFailure, CollectionInvalid
 
 from databases.mongodb.Operations import *
 from utils.envHandler import getenv
 from utils.logs import Logger
-from utils.paths import getFileSystemPath
+from utils.time import now
+from models.reader.cache import cached_credentials
 
-
+print("DB: Credentials: ", cached_credentials)
+connectionStr = getenv("MONGO_URI")
 logger = Logger("MongoDB-Janine")
-
-def read_user_endpoint() -> Tuple[str, str] | None:
-    """
-    Reads the user endpoint from the credentials file.
-
-    This function retrieves the base path using the "APP_BASE_PATH" environment variable.
-    It then constructs the path to the credentials file and attempts to open it.
-    If the file is found, it loads the JSON data and returns the user ID and email.
-    If the file is not found, it returns None.
-    If any other exception occurs during the process, it is re-raised.
-
-    Returns:
-        Tuple[str, str] | None: A tuple containing the user ID and email, or None if the file is not found.
-    """
-    base_path = getFileSystemPath(getenv("APP_BASE_PATH"))
-    credentials_path = os.path.join(base_path, "credentials", "credentials.json")
-    try:
-        with open(credentials_path, 'r') as credentials_file:
-            credentials = json.load(credentials_file)
-
-        return credentials.get('id', ''), credentials.get('email', '')
-    except FileNotFoundError:
-        return None
-    except Exception as e:
-        raise(e)
-
-creds_details = read_user_endpoint()
-
-if not creds_details:
-    logger.log('error', "Empty credentials", ValueError("Empty credentials"))
-    id, email = '', ''
-else:
-    id, email = creds_details
-
+MAX_DOCS = 50
+MAX_COLLECTIONS = 50
+ID = cached_credentials.get("id", None)
+EMAIL = cached_credentials.get("email", None)
+if not ID or not EMAIL:
+    logger.log('error', 'Empty user credentials.', ValueError('User credentials not found in cache.'))
 
 class JanineMongoDatabase:
-    """
-    A class used to interact with a MongoDB database for storing chat history.
+    def __init__(self, uri: str = connectionStr, user: str=f'{ID}-{EMAIL}', title: str = None):
+        self.uri = uri
+        self.user = user.split('.')[0][:36] # Comply with mongodb db name max length
+        self.id: str  = ID
+        self.email: str = EMAIL
+        self.client = None
+        self.database: Database = None
+        self.chatCollections: list[str] = None
+        self.chatHistory: Collection = None
+        self.title = title
 
-    Attributes
-    ----------
-    client : MongoClient
-        The MongoDB client used to connect to the database.
-    database : Database
-        The MongoDB database instance.
-    user : str
-        The user associated with the chat history.
-    chatHistory : Collection
-        The MongoDB collection for storing chat history.
-
-    Methods
-    -------
-    __init__(connectionStr: str, user: str="User")
-        Initializes the JanineMongoDatabase instance with a MongoDB connection string and user.
-
-    insert(item: Dict[str, Any])
-        Inserts a chat history item into the MongoDB collection.
-
-    history()
-        Retrieves all chat history items from the MongoDB collection.
-
-    deleteExcess(max:int=50)
-        Deletes excess chat history items from the MongoDB collection to maintain a maximum limit.
-    """
-    def __init__(self, connectionStr: str, user: str="User"):
+    def connect(self):
         """
-        Initializes the JanineMongoDatabase instance with a MongoDB connection string and user.
-
-        Parameters
-        ----------
-        connectionStr : str
-            The MongoDB connection string.
-        user : str, optional
-            The user associated with the chat history. Default is "User".
+        Connects to the MongoDB database.
         """
-        self.client = MongoClient(connectionStr)
-        self.database: Database = self.client.JanineDB
+        try:
+            self.client = MongoClient(self.uri, server_api=ServerApi('1'))
+            self.database = self.client[self.user]
+        except ConnectionFailure as  conn_failure:
+            logger.log("error", "Failed to connect to MongoDB", conn_failure)
+        except Exception as e:
+            logger.log("error", "Failed to create/connect to MongoDB database", e)
 
-        self.user = user
-        self.chatHistory: Collection = self.database[f'{id}-{email}']
+    def createChat(self, title: str = None):
+        """
+        Creates the chat history collection if it does not exist.
+        """
+        try:
+            self.connect()
+            if self.title is not None:
+                self.chatHistory = self.database[self.title]
+            else:
+                if title:
+                    self.chatHistory = self.database[title]
+                else:
+                    logger.log("error", "Chat title not provided", ValueError("Chat title not provided"))
+        except CollectionInvalid as col_invalid:
+            logger.log("error", "Invalid title: Failed to create chat history collection", col_invalid)
+        except Exception as e:
+            logger.log("error", "Failed to create chat", e)
+
+    def getCollections(self):
+        try:
+            self.ensureMetadataIndex()
+            self.chatCollections = self.getSortedCollections()
+            if self.chatCollections and len(self.chatCollections) > 0:
+                if self.title is not None:
+                    self.chatHistory = self.database[self.title]
+                else:
+                    recentChat = self.chatCollections[-1]
+                    self.chatHistory = self.database[recentChat]
+            else:
+                self.chatHistory = None
+                self.chatCollections = None
+            return self.chatCollections
+        except Exception as e:
+            logger.log("error", "Failed to get collections", e)
+            return None
+    
+    def ensureMetadataIndex(self):
+        """
+        Ensure that a metadata collection exists and has an index on 'createdAt' field.
+        """
+        try:
+            metadataCollection = self.database['metadata']
+            # Create index on 'createdAt' field if it does not exist
+            index = metadataCollection.index_information()
+            if 'createdAt_DESC' not in index:
+                # Create index on 'createdAt' field
+                metadataCollection.create_index([('chat.createdAt', DESCENDING)])
+        except Exception as e:
+            logger.log("error", "Failed to create metadata index", e)
+    
+    def getSortedCollections(self, limit: int = MAX_COLLECTIONS):
+        metadataCollection = self.database['metadata']
+        recentCollections = metadataCollection.find().sort('chat.createdAt', -1).limit(limit)
+        # Extract collection names
+        titles = [doc['chat']['title'] for doc in recentCollections]
+        return titles
 
     def insert(self, item: Dict[str, Any]):
         """
@@ -102,6 +112,8 @@ class JanineMongoDatabase:
         item : Dict[str, Any]
             The chat history item to be inserted.
         """
+        if self.chatHistory is None:
+            raise Exception("Chat history collection not initialized")
         insert(self.chatHistory, item)
 
     def history(self):
@@ -111,17 +123,28 @@ class JanineMongoDatabase:
         Returns:
             List[Dict[str, Any]]: A list of dictionaries representing the chat history items.
         """
+        if self.chatHistory is None:
+            raise Exception("Chat history collection not initialized")
         return fetchAll(self.chatHistory)
     
-    def deleteExcess(self, max:int=50):
-        """Chat context up to 50 chat items. Delete the excess."""
+    def deleteExcess(self, max:int=MAX_DOCS):
+        """Chat context up to specified max chat items. Delete the excess."""
+        if self.chatHistory is None:
+            raise Exception("Chat history collection not initialized")
         count = self.chatHistory.count_documents({})
         excess = count-max
         print(f"Database contains {count} documents")
         if excess > 0:
             deleteMany(self.chatHistory, limit=excess)
-    
-connectionStr = getenv("MONGO_URI")
 
-janineDB = JanineMongoDatabase(connectionStr)
-chatHistory = janineDB.chatHistory
+    def delete(self, query: Dict[str, Any]):
+        """
+        Deletes a chat history item from the MongoDB collection based on a query.
+
+        Parameters:
+        query : Dict[str, Any]
+            The query to match the chat history item to be deleted.
+        """
+        if self.chatHistory is None:
+            raise Exception("Chat history collection not initialized")
+        delete(self.chatHistory, query)

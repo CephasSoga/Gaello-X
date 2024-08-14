@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(0, 0, 0);
+border-radius: 24px;
+border-width: 0px;</string>
+  </property>
+  <widget class="QLineEdit" name="chatTitleEdit">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>40</y>
+     <width>720</width>
+     <height>100</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 10pt &quot;Roboto Mono&quot;;
+color: rgb(255, 255, 255);
+border-style: solid;
+border-radius: 12px;
+border-width: 2px;
+border-color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="placeholderText">
+    <string>Enter a title for your new chat</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="continueButton">
+   <property name="geometry">
+    <rect>
+     <x>610</x>
+     <y>220</y>
+     <width>150</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 10pt &quot;Roboto Mono&quot;;
+color: rgb(255, 255, 255);
+border-style: solid;
+border-radius: 12px;
+border-width: 2px;
+border-color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string>Continue</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="cancelButton">
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>220</y>
+     <width>150</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 10pt &quot;Roboto Mono&quot;;
+color: rgb(255, 255, 255);
+border-style: outset;
+border-radius: 12px;
+border-width: 2px;
+border-color: rgb(20, 20, 20);</string>
+   </property>
+   <property name="text">
+    <string>Cancel</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

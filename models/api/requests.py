@@ -1,53 +1,21 @@
-import os
 import json
 import aiohttp
-from typing import Any, List, Dict, Tuple
+from typing import Any, List, Dict
 
+from models.reader.cache import cached_credentials
 from utils.logs import Logger
-from utils.envHandler import getenv
-from utils.paths import getFileSystemPath
-
 
 logger = Logger("Request-Manager")
 
-def read_user_endpoint() -> Tuple[str, str] | None:
-    """
-    Reads the user endpoint from the credentials file.
-
-    This function retrieves the base path using the "APP_BASE_PATH" environment variable.
-    It then constructs the path to the credentials file and attempts to open it.
-    If the file is found, it loads the JSON data and returns the user ID and email.
-    If the file is not found, it returns None.
-    If any other exception occurs during the process, it is re-raised.
-
-    Returns:
-        Tuple[str, str] | None: A tuple containing the user ID and email, or None if the file is not found.
-    """
-    base_path = getFileSystemPath(getenv("APP_BASE_PATH"))
-    credentials_path = os.path.join(base_path, "credentials", "credentials.json")
-    try:
-        with open(credentials_path, 'r') as credentials_file:
-            credentials = json.load(credentials_file)
-
-        return credentials.get('id', ''), credentials.get('email', '')
-    except FileNotFoundError:
-        return None
-    except Exception as e:
-        raise(e)
-
-creds_details = read_user_endpoint()
-
-if not creds_details:
-    logger.log('error', "Empty credentials", ValueError("Empty credentials"))
-    id, email = '', ''
-else:
-    id, email = creds_details
-
-
+print("Req: Credentials: ", cached_credentials)
 PROTOCOL = 'http'
 IP = '127.0.0.1'
 PORT = '5000'
-PATH = f'janine/index/{id}-{email}'
+ID = cached_credentials.get('id', '')
+EMAIL = cached_credentials.get('email', '')
+if not ID or not EMAIL:
+    logger.log('error', 'Empty user credentials.', ValueError('User credentials not found in cache.'))
+PATH = f'janine/index/{ID}-{EMAIL}'
 
 def serialize(obj):
     """

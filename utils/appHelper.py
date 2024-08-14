@@ -120,8 +120,22 @@ def clearLayout(layout: QVBoxLayout | QHBoxLayout | QGridLayout):
 	Returns:
 		None
 	"""
-    while layout.count():
-        item = layout.takeAt(0)
+    # Remove and delete all widgets in the layout
+    for i in reversed(range(layout.count())):
+        item = layout.itemAt(i)
         widget = item.widget()
         if widget:
-            widget.deleteLater()
+            widget.setParent(None)
+            widget.deleteLater()  # Safely delete the widget
+            layout.removeWidget(widget)  # Remove from layout
+
+    # Optionally remove any remaining layout items
+    for i in reversed(range(layout.count())):
+        item = layout.itemAt(i)
+        if isinstance(item, QHBoxLayout | QVBoxLayout | QGridLayout):
+            clearLayout(item)
+        else:
+            layout.removeItem(item)
+
+    # Ensure the layout is fully cleared
+    layout.update()

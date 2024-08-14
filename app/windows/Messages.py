@@ -52,8 +52,8 @@ class ChatTextMessage(QFrame):
     def setContents(self):
         self.originLabel.setText(f"{self.origin}")
         self.text.setPlainText(f"{self.textMessage}")
-        self.date.setText(f"{date()}")
-        self.time.setText(f"{time_()}")
+        self.date.setText(f"{self.content.date}")
+        self.time.setText(f"{self.content.time}")
 
         self.text.setReadOnly(True)
 

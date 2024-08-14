@@ -1,22 +1,19 @@
-from PyQt5.QtWidgets import QApplication, QSplashScreen, QMainWindow
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import QTimer
-import sys
-
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Main Application")
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    splash_pix = QPixmap('splash.png')
-    splash = QSplashScreen(splash_pix)
-    splash.show()
-
-    # Timer to close the splash screen after 3000 milliseconds (3 seconds)
-    QTimer.singleShot(3000, lambda: splash.finish(MainWindow()))
-
-    main_window = MainWindow()
-    main_window.show()
-    sys.exit(app.exec_())
+def getCollections(self):
+        import time
+        s = time.perf_counter()
+        self.chatCollections = sorted(
+            self.database.list_collection_names(),
+            reverse=True # which should help stack the chat history in ascending order, from bootom to top in QVBoxLayout
+        )
+        if self.title:
+            title = f'{title}' # add timpstamp by dynamic sorting
+            self.chatHistory: Collection = self.database[title]
+        else:
+            if not self.chatCollections or len(self.chatCollections) == 0:
+                self.chatHistory = None
+            else:
+                recentChat = self.chatCollections[-1]
+                self.chatHistory: Collection = self.database[recentChat]
+        e = time.perf_counter()
+        print(f"JanineDB getCollections: {e - s:.2f} seconds")
+        return self.chatCollections

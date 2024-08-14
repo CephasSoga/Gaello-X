@@ -6,14 +6,17 @@ from janine.RichVision import VisionCompletion
 from janine.RichFile import FileCompletion
 
 from models.api.requests import RequestManager
-from databases.mongodb.JanineDB import janineDB
+from databases.mongodb.JanineDB import JanineMongoDatabase
+from utils.logs import Logger
+
+logger = Logger("Janine")
 
 class Janine(TextCompletion, AudioStreamCompletion, VisionCompletion, FileCompletion):
     """
     A class that integrates various completion capabilities for different message types.
     It inherits from TextCompletion, AudioStreamCompletion, VisionCompletion, and FileCompletion.
     """
-    def __init__(self):
+    def __init__(self, database: JanineMongoDatabase | Any):
         """
         Initializes a new instance of the Janine class, inheriting from TextCompletion, 
         AudioStreamCompletion, VisionCompletion, and FileCompletion. It sets up the 
@@ -31,7 +34,7 @@ class Janine(TextCompletion, AudioStreamCompletion, VisionCompletion, FileComple
         FileCompletion.__init__(self)
 
         self.requestManager = RequestManager()
-        self.database = janineDB
+        self.database = database
 
     async def CompleteMessage(self,
         history: List[Dict[str, Any]] = [],
@@ -108,12 +111,19 @@ class Janine(TextCompletion, AudioStreamCompletion, VisionCompletion, FileComple
         textInput = body.get('text')
         messageType = body.get('type')
 
-        return await self.CompleteMessage(
-            history=history,
-            frames=frames,
-            transcription=transcription,
-            textInput=textInput,
-            messageType=messageType,
-        )
+        try:
+            return await self.CompleteMessage(
+                history=history,
+                frames=frames,
+                transcription=transcription,
+                textInput=textInput,
+                messageType=messageType,
+            )
 
-janineInstance = Janine()
+        except Exception as e:
+            logger.log('error', "Error in while completing message", e)
+        finally:
+            if isinstance(self.database, JanineMongoDatabase):
+                # constanly check for title changes in chat  by reinitalizing the database
+                self.database.connect()
+

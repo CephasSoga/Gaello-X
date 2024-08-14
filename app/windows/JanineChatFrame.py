@@ -2,27 +2,34 @@ import os
 import glob
 import asyncio
 from pathlib import Path
-from typing import Union
+from typing import List, Union
 
 from PyQt5 import uic
-from PyQt5.QtCore import Qt, QEvent, pyqtSlot
+from PyQt5.QtCore import Qt, QEvent, pyqtSlot, QTimer, pyqtSignal
 from PyQt5.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox
 from qasync import asyncSlot, QApplication, QEventLoop
 
+from app.windows.Spinner import Spinner, Worker
 from app.windows.Messages import *
 from app.windows.Types import Recorder
 from app.windows.Styles import scrollBarStyle
 from utils.paths import latestTargetFilesWithPolling
 from models.api.requests import RequestManager
-from models.janine.JanineModel import janineInstance
-from databases.mongodb.JanineDB import janineDB
+from models.janine.JanineModel import Janine
+from databases.mongodb.JanineDB import JanineMongoDatabase
 from utils.fileHelper import getAudioLength
 from utils.envHandler import getenv
 from utils.paths import rawPathStr, getFrozenPath, getFileSystemPath
 from app.windows.Fonts import  QuicksandBold, Exo2Medium
 from app.windows.WaiterFrame import Waiter
+from app.windows.ChatTitleFrame import ChatTitleSelector, ChatTitle
+from utils.appHelper import setRelativeToMainWindow,clearLayout
+from utils.time import now
+
+HISTORY_LIMIT = 100
 
 class JanineChat(QFrame):
+    gatheredChats = pyqtSignal(list)
     def __init__(self, parent=None):
         super(JanineChat, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "chat_.ui"))
@@ -34,24 +41,30 @@ class JanineChat(QFrame):
         self.waiter = Waiter()
 
         self.initUI()
+        #QTimer.singleShot(10, self.topLevelHistoryRendering)
 
     def initUI(self):
+        import time
+
+        s = time.perf_counter()
         self.setContents()
         self.setWFlags()
         self.setupLayout()
         self.setButtonDescriptions()
         self.connectSlots()
         self.setFonts()
+        self.runAsyncforHistory()
+        e = time.perf_counter()
+        print(f"UI init took: {e - s:.2f} seconds")
 
     def setContents(self):
-        self.requestManager = RequestManager()
-        self.db = janineDB
-        self.recorder = Recorder()
-
-        self.janine = janineInstance
-
         self.chatMessages: list[Message] = []
         self.lastMessageIndex = -1
+        self.requestManager = RequestManager()
+
+        self.db = JanineMongoDatabase()
+        self.recorder = Recorder()
+        self.janine = Janine(self.db)
 
         self.outputFile = None
         self.isRecording = False
@@ -121,6 +134,10 @@ class JanineChat(QFrame):
         self.attach.clicked.connect(self.loadMedia)
         self.send.clicked.connect(self.constructMessage)
 
+        self.newChat.clicked.connect(self.startNewChat)
+
+        self.gatheredChats.connect(self.topLevelHistoryRendering)
+
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseButtonPress:
             if not self.geometry().contains(event.globalPos()):
@@ -128,14 +145,14 @@ class JanineChat(QFrame):
         return super().eventFilter(obj, event)
     
     def alignByOrigin(self, msg: Union[ChatTextMessage, ChatVoiceMail, ChatMultimedia], origin: str):
-        hLayout = QHBoxLayout()
+        self.hLayout = QHBoxLayout()
         if origin == "User":
-            hLayout.addStretch()
-            hLayout.addWidget(msg)
+            self.hLayout.addStretch()
+            self.hLayout.addWidget(msg)
         else:
-            hLayout.addWidget(msg)
-            hLayout.addStretch()
-        self.chatLayout.addLayout(hLayout)
+            self.hLayout.addWidget(msg)
+            self.hLayout.addStretch()
+        self.chatLayout.addLayout(self.hLayout)
         self.chatWidget.update()
 
     def display(self):
@@ -179,7 +196,7 @@ class JanineChat(QFrame):
     async def attachFileFunc(self, origin:str="User"):
         text = "\n".join(self.message.toPlainText().split("\n")[1:])
         tempPath = Path(self.loadedFilePath)
-        multimedia = Multimedia(tempPath, text, origin=origin)
+        multimedia = Multimedia(model=self.janine, filePath=tempPath, text=text, origin=origin)
         multimediaStr = await multimedia.toString()
         await self.requestManager.post(message=multimediaStr)
         self.db.insert(item=multimediaStr)
@@ -261,7 +278,7 @@ class JanineChat(QFrame):
                 self, "Invalid Voice Message", "No voice input found.",
             )
             return
-        voicemail = VoiceMail(path, origin=origin)
+        voicemail = VoiceMail(model=self.janine, path=path, origin=origin)
         voicemailStr = await voicemail.toString()
         await self.requestManager.post(message=voicemailStr)
         self.db.insert(item=voicemailStr)
@@ -317,6 +334,78 @@ class JanineChat(QFrame):
         self.chatLayout.removeWidget(self.waiterWidget)
         self.waiterWidget.hide()
         self.chatWidget.update()
+
+    def startNewChat(self):
+        clearLayout(self.chatLayout)
+        selector = ChatTitleSelector(self)
+        selector.titleSet.connect(self.newChatTitleSelected)
+        setRelativeToMainWindow(selector, self, 'center')
+
+    def newChatTitleSelected(self, title: str):
+        if title:
+            chatTitle = ChatTitle(title=title, func=self.showFullChat, parent=self)
+            chatTitle.setStyleSheet(
+                "background-color: rgba(10, 10, 10, 200);"
+            )
+            self.historyLayout.addWidget(chatTitle)
+            self.historyWidget.setLayout(self.historyLayout)
+            self.historyScrollArea.setWidget(self.historyWidget)
+            self.installEventFilter(chatTitle)
+        
+            #mongoUpdate(database=self.db.user, collection='chatHistory', update={'$set': {'chat': {'title': title, 'time': now()}}})
+            self.db.createChat(title=title)
+            print("title: ",self.db.title)
+            try:
+                self.db.database['metadata'].insert_one({'chat': {'createdAt': now(), 'title': title}}) #  insert a metadata record to properly sort collections 
+            except Exception: # if it fails because the database has not be initialized yet
+                self.logger.log("error", "error inserting metadata record", ValueError("No connection to Janine database found."))
+                print('unsed con.')
+                self.db.connect() # Connect to database
+                self.db.database['metadata'].insert_one({'chat': {'createdAt': now(), 'title': title}}) #  and retry
+            self.db.insert({'title': title}) # insert dummy data into collection to properly initialize collection
+            self.db.delete({'title': title}) # delete right away
+
+    async def getCollections(self):
+        await asyncio.sleep(0.1)
+        self.db.connect()
+        collections = self.db.getCollections()
+        print("collections: ", collections)
+        self.gatheredChats.emit(collections)
+
+    def gatherChatHistory(self, collectionNames: List[str]):
+        for collection in collectionNames:
+            chat  = ChatTitle(title=collection, func=self.showFullChat, parent=self)
+            self.historyLayout.addWidget(chat)
+            self.historyWidget.setLayout(self.historyLayout)
+            self.historyScrollArea.setWidget(self.historyWidget)
+            self.installEventFilter(chat)
+
+    def showFullChat(self, collection: str):
+        clearLayout(self.chatLayout)
+        chatItems = self.db.database[collection].find().sort("content.date", 1).limit(HISTORY_LIMIT)
+        messages = list(map(lambda x: x['content'], chatItems))
+        for message in messages:
+            msg = TextMessage(text=message.get('text') or message.get('transcription'),
+                origin=message['origin'],
+                date=message['date'],
+                time=message['time']
+            )
+            self.push(msg)
+
+    def topLevelHistoryRendering(self, collections: list[str]):
+        if not collections or self.db.chatHistory is None:
+            self.startNewChat()
+        else:
+            self.gatherChatHistory(collections)
+
+    def runAsyncforHistory(self):
+        spinner = Spinner(parent=self)
+        self.worker = Worker(self.getCollections, 'async')
+
+        self.worker.start()
+
+        self.worker.started.connect(spinner.start)
+        self.worker.finished.connect(spinner.stop)
 
 if __name__ == "__main__":
     import sys

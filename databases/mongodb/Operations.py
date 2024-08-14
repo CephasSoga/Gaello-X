@@ -120,3 +120,26 @@ def deleteMany(collection: Collection, limit:int):
         for i in l:
             collection.delete_one({'_id': i['_id']})
             print(f"Deleted at id {i['_id']}")
+
+
+def delete(collection: Collection, query: Dict[str, Any]):
+    """
+    Deletes a single document from a MongoDB collection based on the provided query.
+
+    Args:
+        collection (Collection): The MongoDB collection to delete the document from.
+        query (Dict[str, Any]): The query to filter the document to be deleted.
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If an error occurs while deleting the document.
+
+    Prints:
+        str: A message indicating that an error occurred while deleting the document.
+    """
+    try:
+        collection.delete_one(query)
+    except Exception as e:
+        raise(e)

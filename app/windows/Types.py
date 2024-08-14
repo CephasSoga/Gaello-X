@@ -11,7 +11,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 
 from utils.time import time_, date
 from utils.paths import constructPath, getFileSystemPath
-from models.janine.JanineModel import janineInstance
+from models.janine.JanineModel import Janine
 from utils .envHandler import getenv
 
 APP_BASE_PATH = getFileSystemPath(getenv('APP_BASE_PATH'))
@@ -32,9 +32,9 @@ class TextMessage:
     toString():
         Returns a dictionary representation of the text message.
     """
-    def __init__(self, text:str, origin:str="User"):
+    def __init__(self, text:str, origin:str="User", date:str=date(), time:str=time_()):
         """
-        Constructs all the necessary attributes for the TextMessage object.
+        Initializes a TextMessage object with the given text, origin, date, and time.
 
         Parameters
         ----------
@@ -42,9 +42,19 @@ class TextMessage:
             The content of the text message.
         origin : str, optional
             The origin of the text message. Default is "User".
+        date : str, optional
+            The date when the message was sent. Default is the current date.
+        time : str, optional
+            The time when the message was sent. Default is the current time.
+
+        Returns
+        -------
+        None
         """
         self.text = text
         self.origin = origin
+        self.time = time
+        self.date = date
 
     def toString(self):
         """
@@ -72,8 +82,8 @@ class TextMessage:
                 "text": self.text,
                 "origin": self.origin,
                 "type": "text",
-                "date": date(),
-                "time": time_()
+                "date": self.date,
+                "time": self.time,
             }
         }
     
@@ -182,11 +192,12 @@ class VoiceMail:
     getTranscriptionSync()
         Returns the transcription result synchronously.
     """
-    def __init__(self, filePath:Path, origin:str="User"):
+    def __init__(self, model: Janine, filePath: Path, origin: str = "User"):
         """
         Initializes a new instance of the VoiceMail class.
 
         Parameters:
+            model (Janine): The model to instantiate
             filePath (Path): The file path of the recorded audio.
             origin (str, optional): The origin of the voice mail message. Defaults to "User".
 
@@ -198,7 +209,7 @@ class VoiceMail:
         self.transcription = None
         self.transcriptionFuture = asyncio.ensure_future(self.handleTranscript(self.filePath))
         self.transcriptionFuture.add_done_callback(self.setTranscriptionResult)
-
+        self.model = model
 
 
     async def toString(self):
@@ -252,7 +263,7 @@ class VoiceMail:
         Raises:
             None
         """
-        return await janineInstance.audioTranscript(filePath)
+        return await self.model.audioTranscript(filePath)
 
     async def handleTranscript(self, filePath):
         """
@@ -323,7 +334,7 @@ class Multimedia:
     getFramesResultSync(): Returns the frames result synchronously.
     toString(): Asynchronously converts the object to a dictionary representation.
     """
-    def __init__(self, filePath:Path, text:str="", origin:str="User"):
+    def __init__(self, model:Janine, filePath:Path, text:str="", origin:str="User"):
         """
         Initializes a new instance of the Multimedia class.
 
@@ -336,6 +347,7 @@ class Multimedia:
             None
 
         Initializes the following attributes:
+            - model: The model used for operations.
             - filePath (Path): The file path of the multimedia file.
             - text (str): The text associated with the multimedia file.
             - origin (str): The origin of the multimedia file.
@@ -359,6 +371,7 @@ class Multimedia:
         self.frames = None
         self.framesFuture = asyncio.ensure_future(self.handleFrames())
         self.framesFuture.add_done_callback(self.setFramesResult)
+        self.model = model
 
     def type_(self):
         """
@@ -385,11 +398,11 @@ class Multimedia:
 
         This function checks the type of the multimedia file and returns the corresponding transcription.
         If the type is "image", an empty string is returned.
-        If the type is "audio", the function tries to get the audio transcript using `janineInstance.audioTranscript()`.
+        If the type is "audio", the function tries to get the audio transcript using `self.model.audioTranscript()`.
         If an exception occurs, an error message is printed and an empty string is returned.
-        If the type is "video", the function tries to extract the audio from the video using `janineInstance.async_extract_audio()`.
+        If the type is "video", the function tries to extract the audio from the video using `self.model.async_extract_audio()`.
         If an exception occurs, an error message is printed and an empty string is returned.
-        If successful, the function gets the audio transcript using `janineInstance.audioTranscript()`.
+        If successful, the function gets the audio transcript using `self.model.audioTranscript()`.
 
         Returns:
             str: The transcription of the multimedia file.
@@ -398,14 +411,14 @@ class Multimedia:
                 return ""
         if self.type == "audio":
             try:
-                return await janineInstance.audioTranscript(self.filePath)
+                return await self.model.audioTranscript(self.filePath)
             except Exception as e:
                 print(f"Error getting audio transcript from audio: {e}")
                 return ""
         if self.type == "video":
             try:
-                extractedAudioPath = await janineInstance.async_extract_audio(self.filePath)
-                return await janineInstance.audioTranscript(extractedAudioPath)
+                extractedAudioPath = await self.model.async_extract_audio(self.filePath)
+                return await self.model.audioTranscript(extractedAudioPath)
             except Exception as e:
                 print(f"Error getting audio transcript from video: {e}")
                 return ""
@@ -413,16 +426,16 @@ class Multimedia:
     async def extractFramePaths(self):
         """
         Asynchronously extracts frame paths based on the type of multimedia file.
-        If the type is "image", it tries to extract a single frame path using `janineInstance.async_single_frame`.
+        If the type is "image", it tries to extract a single frame path using `self.model.async_single_frame`.
         If the type is "audio", it returns an empty list.
-        If the type is "video", it tries to extract multiple frame paths using `janineInstance.async_videoframes`.
+        If the type is "video", it tries to extract multiple frame paths using `self.model.async_videoframes`.
 
         Returns:
             List[str]: A list of frame paths extracted from the multimedia file.
         """
         if self.type == "image":
                 try:
-                    path = await janineInstance.async_single_frame(self.filePath)
+                    path = await self.model.async_single_frame(self.filePath)
                     path = [str(path)]
                     return path
                 except Exception as e:
@@ -432,7 +445,7 @@ class Multimedia:
             return []
         if self.type == "video":
             try:
-                framePaths = await janineInstance.async_videoframes(self.filePath)
+                framePaths = await self.model.async_videoframes(self.filePath)
                 framePaths = [str(x) for x in framePaths]
                 return framePaths
             except Exception as e:

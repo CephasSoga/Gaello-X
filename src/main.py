@@ -25,6 +25,7 @@ from databases.mongodb import Common,  UsersAuth, Operations, JanineDB
 from models.janine import JanineModel
 from models.api.requests import RequestManager
 from models.api import app
+from models.reader.cache import CredentialsReader, cached_credentials
 #8- Dispatched imports from app
 from app.windows import *
 from app.handlers import HashWorker, ExportAssets, Patterns, ShortLiveSeries
@@ -63,7 +64,7 @@ def exec_api():
     """
     try:
         cwd = getFrozenPath(os.path.join("models", "api", "app.py"))
-        subprocess.Popen(['python', f'{cwd}'])
+        subprocess.Popen(['python', f'{cwd}'], cwd=os.path.dirname(cwd), shell=True)
     except Exception as e:
         main_logger.log("error", "Error executing the API", e)
     finally:
