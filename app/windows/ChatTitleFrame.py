@@ -50,6 +50,7 @@ class ChatTitleSelector(QFrame):
 
 
 class ChatTitle(QFrame):
+    isClicked = pyqtSignal()
     def __init__(self, title: str, db: Database, func: Optional[Callable[[str], None]] = None, parent = None, gdparent = None):
         super(ChatTitle, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "chatTitle.ui"))
@@ -86,29 +87,11 @@ class ChatTitle(QFrame):
             # Convert global position to widget-relative position
             pos = self.mapFromGlobal(event.globalPos())
             if self.rect().contains(pos):
+                self.isClicked.emit()
                 if self.func:
                     self.func(self.title)
-                self.setStyleSheet(
-                    """
-                    background-color: rgba(10, 10, 10, 180);
-                    border-style: solid;
-                    border-width: 2px;
-                    border-radius: 12px;
-                    border-color: rgb(200, 200, 200);
-                    """
-                )  # Focus style
                 return True
-            else:
-                self.setStyleSheet(
-                    """
-                    background-color: rgba(0, 0, 0, 0);
-                    border-style: solid;
-                    border-width: 2px;
-                    border-radius: 12px;
-                    border-color: rgb(200, 200, 200);
-                    """
-                )  # No focus
-                return True
+            return super().eventFilter(obj, event)
         return super().eventFilter(obj, event)
     
     def connectSlots(self):

@@ -59,6 +59,7 @@ class JanineChat(QFrame):
 
     def setContents(self):
         self.chatMessages: list[Message] = []
+        self.chatTitleList: list[ChatTitle] = []
         self.lastMessageIndex = -1
         self.requestManager = RequestManager()
 
@@ -356,6 +357,8 @@ class JanineChat(QFrame):
             self.historyWidget.setLayout(self.historyLayout)
             self.historyScrollArea.setWidget(self.historyWidget)
             self.historyWidget.installEventFilter(chatTitle)
+
+            self.chatTitleList.append(chatTitle)
         
             #mongoUpdate(database=self.db.user, collection='chatHistory', update={'$set': {'chat': {'title': title, 'time': now()}}})
             self.db.createChat(title=title)
@@ -393,6 +396,8 @@ class JanineChat(QFrame):
             self.historyScrollArea.setWidget(self.historyWidget)
             self.historyWidget.installEventFilter(chat)
 
+            self.chatTitleList.append(chat)
+
     def showFullChat(self, collection: str):
         try:
             clearLayout(self.chatLayout)
@@ -407,7 +412,26 @@ class JanineChat(QFrame):
                 self.push(msg)
         finally:
             self.db.chatHistory = self.db.database[collection] #switch to current collection to handle how messages are distributed accross chat
-            
+            # show that focus has changed
+            for chat in self.chatTitleList:
+                if chat.title == collection:
+                    chat.setStyleSheet(
+                    """
+                    background-color: rgba(10, 10, 10, 180);
+                    border-style: solid;
+                    border-width: 2px;
+                    border-radius: 12px;
+                    border-color: rgb(200, 200, 200);
+                    """)
+                else:
+                    chat.setStyleSheet(
+                    """
+                    background-color: rgba(0, 0, 0, 0);
+                    border-style: dotted;
+                    border-width: 2px;
+                    border-radius: 12px;
+                    border-color: rgb(200, 200, 200);
+                    """)
 
     def topLevelHistoryRendering(self, collections: list[str]):
         if not collections or self.db.chatHistory is None:
