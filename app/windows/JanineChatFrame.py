@@ -381,16 +381,20 @@ class JanineChat(QFrame):
             self.installEventFilter(chat)
 
     def showFullChat(self, collection: str):
-        clearLayout(self.chatLayout)
-        chatItems = self.db.database[collection].find().sort("content.date", 1).limit(HISTORY_LIMIT)
-        messages = list(map(lambda x: x['content'], chatItems))
-        for message in messages:
-            msg = TextMessage(text=message.get('text') or message.get('transcription'),
-                origin=message['origin'],
-                date=message['date'],
-                time=message['time']
-            )
-            self.push(msg)
+        try:
+            clearLayout(self.chatLayout)
+            chatItems = self.db.database[collection].find().sort("content.date", 1).limit(HISTORY_LIMIT)
+            messages = list(map(lambda x: x['content'], chatItems))
+            for message in messages:
+                msg = TextMessage(text=message.get('text') or message.get('transcription'),
+                    origin=message['origin'],
+                    date=message['date'],
+                    time=message['time']
+                )
+                self.push(msg)
+        finally:
+            self.db.chatHistory = self.db.database[collection] #switch to current collection to handle how messages are distributed accross chat
+            
 
     def topLevelHistoryRendering(self, collections: list[str]):
         if not collections or self.db.chatHistory is None:

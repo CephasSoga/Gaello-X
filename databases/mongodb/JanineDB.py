@@ -125,7 +125,12 @@ class JanineMongoDatabase:
         """
         if self.chatHistory is None:
             raise Exception("Chat history collection not initialized")
-        return fetchAll(self.chatHistory)
+        elif self.chatCollections:
+            return [fetchAll(self.database[collection]) for collection in self.chatCollections]
+        elif not self.chatCollections and self.chatHistory:
+            return fetchAll(self.chatHistory)
+        else:
+            return []
     
     def deleteExcess(self, max:int=MAX_DOCS):
         """Chat context up to specified max chat items. Delete the excess."""
