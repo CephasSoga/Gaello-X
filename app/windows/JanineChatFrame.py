@@ -421,7 +421,14 @@ class JanineChat(QFrame):
             chatItems = self.db.database[collection].find().sort("content.date", 1).limit(HISTORY_LIMIT)
             messages = list(map(lambda x: x['content'], chatItems))
             for message in messages:
-                msg = TextMessage(text=message.get('text') or message.get('transcription'),
+                textMsg = ""
+                text = text=message.get('text') or message.get('transcription')
+                path = message.get('frames', [None])[0]
+                if path:
+                    textMsg +=  str(path) + '\n' + text  
+                else:
+                    textMsg += text
+                msg = TextMessage(text=textMsg,
                     origin=message['origin'],
                     date=message['date'],
                     time=message['time']
