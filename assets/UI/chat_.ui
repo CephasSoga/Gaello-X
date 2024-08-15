@@ -113,7 +113,7 @@ border-style: none;</string>
      <x>510</x>
      <y>60</y>
      <width>1400</width>
-     <height>801</height>
+     <height>800</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -131,7 +131,7 @@ border-style: none;</string>
       <x>0</x>
       <y>0</y>
       <width>1400</width>
-      <height>801</height>
+      <height>800</height>
      </rect>
     </property>
    </widget>
@@ -140,7 +140,7 @@ border-style: none;</string>
    <property name="geometry">
     <rect>
      <x>509</x>
-     <y>900</y>
+     <y>910</y>
      <width>1401</width>
      <height>80</height>
     </rect>
@@ -268,9 +268,9 @@ color: rgb(250, 250, 250);
    <property name="geometry">
     <rect>
      <x>508</x>
-     <y>990</y>
+     <y>1000</y>
      <width>1401</width>
-     <height>70</height>
+     <height>60</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -307,6 +307,22 @@ background-color: rgb(255, 255, 255);</string>
      <width>36</width>
      <height>36</height>
     </size>
+   </property>
+  </widget>
+  <widget class="QWidget" name="pathContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>510</x>
+     <y>850</y>
+     <width>1401</width>
+     <height>60</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border-style: outset;
+border-color: rgb(50, 50, 50);
+border-width: 0px;
+border-radius: 12px</string>
    </property>
   </widget>
  </widget>

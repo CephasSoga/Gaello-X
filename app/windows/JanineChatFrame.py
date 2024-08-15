@@ -25,6 +25,7 @@ from app.windows.WaiterFrame import Waiter
 from app.windows.ChatTitleFrame import ChatTitleSelector, ChatTitle
 from utils.appHelper import setRelativeToMainWindow,clearLayout
 from utils.time import now
+from app.windows.AttachmentFrame import Attachment
 
 HISTORY_LIMIT = 100
 
@@ -58,6 +59,8 @@ class JanineChat(QFrame):
         print(f"UI init took: {e - s:.2f} seconds")
 
     def setContents(self):
+        self.attachments: list[Attachment] = []
+
         self.chatMessages: list[Message] = []
         self.chatTitleList: list[ChatTitle] = []
         self.lastMessageIndex = -1
@@ -72,6 +75,7 @@ class JanineChat(QFrame):
         self.fileLoaded = False
         self.loadedFilePath = ""
 
+        self.attachmentLayout = QVBoxLayout()
         self.chatWidget = QWidget()
         self.historyWidget = QWidget()
         self.messageBox = QMessageBox()
@@ -190,12 +194,23 @@ class JanineChat(QFrame):
         if filePath:
             self.loadedFilePath = filePath
             self.fileLoaded = True
-            self.message.setText(f"Attached file: {self.loadedFilePath}\n")
+            attachment = Attachment(filePath, self)
+            self.attachments.append(attachment)
+            self.showAttachments()
+            if len(self.attachments) >= 1:
+                self.attach.setEnabled(False)
         else:
             pass
 
+
+    def showAttachments(self):
+        for attachment in self.attachments:
+            self.attachmentLayout.addWidget(attachment)
+            self.pathContainer.setLayout(self.attachmentLayout)
+            self.pathContainer.update()
+
     async def attachFileFunc(self, origin:str="User"):
-        text = "\n".join(self.message.toPlainText().split("\n")[1:])
+        text = "\n".join(self.message.toPlainText().split("\n")[:])
         tempPath = Path(self.loadedFilePath)
         multimedia = Multimedia(model=self.janine, filePath=tempPath, text=text, origin=origin)
         multimediaStr = await multimedia.toString()
@@ -222,6 +237,8 @@ class JanineChat(QFrame):
 
     def resetMessageField(self):
         self.fileLoaded = False
+        self.attachments.clear()
+        clearLayout(self.attachmentLayout)
         self.loadedFilePath = ""
         self.message.clear()
 
@@ -230,7 +247,7 @@ class JanineChat(QFrame):
             text = message
         else: 
             text = self.message.toPlainText()
-            if len(text) == 0:
+            if len(text) == 0 and not self.fileLoaded: 
                 self.messageBox.information(
                     self, "Invalid Text Message", "No message input found.",
                 )

@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import time
 import glob
@@ -229,3 +230,20 @@ def getFileSystemPath(base_directory=None, file_name=''):
         file_full_path = os.path.join(base_directory, file_name)
 
     return file_full_path
+
+
+def pathPatterns(text: str):
+    """
+    This function takes a string input and returns a list of all patterns 
+    in the string that match the regular expression. The regular expression 
+    matches paths in both Unix and Windows formats.
+
+    Parameters:
+    - text (str): The input string to search for patterns.
+
+    Returns:
+    - None: The function prints the list of matched patterns.
+    """
+    pattern = r'/[a-zA-Z0-9_./-]+|[A-Za-z]:\\(?:[^\\/:*?"<>|\r\n]+\\)*[^\\/:*?"<>|\r\n]*'
+    matches = re.findall(pattern, text)
+    print(matches)
