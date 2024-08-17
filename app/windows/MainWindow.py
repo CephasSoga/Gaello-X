@@ -78,7 +78,7 @@ class MainWindow(QMainWindow):
         exit(0)
 
     def connectSlots(self):
-        self.header.minimize.clicked.connect(self.hide)
+        self.header.minimize.clicked.connect(self.reduceWindow)
         self.header.closeApp.clicked.connect(self.closeAndExit)
         self.finishedLoading.connect(self.onLoadingFinished)
 
@@ -117,3 +117,6 @@ class MainWindow(QMainWindow):
     def spawnAccountDetails(self):
         self.accountMenu = AccountMenu()
         setRelativeToMainWindow(self.accountMenu, self.header, 'right')
+
+    def reduceWindow(self):
+        self.showMinimized()  # This keeps the window in a reduced state (icon in taskbar)

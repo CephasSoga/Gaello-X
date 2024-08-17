@@ -1,6 +1,4 @@
 import os
-import time
-import json
 import signal
 import subprocess
 from pathlib import Path
@@ -15,10 +13,10 @@ from app.windows.Fonts import RobotoBold
 from app.windows.NewAccountOk import AccountAllSet, AccountInitFailure
 from utils.appHelper import setRelativeToMainWindow
 from utils.databases import mongoGet
-from utils.envHandler import getenv
 from utils.appHelper import browse
 from utils.system import restoreSystemPath
 from utils.paths import getFrozenPath
+from models.reader.cache import cached_credentials
 
 PORT = 8888
 IP = 'http://localhost'
@@ -70,27 +68,14 @@ class PaymentForm(QFrame):
     def getEmail(self):
         if self.email:
             return self.email
-        base_path = getenv("APP_BASE_PATH")
-        credentials_path = os.path.join(base_path, "credentials", "credentials.json")
-        try:
-            with open(credentials_path, 'r') as credentials_file:
-                credentials = json.load(credentials_file)
-
-            self.email = credentials.get('email', '')
-        except FileNotFoundError:
-            QMessageBox.warning(self, "Credentials were deleted.", "Error: Credentials were deleted. Login again to recreate the file.")
-            self.close()
-            return
-        
-        except json.JSONDecodeError:
-            QMessageBox.warning(self, "Credentials file is corrupted.", "Error: Credentials file is corrupted. Please, try again.")
-            self.close()
-            return
-
-        except Exception as e:
-            QMessageBox.warning(self, "Error retrieving user's email.", f"Error: {str(e)}")
-            self.close()
-            return
+        else:
+            self.email = cached_credentials.get("email", "")
+            if not self.email:
+                QMessageBox.warning(
+                    self, 
+                    "Unable to find user credentials", 
+                    "Credentials Json file might be missing or corrupted. Please, try again."
+                )
 
     def validatePayment(self) -> bool:
         if not self.email:
@@ -105,8 +90,12 @@ class PaymentForm(QFrame):
     def handOverToBrowser(self):
         self.getEmail()
         if self.email:
+            print("Email found: ", self.email)
             self.start_node_server()
             browse(f'{IP}:{PORT}')
+        else:
+            print("Email not found")
+            self.renderFailure()
 
     def validationResult(self):
         return self.validatePayment()

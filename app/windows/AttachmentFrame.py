@@ -5,12 +5,12 @@ from pathlib import Path
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import QFrame
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 
 from utils.paths import getFrozenPath
 
 class Attachment(QFrame):
-
+    isDeleted = pyqtSignal()
     def __init__(self, filePath: Union[str, Path], parent=None):
         super().__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "attachment.ui"))
@@ -35,4 +35,8 @@ class Attachment(QFrame):
         self.attachmentLabel.setText(self.filePath)
     
     def connectSlots(self):
-        self.removeButton.clicked.connect(self.deleteLater)
+        self.removeButton.clicked.connect(self.selfDelete)
+    
+    def selfDelete(self):
+        self.isDeleted.emit()
+        self.deleteLater()

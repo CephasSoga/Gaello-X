@@ -50,7 +50,6 @@ def thread_exec(func):
     thread = threading.Thread(target=func)
     thread.setDaemon(True)  # Daemonize the thread, so it will exit when the main program exits.
     thread.start()
-    thread.join()
 
 def exec_client():
     """

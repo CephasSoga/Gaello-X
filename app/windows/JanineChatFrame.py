@@ -195,6 +195,7 @@ class JanineChat(QFrame):
             self.loadedFilePath = filePath
             self.fileLoaded = True
             attachment = Attachment(filePath, self)
+            attachment.isDeleted.connect(lambda: self.attach.setEnabled(True))
             self.attachments.append(attachment)
             self.showAttachments()
             if len(self.attachments) >= 1:
@@ -423,7 +424,11 @@ class JanineChat(QFrame):
             for message in messages:
                 textMsg = ""
                 text = text=message.get('text') or message.get('transcription')
-                path = message.get('frames', [None])[0]
+                path = message.get('frames', [None])
+                if len(path) > 0 and path[0] is not None:
+                    path = path[0]
+                else:
+                    path = None
                 if path:
                     textMsg +=  str(path) + '\n' + text  
                 else:

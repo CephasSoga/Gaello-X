@@ -1,5 +1,4 @@
 import os
-import json
 from pathlib import Path
 
 from PyQt5 import uic
@@ -10,11 +9,11 @@ from PyQt5.QtWidgets import QFrame, QMessageBox
 
 from utils.appHelper import setRelativeToMainWindow
 from utils.databases import mongoUpdate
-from utils.envHandler import getenv
 from utils.paths import getFrozenPath
 from app.windows.Fonts import RobotoMedium, RobotoBold, QuicksandMedium, RobotoLight
 from app.windows.PaymentForm import PaymentForm
 from app.windows.NewAccountOk import AccountAllSet,  AccountInitFailure
+from models.reader.cache import cached_credentials
 
 
 class NewAccountPlan(QFrame):
@@ -48,29 +47,16 @@ class NewAccountPlan(QFrame):
         self.advancedTierButton.clicked.connect(self.submitAdvancedTier)
 
     def getEmail(self):
-        base_path = getenv("APP_BASE_PATH")
-        credentials_path = os.path.join(base_path, "credentials", "credentials.json")
-        try:
-            with open(credentials_path, 'r') as credentials_file:
-                credentials = json.load(credentials_file)
+        email: str = cached_credentials.get("email", "")
+        if not self.email:
+            QMessageBox.warning(
+                self, 
+                "Unable to find user credentials", 
+                "Credentials Json file might be missing or corrupted. Please, try again."
+            )
+            return None
+        return email
 
-            email: str = credentials.get('email', '')
-            return email
-        except FileNotFoundError:
-            QMessageBox.warning(self, "Credentials were deleted.", "Error: Credentials were deleted. Login again to recreate the file.")
-            self.close()
-            return
-        
-        except json.JSONDecodeError:
-            QMessageBox.warning(self, "Credentials file is corrupted.", "Error: Credentials file is corrupted. Please, try again.")
-            self.close()
-            return
-
-        except Exception as e:
-            QMessageBox.warning(self, "Error retrieving user's email.", f"Error: {str(e)}")
-            self.close()
-            return
-        
     def submitFreeTier(self):
         parent = self.parent()
         email = self.getEmail()
@@ -98,7 +84,8 @@ class NewAccountPlan(QFrame):
     def submitStandardTier(self):
         parent = self.parent()
         serverPathStr = getFrozenPath(os.path.join('server', 'standard.js'))
-        self.paymentForm = PaymentForm(serverPath=Path(serverPathStr))
+        execPath = getFrozenPath(".")
+        self.paymentForm = PaymentForm(execPath=execPath, serverPath=Path(serverPathStr))
         if self.paymentForm:
             self.paymentForm.hide()
             if parent:
@@ -110,7 +97,8 @@ class NewAccountPlan(QFrame):
     def submitAdvancedTier(self):
         parent = self.parent()
         serverPathStr = getFrozenPath(os.path.join('server', 'advanced.js'))
-        self.paymentForm = PaymentForm(serverPath=Path(serverPathStr))
+        execPath = getFrozenPath(".")
+        self.paymentForm = PaymentForm(execPath=execPath, serverPath=Path(serverPathStr))
         if self.paymentForm:
             self.paymentForm.hide()
             if parent:
