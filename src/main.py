@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import threading
 
 # Help pyinstaller detect used packages
 # 1- Pypi packages
@@ -25,6 +26,7 @@ from databases.mongodb import Common,  UsersAuth, Operations, JanineDB
 from models.janine import JanineModel
 from models.api.requests import RequestManager
 from models.api import app
+from models.api.app import Application as FlaskApplication
 from models.reader.cache import CredentialsReader, cached_credentials
 #8- Dispatched imports from app
 from app.windows import *
@@ -36,12 +38,19 @@ from app.inferential import ExportInsights, Insights
 
 from client.client import Client
 from utils.system import restoreSystemPath
-from utils.paths import getFrozenPath
+from utils.paths import getFrozenPath, getFrozenPath2
 
 _cwd = os.getcwd()
 main_logger = Logger("Main")
 main_logger.log("info", "Starting the application...")
 main_logger.log("info", f"Current working directory: {_cwd}")
+
+
+def thread_exec(func):
+    thread = threading.Thread(target=func)
+    thread.setDaemon(True)  # Daemonize the thread, so it will exit when the main program exits.
+    thread.start()
+    thread.join()
 
 def exec_client():
     """
@@ -55,21 +64,13 @@ def exec_client():
     cl.run()
 
 def exec_api():
-    """
-    Executes the API by running a separate Python process that executes the app.py file in the models/api directory.
-
-    This function does not take any parameters.
-
-    This function does not return any values.
-    """
+    api = FlaskApplication()
     try:
-        cwd = getFrozenPath(os.path.join("models", "api", "app.py"))
-        subprocess.Popen(['python', f'{cwd}'], cwd=os.path.dirname(cwd), shell=True)
+        thread_exec(
+            lambda: api.run(threaded=False, host='0.0.0.0', port=5000, debug=True),
+        )
     except Exception as e:
-        main_logger.log("error", "Error executing the API", e)
-    finally:
-        # Ensure the system’s default DLL search path on Windows systems is restored
-        restoreSystemPath()
+        main_logger.log("error", "Failed to start the API", e)
 
 def exec_all():
     """

@@ -78,20 +78,22 @@ def index():
 class Application:
 
     @staticmethod
-    def run():
+    def run(host: str, port: int | str, threaded: bool = False, debug: bool = True):
         try:
             logger.log('info', 'Starting Janine-Endpoint on plain Flask...')
-            app.run(debug=True)
+            app.run(host=host, port=port, threaded=threaded, debug=debug)
+        except ModuleNotFoundError as e: # Expects a ModuleNotFoundError if run as subprocess
+            raise # propagate exception to catch it later
         except Exception as e:
             logger.log('error', f'Error starting Janine-Endpoint: {e}', ValueError('Error starting Janine-Endpoint'))
             logger.log("info", "Shifting to waitress server")
             try:
-                serve(app, host="0.0.0.0", port=5000)
+                serve(app, host=host, port=port)
                 logger.log("info", "Successfully shifted to waitress server")
             except Exception as e:
                 logger.log('error', f'Error starting waitress server: {e}', ValueError('Error starting waitress server'))
-                logger.log('error', 'Error starting Janine-Endpoint. Please check the logs for more information.')
+                logger.log('debug', 'Error starting Janine-Endpoint. Please check the logs for more information.')
 
 
 if __name__ == "__main__":
-    Application.run()
+    Application.run(host='0.0.0.0', port=19220, debug=True)
