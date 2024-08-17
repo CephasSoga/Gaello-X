@@ -16,6 +16,10 @@ from app.windows.CommunityWidget import JanineCommunity
 from app.windows.PlusWidget import ProjectHome
 from utils.paths import getFrozenPath
 
+# ffmperg binaries at assets\binaries\w64\ffmpeg\bin
+ffmpeg_path = resourcePath(os.path.join('assets', 'binaries', 'w64', 'ffmpeg', 'bin'))
+os.environ['PATH'] = ffmpeg_path + os.pathsep + os.environ['PATH']
+
 class PressInsigthsFrame(QFrame):
     def __init__(self, widget: QWidget, parent=None):
         super().__init__(parent)

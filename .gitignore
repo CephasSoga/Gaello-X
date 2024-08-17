@@ -3,6 +3,7 @@
 build
 dist
 node_modules
+assets/binaries
 app/__pycache__
 app/handlers/__pycache__
 app/inferential/__pycache__

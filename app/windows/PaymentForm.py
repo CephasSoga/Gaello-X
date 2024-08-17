@@ -15,7 +15,7 @@ from utils.appHelper import setRelativeToMainWindow
 from utils.databases import mongoGet
 from utils.appHelper import browse
 from utils.system import restoreSystemPath
-from utils.paths import getFrozenPath
+from utils.paths import getFrozenPath, resourcePath
 from models.reader.cache import cached_credentials
 
 PORT = 8888
@@ -35,6 +35,9 @@ class PaymentForm(QFrame):
         else:
             raise FileNotFoundError(f"{path} not found")
 
+        self.NODE = resourcePath(
+            os.path.join('assets', 'binaries', 'w64', 'node-v22.6.0', 'node-v22.6.0-win-x64', 'node.exe') # assets\binaries\w64\node-v22.6.0\node-v22.6.0-win-x64\node.exe
+        )
         self.execPath = execPath
         self.serverPath = serverPath
         self.nodeProcess = None
@@ -153,7 +156,7 @@ class PaymentForm(QFrame):
         if self.nodeProcess is None:
             try:
                 self.nodeProcess = subprocess.Popen(
-                    ['node', str(self.serverPath)], 
+                    [self.NODE, str(self.serverPath)], 
                     cwd=self.execPath, 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.PIPE, 
@@ -164,8 +167,13 @@ class PaymentForm(QFrame):
                 stdout, stderr = self.nodeProcess.communicate(timeout=CONNECTION_TIMEOUT)
 
                 if stdout and not stderr:
+                        print("Output: ", stdout)
                         self.success.emit()
+                elif stderr:
+                    QMessageBox.warning(self, "Server Error", f"Unable to start server. Error: {stderr}")
+                    self.failure.emit()
                 else:
+                    QMessageBox.warning(self, "Server Error", "Server returned no output")
                     self.failure.emit()
             except subprocess.TimeoutExpired:
                 self.failure.emit()
