@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QFrame, QLayout
 
 from app.windows.Fonts import RobotoRegular
 from utils.paths import getFrozenPath
+from utils.appHelper import adjustForDPI
 
 
 class AccountAllSet(QFrame):
@@ -22,6 +23,7 @@ class AccountAllSet(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.connectSlots()
         self.setFonts()

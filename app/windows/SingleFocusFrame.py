@@ -15,7 +15,7 @@ from app.handlers.Patterns import Index, Symbol
 from utils.workers import spinnerWork
 from app.windows.Fonts import RobotoRegular
 from app.windows.Styles import chatScrollBarStyle
-from utils.appHelper import clearLayout
+from utils.appHelper import clearLayout, adjustForDPI
 from utils.paths import getFrozenPath
 
 
@@ -43,6 +43,7 @@ class SingleFocus(QWidget):
         QTimer.singleShot(0, self.makeQuoteWithSpinner)
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.setupLayout()
 

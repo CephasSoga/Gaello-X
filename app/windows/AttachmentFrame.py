@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QFrame
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from utils.paths import getFrozenPath
+from utils.appHelper import adjustForDPI
 
 class Attachment(QFrame):
     isDeleted = pyqtSignal()
@@ -24,6 +25,7 @@ class Attachment(QFrame):
 
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.setContents()
         self.connectSlots()

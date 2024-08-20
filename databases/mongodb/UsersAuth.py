@@ -61,18 +61,23 @@ class UserCredentials:
         }
         return self
     
-    def toDict(self):
+    def toDict(self, id: str = uuid.uuid4().hex):
         """
         Returns a dictionary representation of the object.
 
+        Args:
+            id (str): The unique identifier for the user. Defaults to a random UUID.
+
         Returns:
             dict: A dictionary containing the following keys:
+                - "userId" (str): The user ID. Defaults to a random UUID.
                 - "user" (dict): The user field.
                 - "company" (dict): The company field.
                 - "accountType" (dict): The account type field.
                 - "prospected" (dict): The prospected field.
         """
         return {
+            "userId": id,
             "user": self.userField,
             "company": self.companyField,
             "accountType": self.accountTypeField,
@@ -164,17 +169,17 @@ class UserAuthentification:
         
         hashedPassword = self.hasher.hashPswd(password)
         credentials = credentials.integratePswdHash(hashedPassword)
-        credDict = credentials.toDict()
+        credDict = credentials.toDict(id=uuid.uuid4().hex)
         self.users.insert_one(credDict)
 
         # Dump none-sensible fields into a local persistent file
         self.save(
             {
                 "email": credDict.get('user', {}).get('email', ""),
-                "id": uuid.uuid4().hex,
+                "id": credDict.get('userId', ""),
                 "loggedIn": True,
                 "presistentLoggedIn": True,
-                "authorizationLevel": 0
+                "authorizationLevel": 'defined'
             }
         )
         return True

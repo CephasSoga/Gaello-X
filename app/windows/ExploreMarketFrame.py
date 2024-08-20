@@ -18,6 +18,7 @@ from app.windows.CryptoItemFrame import CryptoItem
 from app.windows.CommodityItemFrame import CommodityItem
 from app.windows.Styles import scrollBarStyle
 from utils.paths import getFrozenPath
+from utils.appHelper import adjustForDPI
 
 class ExploreMarket(QFrame):
     def __init__(self, parent=None):
@@ -55,6 +56,7 @@ class ExploreMarket(QFrame):
         self.startLazyLoad(self.completeJobs)
         
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.setupLayout()
         self.connectSlots()

@@ -3,6 +3,7 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import *
 
 from utils.paths import getFrozenPath
+from utils.appHelper import adjustForDPI
 
 class Notifications(QtWidgets.QFrame):
     def __init__(self, parent=None):
@@ -16,6 +17,7 @@ class Notifications(QtWidgets.QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.layout = QtWidgets.QVBoxLayout()
         self.setLayout(self.layout)
 

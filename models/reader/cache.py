@@ -37,13 +37,13 @@ class FileCache:
             return content
         except FileNotFoundError as file_not_found:
             self.logger.log("error", "File not found", file_not_found)
-            return None
+            return {}
         except json.JSONDecodeError as json_decode_error:
             self.logger.log("error", "JSON decode error", json_decode_error)
-            return None
+            return {}
         except Exception as e:
             self.logger.log("error", "An error occurred while reading the JSON file", e)
-            return None
+            return {}
         
 
 class CredentialsReader:
@@ -60,7 +60,7 @@ class CredentialsReader:
             return {"id": data.get("id"), "email": data.get("email")}
         except Exception as e:
             self.logger.log("error", "An error occurred while reading the credentials file", e)
-            return None
+            return {}
         
 
 credentials_reader = CredentialsReader(cache_size=120)

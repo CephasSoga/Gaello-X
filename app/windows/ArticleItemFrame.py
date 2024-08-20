@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QFrame
 
 from app.windows.Fonts import *
 from app.windows.ArticleExpandFrame import ArticleExpand
-from utils.appHelper import setRelativeToMainWindow
+from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.paths import getFrozenPath
 
 class ArticleItem(QFrame):
@@ -42,6 +42,7 @@ class ArticleItem(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.setContents()
         self.setFonts()

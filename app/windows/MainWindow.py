@@ -5,13 +5,13 @@ from pathlib import Path
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QWidget, QMainWindow, QApplication, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QMainWindow, QApplication, QVBoxLayout, QSizePolicy
 
 from app.windows.LoginFrame import SignInFrame
 from app.windows.MenuFrame import AccountMenu
 from app.windows.TopWidget import Header
 from app.windows.BottomWidget import Bottom
-from utils.appHelper import stackOnCurrentWindow, setRelativeToMainWindow
+from utils.appHelper import stackOnCurrentWindow, setRelativeToMainWindow, isFrozen, adjustForDPI
 from utils.paths import constructPath, getFrozenPath, getFileSystemPath
 from utils.envHandler import getenv
 
@@ -29,6 +29,7 @@ class MainWindow(QMainWindow):
 
     def initUI(self):
         try:
+            adjustForDPI(self)
             self.setWFlags()
             self.setWIcon()
             self.setLayout()
@@ -45,19 +46,17 @@ class MainWindow(QMainWindow):
 
     def setLayout(self):
         screenGeometry = QApplication.primaryScreen().availableGeometry()
-        self.setGeometry(
-            screenGeometry.x(),
-            screenGeometry.y(),
-            screenGeometry.width(),
-            screenGeometry.height()
-        )
+        self.setGeometry(screenGeometry)
 
         self.scrollArea.setStyleSheet("border-style: none;")
         self.scrollArea.setWidgetResizable(True)
         self.setCentralWidget(self.scrollArea)
         self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
         self.scrollWidget = QWidget()
+        self.scrollWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.scrollLayout = QVBoxLayout(self.scrollWidget)
         self.scrollLayout.setContentsMargins(0, 0, 0, 0)
         self.scrollLayout.setSpacing(0)
@@ -67,6 +66,7 @@ class MainWindow(QMainWindow):
         w, h = 1900, 1080
         self.header = Header(self)
         self.bottom = Bottom(self)
+        self.showMaximized()  # or self.showFullScreen()
         self.header.setMinimumSize(w, h)
         self.bottom.setMinimumSize(w, h)
 
@@ -75,7 +75,8 @@ class MainWindow(QMainWindow):
 
     def closeAndExit(self):
         self.close()
-        exit(0)
+        if not isFrozen():
+            exit(0)
 
     def connectSlots(self):
         self.header.minimize.clicked.connect(self.reduceWindow)

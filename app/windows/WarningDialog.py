@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QDialog
 
 from app.windows.Fonts import RobotoBold
 from utils.paths import getFrozenPath
+from utils.appHelper import adjustForDPI
 
 class Warning(QDialog):
     def __init__(self, title: str, message: str,  parent=None):
@@ -23,6 +24,7 @@ class Warning(QDialog):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.setFonts()
         self.connectSlots()

@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QFrame, QLayout, QLineEdit, QMessageBox
 
 from app.windows.Fonts import RobotoRegular
 from app.windows.NewAccountPlan import NewAccountPlan
-from utils.appHelper import setRelativeToMainWindow, showWindow
+from utils.appHelper import setRelativeToMainWindow, showWindow, adjustForDPI
 from utils.paths import getFrozenPath
 from databases.mongodb.UsersAuth import UserCredentials, userAuthInstance
 
@@ -27,6 +27,7 @@ class NewAccountSetup(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.abstractContens()
         self.setWFlags()
         self.connectSlots()

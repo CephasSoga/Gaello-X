@@ -35,8 +35,9 @@ class PaymentForm(QFrame):
         else:
             raise FileNotFoundError(f"{path} not found")
 
+        # assets\binaries\w64\node-v22.6.0\node.exe
         self.NODE = resourcePath(
-            os.path.join('assets', 'binaries', 'w64', 'node-v22.6.0', 'node-v22.6.0-win-x64', 'node.exe') # assets\binaries\w64\node-v22.6.0\node-v22.6.0-win-x64\node.exe
+            os.path.join('assets', 'binaries', 'w64', 'node-v22.6.0', 'node.exe') # assets\binaries\w64\node-v22.6.0\node-v22.6.0-win-x64\node.exe
         )
         self.execPath = execPath
         self.serverPath = serverPath

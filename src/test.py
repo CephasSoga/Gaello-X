@@ -1,37 +1,46 @@
-import sys
-import os
-import subprocess
+import ctypes
 
-def resourcePath(relative_path):
+def get_dpi():
+    hdc = ctypes.windll.user32.GetDC(0)
+    dpi = ctypes.windll.gdi32.GetDeviceCaps(hdc, 88)
+    ctypes.windll.user32.ReleaseDC(0, hdc)
+    return dpi
+
+#print(f"System DPI: {get_dpi()}")
+
+
+import ctypes
+
+user32 = ctypes.windll.user32
+screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+
+print(f"Screen resolution: {screensize[0]} x {screensize[1]}")
+
+
+def adjustForDPI(widget: QWidget):
     """
-    Returns the absolute path of a resource file.
+    Adjusts the window size of the provided QWidget based on the system's DPI settings.
+
+    Args:
+        widget (QWidget): The QWidget instance to be resized.
+
+    Returns:
+        None
     """
-    try:
-        base_path = sys._MEIPASS  # or sys._MEIPASS2
-    except Exception:
-        base_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
-
-# Resolve paths to Node.js and the server script
-nodePath = resourcePath(os.path.join('resources', 'node', 'node.exe'))  # Adjust for your platform
-serverPathStr = resourcePath(os.path.join('server', 'advanced.js'))
-execPath = resourcePath(".")
-
-# Running the subprocess with the bundled Node.js
-try:
-    process = subprocess.Popen(
-        [nodePath, serverPathStr], 
-        cwd=execPath, 
-        stdout=subprocess.PIPE, 
-        stderr=subprocess.PIPE, 
-        text=True
-    )
-    stdout, stderr = process.communicate()
-
-    if process.returncode != 0:
-        print(f"Error: {stderr}")
-    else:
-        print(f"Output: {stdout}")
-except Exception as e:
-    print(f"Failed to start subprocess: {e}")
+    from PyQt5.QtGui import QGuiApplication
+    dpi = QGuiApplication.primaryScreen().logicalDotsPerInch()
+    scalingFactor = dpi / 96.0  # Default DPI
+    print(f"DPI: {dpi}, Scaling Factor: {scalingFactor}")
+    print("Resizing...")
+    _w = widget.width() * scalingFactor
+    _h = widget.height() * scalingFactor
+    for child in widget.children():
+        if not isinstance(child, QGridLayout| QVBoxLayout | QHBoxLayout) and isinstance(child, QWidget):
+            if scalingFactor in [1.5]: # 1.5 included as the dev machine has a 144 dpi value and a 1.5 scaling factor. Test for other values as well.
+                continue
+            child.resize(
+                int(child.width() * scalingFactor), 
+                int(child.height() * scalingFactor)
+            )
+    widget.resize(int(_w), int(_h))
+    # Adjust other UI elements as needed

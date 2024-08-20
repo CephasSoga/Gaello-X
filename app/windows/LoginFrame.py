@@ -67,7 +67,7 @@ class SignInFrame(QMainWindow):
                 #TODO: ...
                 if self.userAuth.login(email, password):
                     #TODO: Allow access to restricted windows:  Cleared!
-                    QMessageBox.information(self, "Success", "You are now logged in.")
+                    QMessageBox.information(self, "Success", "You are now logged in. \nRestart this appliaction to make login effective ")
 
                     # Recreate persistent login file
                     self.retreiveAndSave(email)
@@ -113,11 +113,11 @@ class SignInFrame(QMainWindow):
 
         credentials = UserCredentials(**user)
 
-        credDict = credentials.toDict()
+        credDict = credentials.toDict(id=user.get("userId", uuid.uuid4().hex))
         self.userAuth.save(
             {
                 "email": credDict.get('user', {}).get('email', ""),
-                "id": uuid.uuid4().hex,
+                "id": credDict.get('userId', ""),
                 "loggedIn": True,
                 "presistentLoggedIn": True,
                 "authorisationLevel": 'defined',

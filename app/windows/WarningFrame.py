@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtWidgets import QFrame
 
 from utils.paths import getFrozenPath
+from utils.appHelper import adjustForDPI
 
 
 class Warning(QFrame):
@@ -19,6 +20,7 @@ class Warning(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.setupAppearance()
 

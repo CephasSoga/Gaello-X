@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QEvent
 from PyQt5.QtWidgets import QFrame, QDialog
 
 from utils.paths import getFrozenPath
-from utils.appHelper import setRelativeToMainWindow
+from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 
 class ChatTitleSelector(QFrame):
     titleSet = pyqtSignal(str)
@@ -22,6 +22,7 @@ class ChatTitleSelector(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.connectSlots()
 

@@ -23,7 +23,7 @@ from utils.paths import rawPathStr, getFrozenPath, getFileSystemPath
 from app.windows.Fonts import  QuicksandBold, Exo2Medium
 from app.windows.WaiterFrame import Waiter
 from app.windows.ChatTitleFrame import ChatTitleSelector, ChatTitle
-from utils.appHelper import setRelativeToMainWindow,clearLayout
+from utils.appHelper import setRelativeToMainWindow, clearLayout, adjustForDPI
 from utils.time import now
 from app.windows.AttachmentFrame import Attachment
 
@@ -48,6 +48,7 @@ class JanineChat(QFrame):
         import time
 
         s = time.perf_counter()
+        adjustForDPI(self)
         self.setContents()
         self.setWFlags()
         self.setupLayout()

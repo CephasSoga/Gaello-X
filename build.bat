@@ -1,7 +1,8 @@
 @echo off
 pyinstaller --onefile --name Gaello --icon=icon.ico --splash=splash.png ^
-    --add-data "assets/binaries/w64/node-v22.6.0/node-v22.6.0-win-x64/*;assets/binaries/w64/node-v22.6.0/node-v22.6.0-win-x64" ^
+    --add-data "assets/binaries/w64/node-v22.6.0/**/*;assets/binaries/w64/node-v22.6.0" ^
     --add-data "assets/binaries/w64/ffmpeg/bin/*;assets/binaries/w64/ffmpeg/bin" ^
+    --add-data "assets/binaries/w64/ffmpeg/presets/*;assets/binaries/w64/ffmpeg/presets" ^
     --add-data "assets/UI/*.ui;assets/UI" ^
     --add-data "assets/fonts/Exo_2/static/*;assets/fonts/Exo_2/static" ^
     --add-data "assets/fonts/Montserrat/static/*;assets/fonts/Montserrat/static" ^
@@ -13,7 +14,7 @@ pyinstaller --onefile --name Gaello --icon=icon.ico --splash=splash.png ^
     --add-data "assets/videos/*;assets/videos" ^
     --add-data "assets/html/*;assets/html" ^
     --add-data "assets/logo/*;assets/logo" ^
-    --add-data "node_modules/*;node_modules" ^
+    --add-data "node_modules/**/*;node_modules" ^
     --add-data "server/*;server" ^
     --add-data "views/*;views" ^
     --add-data "models/api/*;models/api" ^

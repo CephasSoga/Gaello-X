@@ -8,6 +8,7 @@ from app.windows.Fonts import RobotoRegular, MontserratRegular
 from app.windows.InsightItems import InsightItem
 from app.inferential.ExportInsights import insights
 from utils.paths import getFrozenPath
+from utils.appHelper import adjustForDPI
 
 class JanineInsights(QWidget):
 
@@ -22,6 +23,7 @@ class JanineInsights(QWidget):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setupWFlags()
         self.connectSlots()
         self.setupLayout()

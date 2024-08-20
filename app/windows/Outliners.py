@@ -10,6 +10,7 @@ from app.windows.Fonts import QuicksandRegular
 from utils.databases import mongoGet
 from utils.logs import Logger
 from utils.paths import getFrozenPath
+from utils.appHelper import adjustForDPI
 
 class MarketOutliner:
     def __init__(self):
@@ -52,6 +53,7 @@ class Outline(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setFonts()
 
     def setFonts(self):
@@ -75,6 +77,7 @@ class OutlineTitle(QFrame):
 
 
     def initUI(self):
+        adjustForDPI(self)
         self.setFonts()
 
     def setFonts(self):

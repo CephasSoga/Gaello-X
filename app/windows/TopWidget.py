@@ -79,6 +79,7 @@ class Header(QMainWindow):
         QTimer.singleShot(msDelay, self.setupMovies)
 
     def initUI(self):
+        adjustForDPI(self)
         self.setFonts()
         self.connectSlots()
         self.installEventFilters()

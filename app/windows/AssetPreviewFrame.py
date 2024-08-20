@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QFrame
 
 from app.windows.Fonts import RobotoSemiBold
 from utils.paths import getFrozenPath
+from utils.appHelper import adjustForDPI
 
 class AssetPreview(QFrame):
     clicked = pyqtSignal()
@@ -36,6 +37,7 @@ class AssetPreview(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.setContents()
         self.setFonts()

@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QFrame
 
 from app.windows.AuthHandler import read_user_id
 from app.windows.NewAccountPlan import NewAccountPlan
-from utils.appHelper import setRelativeToMainWindow
+from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.paths import getFrozenPath
 
 class Menu(QFrame):
@@ -21,7 +21,7 @@ class Menu(QFrame):
         self.initUI()
 
     def initUI(self):
-        pass
+        adjustForDPI(self)
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseButtonPress:
@@ -41,6 +41,7 @@ class AccountMenu(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setContents()
         self.connectSlots()
 

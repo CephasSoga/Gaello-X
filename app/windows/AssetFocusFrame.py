@@ -13,7 +13,7 @@ from app.handlers.Patterns import Index, Symbol
 from app.windows.Fonts import RobotoSemiBold, RobotoRegular
 from app.windows.Styles import chatScrollBarStyle
 from utils.logs import Logger
-from utils.appHelper import clearLayout
+from utils.appHelper import clearLayout, adjustForDPI
 from utils.workers import spinnerWork
 from utils.paths import getFrozenPath
 
@@ -29,6 +29,7 @@ class AssetFocusItem(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setAppearance()
         self.setFonts()
 

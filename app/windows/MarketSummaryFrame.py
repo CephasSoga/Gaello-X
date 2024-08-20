@@ -17,6 +17,7 @@ from app.handlers.ExportAssets import IndexList
 from utils.databases import mongoGet
 from utils.asyncJobs import quickFetchBytes
 from utils.paths import getFrozenPath
+from utils.appHelper import adjustForDPI
 
 class MarketSummary(QFrame):
     dataFetched = pyqtSignal(str, list)
@@ -34,6 +35,7 @@ class MarketSummary(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.connectSlots()
         self.setupLayout()

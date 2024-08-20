@@ -1,7 +1,8 @@
+import sys
 import webbrowser
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QLabel
 
 def stackOnCurrentWindow(window:QWidget) -> None:
     """
@@ -139,3 +140,78 @@ def clearLayout(layout: QVBoxLayout | QHBoxLayout | QGridLayout):
 
     # Ensure the layout is fully cleared
     layout.update()
+
+
+def isFrozen():
+    """
+    Checks if the application is frozen.
+
+    Returns:
+        bool: True if the application is frozen, False otherwise.
+    """
+    return getattr(sys, 'frozen', False)
+
+
+def getDPI():
+    import ctypes
+    hdc = ctypes.windll.user32.GetDC(0)
+    dpi = ctypes.windll.gdi32.GetDeviceCaps(hdc, 88)
+    ctypes.windll.user32.ReleaseDC(0, hdc)
+    return dpi
+
+def getScreenSize():
+    import ctypes
+    user32 = ctypes.windll.user32
+    screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+    w = screensize[0]
+    h = screensize[1]
+    return w, h
+
+def adjustForDPI(widget: QWidget):
+    """
+    Adjusts the window size of the provided QWidget based on the system's DPI settings and screen resolution.
+
+    Args:
+        widget (QWidget): The QWidget instance to be resized.
+
+    Returns:
+        None
+    """
+    _BASE_W = 1920
+    _BASE_H = 1080
+    _BASE_DPI = 144
+    _BASE_SCALE = 1.5
+    _CURRENT_W = getScreenSize()[0]
+    _CURRENT_H = getScreenSize()[1]
+
+    w_resize_factor = _CURRENT_W / _BASE_W
+    h_resize_factor = _CURRENT_H / _BASE_H
+
+    from PyQt5.QtGui import QGuiApplication
+    dpi = QGuiApplication.primaryScreen().logicalDotsPerInch()
+    scalingFactor = dpi / 96.0  # Default DPI
+    
+    if (dpi != _BASE_DPI) or (scalingFactor != _BASE_SCALE) or (_CURRENT_H != _BASE_H) or  (_CURRENT_W != _BASE_W):
+        w_factor = scalingFactor * w_resize_factor
+        h_factor = scalingFactor * h_resize_factor
+        for child in widget.children():
+            if not isinstance(child, QGridLayout | QVBoxLayout | QHBoxLayout):
+                if isinstance(child, QPushButton):
+                    continue # Buttons sometimes have complex stylsheet we don't want  to overwrite; and since they are usually small...
+                elif isinstance(child, QLabel):
+                    if child.pixmap() is not None: 
+                        continue # Ignore labels that displays images
+                    child.resize(
+                        int(child.width() * w_factor), 
+                        int(child.height() * h_factor)
+                    )
+                elif isinstance(child, QWidget) and not isinstance(child, QLabel | QPushButton):
+                    child.resize(
+                        int(child.width() *  w_factor), 
+                        int(child.height() * h_factor)
+                    )
+        widget.resize(
+            int(widget.width() * w_factor), 
+            int(widget.height() * h_factor)
+        )
+    print(f"Runtime with following spec: - DPI: {dpi}, - Scale: {scalingFactor}, - Res: {_CURRENT_W}x{_CURRENT_H}")

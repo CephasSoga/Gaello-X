@@ -9,6 +9,7 @@ from PyQt5 import uic
 
 from app.windows.Fonts import loadFont
 from utils.paths import getFrozenPath
+from utils.appHelper import adjustForDPI
 
 # Load the UI file into a QUiLoader object
 class ProjectHome(QWidget):
@@ -23,6 +24,7 @@ class ProjectHome(QWidget):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.setFonts()
         self.connectSlots()

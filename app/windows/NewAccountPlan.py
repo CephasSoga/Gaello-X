@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFrame, QMessageBox
 
-from utils.appHelper import setRelativeToMainWindow
+from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.databases import mongoUpdate
 from utils.paths import getFrozenPath
 from app.windows.Fonts import RobotoMedium, RobotoBold, QuicksandMedium, RobotoLight
@@ -33,6 +33,7 @@ class NewAccountPlan(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.connectSlots()
         self.setFonts()

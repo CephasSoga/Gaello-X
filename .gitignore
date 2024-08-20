@@ -2,6 +2,7 @@
 *.spec
 build
 dist
+datas.txt
 node_modules
 assets/binaries
 app/__pycache__

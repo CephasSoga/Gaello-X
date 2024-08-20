@@ -1,5 +1,6 @@
 import os
 import sys
+import ctypes
 import subprocess
 import threading
 
@@ -16,6 +17,7 @@ import utils
 # 3- Dispatched imports for pyqt5
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtGui import QGuiApplication
 #4 - Dispatched imports from janine
 from janine import RichText, RichAudio, RichFile, RichVision, BaseRemote, BaseUtility
 #5 - Dispatched imports from utils
@@ -32,18 +34,36 @@ from models.reader.cache import CredentialsReader, cached_credentials
 from app.windows import *
 from app.handlers import HashWorker, ExportAssets, Patterns, ShortLiveSeries
 from app.inferential import ExportInsights, Insights
-#9- Dispatched imports from api
-
-
-
+#9- Dispatched imports from ...
 from client.client import Client
 from utils.system import restoreSystemPath
 from utils.paths import getFrozenPath, getFrozenPath2
+from  utils.appHelper import getScreenSize, getDPI
 
 _cwd = os.getcwd()
 main_logger = Logger("Main")
 main_logger.log("info", "Starting the application...")
 main_logger.log("info", f"Current working directory: {_cwd}")
+
+def system_check(resolution_check_enabled: bool = True):
+    BASE_DPI = 144
+    BASE_PROPS = 1920, 1080
+    dpi = getDPI()
+    scaling_factor = dpi / 96.0
+    screen_props = getScreenSize()
+    main_logger.log("info", f"Sytem:\n\tDPI resolution: {dpi}, \n\tScreen resolution: {screen_props}")
+    if resolution_check_enabled:
+        if dpi!= BASE_DPI or (
+            screen_props[0]!= BASE_PROPS[0] or scaling_factor * screen_props[0] != BASE_PROPS[0]
+        ) or (
+            screen_props[1]!= BASE_PROPS[1] or scaling_factor * screen_props[1] != BASE_PROPS[1]
+        ):
+            main_logger.log(
+                "warning", 
+                "The optimal requirements for the application's DPI or screen resolution are not met. Automatically adjusting... Please be warned that this might result in degraded visuals"
+            )
+        else:
+            main_logger.log("info", "The optimal requirements for the application's DPI or screen resolution are met. No adjustments needed.")
 
 
 def thread_exec(func):
@@ -76,8 +96,20 @@ def exec_all():
     A function that executes both the API and client components in a try-finally block.
     """
     try:
+        system_check()
+    except SystemExit:
+        return
+    except Exception:
+        main_logger.log("error", "Unexpected error", exc_info=True)
+        return
+    try:
+        main_logger.log("info", "Starting the Gaello Application...")
         exec_api()
+    except Exception as e:
+        main_logger.log("error", "Failed to start the API and Application. Returning...", e)
+        raise  # Re-raise the exception to propagate it to the caller.
     finally:
+        main_logger.log("info", "Launching GUI...")
         exec_client()
 
 if __name__ == "__main__":

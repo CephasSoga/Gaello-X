@@ -20,7 +20,7 @@ MAX_COLLECTIONS = 50
 ID = cached_credentials.get("id", None)
 EMAIL = cached_credentials.get("email", None)
 if not ID or not EMAIL:
-    logger.log('error', 'Empty user credentials.', ValueError('User credentials not found in cache.'))
+    logger.log('warning', 'Empty user credentials.', ValueError('User credentials not found in cache.'))
 
 class JanineMongoDatabase:
     def __init__(self, uri: str = connectionStr, user: str=f'{ID}-{EMAIL}', title: str = None):

@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5 import uic
 
 from utils.paths import getFrozenPath, resourcePath
+from utils.appHelper import adjustForDPI
 
 class Waiter(QFrame):
     def __init__(self, parent=None):
@@ -18,6 +19,7 @@ class Waiter(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.setContents()
 

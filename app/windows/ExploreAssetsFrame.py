@@ -13,7 +13,7 @@ from app.handlers.ShortLiveSeries import Series
 from app.handlers.ExportAssets import symbolList
 from app.windows.AssetPreviewFrame import AssetPreview
 from app.windows.AssetFocusFrame import AssetFocus
-from utils.appHelper import setRelativeToMainWindow
+from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.databases import mongoGet
 from utils.asyncJobs import quickFetchBytes
 from utils.graphics import chartWithSense
@@ -42,6 +42,7 @@ class ExploreAsset(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.connectSlots()
         self.setupLayout()

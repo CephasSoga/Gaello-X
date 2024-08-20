@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QFrame
 from app.windows.AuthHandler import handleAuth
 from app.windows.Fonts import RobotoBold, Exo2Light
 from app.windows.SingleFocusFrame import SingleFocus
-from utils.appHelper import setRelativeToMainWindow
+from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.paths import getFrozenPath
 
 class CryptoItem(QFrame):
@@ -31,6 +31,7 @@ class CryptoItem(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.setContents()
         self.setFonts()

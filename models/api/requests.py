@@ -13,7 +13,7 @@ PORT = '5000'
 ID = cached_credentials.get('id', '')
 EMAIL = cached_credentials.get('email', '')
 if not ID or not EMAIL:
-    logger.log('error', 'Empty user credentials.', ValueError('User credentials not found in cache.'))
+    logger.log('warning', 'Empty user credentials.', ValueError('User credentials not found in cache.'))
 PATH = f'janine/index/{ID}-{EMAIL}'
 
 def serialize(obj):

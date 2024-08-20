@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QFrame
 
 from app.windows.Fonts import QuicksandBold, QuicksandRegular
 from utils.paths import getFrozenPath
+from utils.appHelper import adjustForDPI
 
 class InsightItem(QFrame):
     def __init__(self, imagePathOrUrl: Union[Path, str] = None, title:str = None, text: str = None, parent=None):
@@ -30,6 +31,7 @@ class InsightItem(QFrame):
 
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.setContents()
         self.style()

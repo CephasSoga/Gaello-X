@@ -7,6 +7,7 @@ from PyQt5 import uic
 
 from app.windows.Fonts import RobotoRegular
 from utils.paths import getFrozenPath
+from utils.appHelper import adjustForDPI
 
 class JanineCommunity(QWidget):
     def __init__(self, parent=None):
@@ -20,6 +21,7 @@ class JanineCommunity(QWidget):
         self.initUI()
     
     def initUI(self):
+       adjustForDPI(self)
        self.setWFlags()
        self.setFonts()
        self.connectSlots()

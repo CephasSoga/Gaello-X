@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QFrame
 from app.windows.Fonts import *
 from app.windows.Styles import chatScrollBarStyle
 from utils.paths import getFrozenPath
+from utils.appHelper import adjustForDPI
 
 class ArticleExpand(QFrame):
     def __init__(self,
@@ -39,6 +40,7 @@ class ArticleExpand(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setWFlags()
         self.setContents()
         self.setFonts()

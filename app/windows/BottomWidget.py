@@ -16,7 +16,7 @@ from app.windows.CommunityWidget import JanineCommunity
 from app.windows.PlusWidget import ProjectHome
 from utils.paths import getFrozenPath
 
-# ffmperg binaries at assets\binaries\w64\ffmpeg\bin
+# ffmpeg binaries at assets\binaries\w64\ffmpeg\bin
 ffmpeg_path = resourcePath(os.path.join('assets', 'binaries', 'w64', 'ffmpeg', 'bin'))
 os.environ['PATH'] = ffmpeg_path + os.pathsep + os.environ['PATH']
 
@@ -100,6 +100,7 @@ class Bottom(QMainWindow):
         QTimer.singleShot(msDelay, self.setupMovies)
         
     def initUI(self):
+        adjustForDPI(self)
         self.setFonts()
         self.setWFlags()
         self.connectSlots()

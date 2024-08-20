@@ -1,6 +1,6 @@
 import sys
 import asyncio
-from PyQt5.QtCore import pyqtSignal, QObject, QThread
+from PyQt5.QtCore import pyqtSignal, QObject, QThread, Qt
 from qasync import QEventLoop, QApplication as QAsyncApplication
 
 from app.windows.Spinner import Spinner
@@ -46,7 +46,9 @@ class Client(QObject):
     """
     def __init__(self):
         super().__init__()
+        Qt.AA_EnableHighDpiScaling = True  # Set this attribute before creating QAsyncApplication
         self.app = QAsyncApplication(sys.argv)
+        #self.app.setAttribute(Qt.AA_EnableHighDpiScaling)
         self.app.setStyle("Oxygen")
 
         self.spinner = Spinner()

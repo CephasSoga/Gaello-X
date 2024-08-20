@@ -13,6 +13,7 @@ from utils.time import time_, date
 from utils.paths import getFrozenPath
 from app.windows.Styles import userMessageBackground, chatScrollBarStyle
 from app.windows.Fonts import RobotoRegular, Exo2Light
+from utils.appHelper import adjustForDPI
 
 class ChatTextMessage(QFrame):
     def __init__(self, message:Message, parent=None):
@@ -32,6 +33,7 @@ class ChatTextMessage(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setupLayout()
         self.setContents()
         self.setFonts()
@@ -102,6 +104,7 @@ class ChatVoiceMail(QFrame):
         self.initUI()
 
     def initUI(self):
+        adjustForDPI(self)
         self.setContents()
         self.setupLayout()
         self.connectSlots()
@@ -228,6 +231,7 @@ class ChatMultimedia(QWidget):
         self.initUI()
         
     def initUI(self):
+        adjustForDPI(self)
         self.setContents()
         self.setupLayout()
         self.connectSlots()
