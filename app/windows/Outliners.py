@@ -1,13 +1,14 @@
 import os
 import asyncio
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from PyQt5 import uic
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFrame
 
-from app.windows.Fonts import QuicksandRegular
+from app.config.fonts import QuicksandRegular, FontSizePoint
 from utils.databases import mongoGet
+from utils.asyncJobs import asyncWrap
 from utils.logs import Logger
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
@@ -21,7 +22,9 @@ class MarketOutliner:
     async def get(self, endpoint: str) -> List[Dict]:
         await asyncio.sleep(0.1)
         try:
-            doc: Dict = mongoGet(database="market", collection="marketSummary")[0]
+            asyncMongoGet = asyncWrap(mongoGet)
+            res: Any = await asyncMongoGet(database="market", collection="marketSummary")
+            doc: Dict = res[0] if res else {}
             target = doc["content"]["performances"]
             return target[endpoint]
         except Exception as e:
@@ -57,7 +60,8 @@ class Outline(QFrame):
         self.setFonts()
 
     def setFonts(self):
-        font = QuicksandRegular(10) or QFont('Arial', 10)
+        size = FontSizePoint
+        font = QuicksandRegular(size.MEDIUM) or QFont('Arial', size.MEDIUM)
         self.symbolLabel.setFont(font)
         self.nameLabel.setFont(font)
         self.priceLabel.setFont(font)
@@ -81,7 +85,8 @@ class OutlineTitle(QFrame):
         self.setFonts()
 
     def setFonts(self):
-        font = QuicksandRegular(12) or QFont('Arial', 12)
+        size = FontSizePoint
+        font = QuicksandRegular(size.BIG) or QFont('Arial', size.BIG)
         self.titleLabel.setFont(font)
 
 async def main():

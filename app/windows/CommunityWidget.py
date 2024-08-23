@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5 import uic
 
-from app.windows.Fonts import RobotoRegular
+from app.config.fonts import RobotoRegular, FontSizePoint
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
@@ -30,7 +30,8 @@ class JanineCommunity(QWidget):
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
 
     def setFonts(self):
-        font = RobotoRegular(14) or QFont("Arial", 14)
+        size = FontSizePoint
+        font = RobotoRegular(size.BIGGER) or QFont("Arial", size.BIGGER)
         for item in self.children():
             item.setFont(font)
 

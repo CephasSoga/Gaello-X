@@ -1,4 +1,5 @@
 import os
+import asyncio
 from typing import Optional
 
 from PyQt5 import uic
@@ -6,8 +7,8 @@ from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QFrame
 
-from app.windows.AuthHandler import handleAuth
-from app.windows.Fonts import RobotoBold, Exo2Light
+from app.handlers.AuthHandler import handleAuth
+from app.config.fonts import RobotoBold, Exo2Light, FontSizePoint
 from app.windows.SingleFocusFrame import SingleFocus
 from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.paths import getFrozenPath
@@ -64,16 +65,17 @@ class CryptoItem(QFrame):
             self.growthLabel.setStyleSheet("color: red; border: none; border-radius: 0;")
 
     def setFonts(self):
-        font = RobotoBold(9) or QFont("Arial", 9)
+        size = FontSizePoint
+        font = RobotoBold(size.SMALL) or QFont("Arial", size.SMALL)
         self.nameLabel.setFont(font)
         self.priceLabel.setFont(font)
         self.growthLabel.setFont(font)
 
-        tinyFont = Exo2Light(8) or QFont("Arial", 8)
+        tinyFont = Exo2Light(size.TINY) or QFont("Arial", size.TINY)
         self.tagLabel.setFont(tinyFont)
 
     def connectSlots(self):
-        self.clicked.connect(lambda: handleAuth(2, self.spawnFocus))
+        self.clicked.connect(lambda: asyncio.ensure_future(handleAuth(2, self.spawnFocus)))
 
     def spawnFocus(self):
         ancestorWidget = self.parent().parent().parent().parent() #Stands for ExploreMarket widget

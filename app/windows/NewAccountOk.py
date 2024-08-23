@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFrame, QLayout
 
-from app.windows.Fonts import RobotoRegular
+from app.config.fonts import RobotoRegular, FontSizePoint
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
@@ -36,7 +36,8 @@ class AccountAllSet(QFrame):
         pass
 
     def setFonts(self):
-        font = RobotoRegular(16) or QFont("Arial", 16)
+        size = FontSizePoint
+        font = RobotoRegular(size.EXTRA) or QFont("Arial", size.EXTRA)
         for item in self.children():
             if not isinstance(item, QLayout):
                 item.setFont(font)
@@ -76,7 +77,8 @@ class AccountInitFailure(QFrame):
         pass
 
     def setFonts(self):
-        font = RobotoRegular(16) or QFont("Arial", 16)
+        size= FontSizePoint
+        font = RobotoRegular(size.EXTRA) or QFont("Arial", size.EXTRA)
         for item in self.children():
             if not isinstance(item, QLayout):
                 item.setFont(font)

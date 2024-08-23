@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QMainWindow, QLineEdit, QMessageBox, QLayout
 from utils.paths import getFrozenPath, getFileSystemPath
 from utils.envHandler import getenv
 from utils.appHelper import setRelativeToMainWindow, showWindow
-from app.windows.Fonts import RobotoRegular
+from app.config.fonts import RobotoRegular, FontSizePoint
 from app.windows.NewAccountSetup import NewAccountSetup
 
 from databases.mongodb.UsersAuth import UserCredentials, userAuthInstance
@@ -135,7 +135,8 @@ class SignInFrame(QMainWindow):
         self.hide()
     
     def setFonts(self):
-        font = RobotoRegular(9) or QFont("Arial", 9)
+        size = FontSizePoint
+        font = RobotoRegular(size.SMALL) or QFont("Arial", size.SMALL)
         for obj in [self.emailEdit, self.passwordEdit, self.loginButton, self.createNewAccount]:
             if not isinstance(obj, QLayout):
                 obj.setFont(font)

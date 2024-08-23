@@ -193,3 +193,12 @@ class Exo2Bold(Font):
     def __init__(self, pointSize):
         super().__init__(loadFont(exo2Bold), pointSize)
 
+
+class FontSizePoint:
+    """sets fonts size constants reltive to screen resolution."""
+    EXTRA = 16
+    BIGGER = 14
+    BIG = 12
+    MEDIUM = 10
+    SMALL = 9
+    TINY = 8

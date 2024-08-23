@@ -10,12 +10,13 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame, QTextEdit
 from utils.databases import mongoGet
 from app.windows.Spinner import Spinner
 from app.handlers.Patterns import Index, Symbol
-from app.windows.Fonts import RobotoSemiBold, RobotoRegular
+from app.config.fonts import RobotoSemiBold, RobotoRegular, FontSizePoint
 from app.windows.Styles import chatScrollBarStyle
 from utils.logs import Logger
 from utils.appHelper import clearLayout, adjustForDPI
 from utils.workers import spinnerWork
 from utils.paths import getFrozenPath
+from app.config.renderer import ViewController
 
 class AssetFocusItem(QFrame):
     def __init__(self, parent=None):
@@ -47,7 +48,8 @@ class AssetFocusItem(QFrame):
         )
 
     def setFonts(self):
-        font = RobotoSemiBold(12) or QFont("Arial", 12)
+        size = FontSizePoint
+        font = RobotoSemiBold(size.BIG) or QFont("Arial", size.BIG)
         self.name.setFont(font)
         self.value.setFont(font)
 
@@ -77,8 +79,8 @@ class AssetFocus(QWidget):
     def setupLayout(self):
         self.scrollWidget = QWidget()
         self.scrollLayout = QVBoxLayout(self.scrollWidget)
-        self.scrollLayout.setContentsMargins(10, 10, 10, 10)
-        self.scrollLayout.setSpacing(10)
+        self.scrollLayout.setContentsMargins(*ViewController.SCROLL_MARGINS)
+        self.scrollLayout.setSpacing(ViewController.DEFAULT_SPACING)
         self.scrollWidget.setLayout(self.scrollLayout)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setWidget(self.scrollWidget)
@@ -129,6 +131,7 @@ class AssetFocus(QWidget):
         return subTarget if subTarget else []
 
     def populateResult(self, result):
+        size = FontSizePoint
         clearLayout(self.scrollLayout)
         if result is None or len(result) == 0:
             self.scrollLayout.addWidget(QLabel("No data is available."))
@@ -136,7 +139,7 @@ class AssetFocus(QWidget):
         item.clear()
         item.setStyleSheet(f"color: rgb(255, 255, 255)")
         item.setFont(
-            RobotoRegular(10) or QFont("Arial", 10)
+            RobotoRegular(size.MEDIUM) or QFont("Arial", size.MEDIUM)
         )
         item.setReadOnly(True)
         item.setPlainText(json.dumps(result, indent=4, separators=(',\n', ': ')))

@@ -20,12 +20,13 @@ from databases.mongodb.JanineDB import JanineMongoDatabase
 from utils.fileHelper import getAudioLength
 from utils.envHandler import getenv
 from utils.paths import rawPathStr, getFrozenPath, getFileSystemPath
-from app.windows.Fonts import  QuicksandBold, Exo2Medium
+from app.config.fonts import  QuicksandBold, Exo2Medium, FontSizePoint
 from app.windows.WaiterFrame import Waiter
 from app.windows.ChatTitleFrame import ChatTitleSelector, ChatTitle
 from utils.appHelper import setRelativeToMainWindow, clearLayout, adjustForDPI
 from utils.time import now
 from app.windows.AttachmentFrame import Attachment
+from app.config.renderer import ViewController
 
 HISTORY_LIMIT = 100
 
@@ -88,8 +89,9 @@ class JanineChat(QFrame):
             obj.setFont(font)
 
     def setFonts(self):
-        regularFont = QuicksandBold(10) or QFont("Arial", 10)
-        discreteFont = Exo2Medium(9) or QFont("Arial", 9)
+        size = FontSizePoint
+        regularFont = QuicksandBold(size.MEDIUM) or QFont("Arial", size.MEDIUM)
+        discreteFont = Exo2Medium(size.SMALL) or QFont("Arial", size.SMALL)
         self.setFontOnObjects(regularFont, [self.newChat, self.message, self.caution])
         self.setFontOnObjects(discreteFont, [self.caution])
 
@@ -104,8 +106,8 @@ class JanineChat(QFrame):
         self.setLayout(self.mainLayout)
 
         self.chatLayout = QVBoxLayout()
-        self.chatLayout.setSpacing(10)
-        self.chatLayout.setContentsMargins(10, 10, 10, 10)
+        self.chatLayout.setSpacing(ViewController.DEFAULT_SPACING)
+        self.chatLayout.setContentsMargins(*ViewController.SCROLL_MARGINS)
         self.chatLayout.setAlignment(Qt.AlignTop)
         self.chatWidget.setLayout(self.chatLayout)
         self.chatScrollArea.verticalScrollBar().setStyleSheet(scrollBarStyle)  
@@ -116,8 +118,8 @@ class JanineChat(QFrame):
         scrollBar.setValue(scrollBar.maximum())
 
         self.historyLayout = QVBoxLayout()
-        self.historyLayout.setSpacing(10)
-        self.historyLayout.setContentsMargins(10, 10, 10, 10)
+        self.historyLayout.setSpacing(ViewController.DEFAULT_SPACING)
+        self.historyLayout.setContentsMargins(*ViewController.SCROLL_MARGINS)
         self.historyLayout.setAlignment(Qt.AlignTop)
         self.historyWidget.setLayout(self.historyLayout)
         self.historyScrollArea.verticalScrollBar().setStyleSheet(scrollBarStyle)

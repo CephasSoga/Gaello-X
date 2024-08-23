@@ -1,5 +1,6 @@
 import sys
 import webbrowser
+from typing import Tuple
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QLabel
@@ -167,7 +168,7 @@ def getScreenSize():
     h = screensize[1]
     return w, h
 
-def adjustForDPI(widget: QWidget):
+def adjustForDPI(widget: QWidget) -> Tuple[int, int]:
     """
     Adjusts the window size of the provided QWidget based on the system's DPI settings and screen resolution.
 
@@ -178,11 +179,15 @@ def adjustForDPI(widget: QWidget):
         None
     """
     _BASE_W = 1920
+    _SUPPORTED_RES_WIDTHS = [_BASE_W, 1366, 1600]
     _BASE_H = 1080
+    _SUPPORTED_RES_HEIGHTS = [_BASE_H, 768, 900]
     _BASE_DPI = 144
+    _SUPPORTED_DPI_SETTINGS = [_BASE_DPI, 96, 192]
     _BASE_SCALE = 1.5
-    _CURRENT_W = getScreenSize()[0]
-    _CURRENT_H = getScreenSize()[1]
+    _SUPPORTED_SCALES = [_BASE_SCALE, 1.0, 1.2, 1.25, 1.4, 2.0]
+    _CURRENT_W: int = getScreenSize()[0]
+    _CURRENT_H: int = getScreenSize()[1]
 
     w_resize_factor = _CURRENT_W / _BASE_W
     h_resize_factor = _CURRENT_H / _BASE_H
@@ -191,7 +196,7 @@ def adjustForDPI(widget: QWidget):
     dpi = QGuiApplication.primaryScreen().logicalDotsPerInch()
     scalingFactor = dpi / 96.0  # Default DPI
     
-    if (dpi != _BASE_DPI) or (scalingFactor != _BASE_SCALE) or (_CURRENT_H != _BASE_H) or  (_CURRENT_W != _BASE_W):
+    if ( dpi not in _SUPPORTED_DPI_SETTINGS) or (scalingFactor not in _SUPPORTED_SCALES) or (_CURRENT_H not in _SUPPORTED_RES_HEIGHTS) or (_CURRENT_W not in _SUPPORTED_RES_WIDTHS):
         w_factor = scalingFactor * w_resize_factor
         h_factor = scalingFactor * h_resize_factor
         for child in widget.children():
@@ -214,4 +219,4 @@ def adjustForDPI(widget: QWidget):
             int(widget.width() * w_factor), 
             int(widget.height() * h_factor)
         )
-    print(f"Runtime with following spec: - DPI: {dpi}, - Scale: {scalingFactor}, - Res: {_CURRENT_W}x{_CURRENT_H}")
+    return _CURRENT_W, _CURRENT_H

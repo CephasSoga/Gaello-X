@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QEvent
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFrame, QMessageBox
 
-from app.windows.Fonts import RobotoBold
+from app.config.fonts import RobotoBold, FontSizePoint
 from app.windows.NewAccountOk import AccountAllSet, AccountInitFailure
 from utils.appHelper import setRelativeToMainWindow
 from utils.databases import mongoGet
@@ -61,7 +61,8 @@ class PaymentForm(QFrame):
 
 
     def setFonts(self):
-        font = RobotoBold(9) or QFont('Arial', 9)
+        size = FontSizePoint
+        font = RobotoBold(size.SMALL) or QFont('Arial', size.SMALL)
         for item in self.children():
             item.setFont(font)
 

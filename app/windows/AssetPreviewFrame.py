@@ -6,7 +6,7 @@ from PyQt5.QtGui import QIcon, QFont, QPixmap
 from PyQt5.QtCore import Qt, QSize, pyqtSignal
 from PyQt5.QtWidgets import QFrame
 
-from app.windows.Fonts import RobotoSemiBold
+from app.config.fonts import RobotoSemiBold, FontSizePoint
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
@@ -86,6 +86,7 @@ class AssetPreview(QFrame):
 
 
     def setFonts(self):
-        font = RobotoSemiBold(9) or QFont("Arial", 9)
+        size = FontSizePoint
+        font = RobotoSemiBold(size.SMALL) or QFont("Arial", size.SMALL)
         for obj in self.children():
             obj.setFont(font)

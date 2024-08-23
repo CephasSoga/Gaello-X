@@ -12,7 +12,7 @@ from app.windows.Types import *
 from utils.time import time_, date
 from utils.paths import getFrozenPath
 from app.windows.Styles import userMessageBackground, chatScrollBarStyle
-from app.windows.Fonts import RobotoRegular, Exo2Light
+from app.config.fonts import RobotoRegular, Exo2Light, FontSizePoint
 from utils.appHelper import adjustForDPI
 
 class ChatTextMessage(QFrame):
@@ -66,8 +66,9 @@ class ChatTextMessage(QFrame):
             obj.setFont(font)
 
     def setFonts(self):
-        regularFont = RobotoRegular(10) or QFont("Arial", 10)
-        tinyFont = Exo2Light(8) or QFont("Arial", 8)
+        size = FontSizePoint
+        regularFont = RobotoRegular(size.MEDIUM) or QFont("Arial", size.MEDIUM)
+        tinyFont = Exo2Light(size.TINY) or QFont("Arial", size.TINY)
         self.setFontOnObjects(regularFont, [self.text])
         self.setFontOnObjects(tinyFont, [self.originLabel, self.date, self.time])
 
@@ -130,7 +131,8 @@ class ChatVoiceMail(QFrame):
             obj.setFont(font)
 
     def setFonts(self):
-        tinyFont = Exo2Light(8) or QFont("Arial", 8)
+        size = FontSizePoint
+        tinyFont = Exo2Light(size.TINY) or QFont("Arial", size.TINY)
         self.setFontOnObjects(tinyFont, [self.originLabel, self.date, self.time])
     
     def setupLayout(self):
@@ -254,8 +256,9 @@ class ChatMultimedia(QWidget):
             obj.setFont(font)
 
     def setFonts(self):
-        regularFont = RobotoRegular(10) or QFont("Arial", 10)
-        tinyFont = Exo2Light(8) or QFont("Arial", 8)
+        size = FontSizePoint
+        regularFont = RobotoRegular(size.MEDIUM) or QFont("Arial", size.MEDIUM)
+        tinyFont = Exo2Light(size.TINY) or QFont("Arial", size.TINY)
         self.setFontOnObjects(regularFont, [self.textLabel])
         self.setFontOnObjects(tinyFont, [self.label, self.date, self.time])
 

@@ -13,10 +13,11 @@ from utils.databases import mongoGet
 from app.windows.Spinner import Spinner
 from app.handlers.Patterns import Index, Symbol
 from utils.workers import spinnerWork
-from app.windows.Fonts import RobotoRegular
+from app.config.fonts import RobotoRegular, FontSizePoint
 from app.windows.Styles import chatScrollBarStyle
 from utils.appHelper import clearLayout, adjustForDPI
 from utils.paths import getFrozenPath
+from app.config.renderer import ViewController
 
 
 class SingleFocus(QWidget):
@@ -50,8 +51,8 @@ class SingleFocus(QWidget):
     def setupLayout(self):
         self.scrollWidget = QWidget()
         self.scrollLayout = QVBoxLayout(self.scrollWidget)
-        self.scrollLayout.setContentsMargins(10, 10, 10, 10)
-        self.scrollLayout.setSpacing(10)
+        self.scrollLayout.setContentsMargins(*ViewController.SCROLL_MARGINS)
+        self.scrollLayout.setSpacing(ViewController.DEFAULT_SPACING)
         self.scrollWidget.setLayout(self.scrollLayout)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setWidget(self.scrollWidget)
@@ -88,6 +89,7 @@ class SingleFocus(QWidget):
         return super().eventFilter(obj, event)
 
     def populateResult(self, result):
+        size = FontSizePoint
         clearLayout(self.scrollLayout)
         if result is None or len(result) == 0:
             #Do somthing here later
@@ -96,7 +98,7 @@ class SingleFocus(QWidget):
         item.clear()
         item.setStyleSheet(f"color: rgb(255, 255, 255)")
         item.setFont(
-            RobotoRegular(10) or QFont ('Arial', 10)
+            RobotoRegular(size.MEDIUM) or QFont ('Arial', size.MEDIUM)
         )
         item.setReadOnly(True)
         try:

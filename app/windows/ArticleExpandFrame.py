@@ -6,7 +6,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFrame
 
-from app.windows.Fonts import *
+from app.config.fonts import RobotoRegular, RobotoSemiBold, Exo2Light, FontSizePoint
 from app.windows.Styles import chatScrollBarStyle
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
@@ -68,15 +68,16 @@ class ArticleExpand(QFrame):
         self.refTextEdit.setHtml(self.link)
     
     def setFonts(self):
-        font = RobotoRegular(10) or QFont("Arial", 10)
+        size = FontSizePoint
+        font = RobotoRegular(size.MEDIUM) or QFont("Arial", size.MEDIUM)
         for obj in [self.mainTextEdit]:
             obj.setFont(font)
 
-        titleFont = RobotoSemiBold(12) or QFont("Arial", 12)
+        titleFont = RobotoSemiBold(size.BIG) or QFont("Arial", size.BIG)
         if self.title:
             self.titleLabel.setFont(titleFont)
 
-        tinyFont = Exo2Light(9) or QFont("Arial", 9)
+        tinyFont = Exo2Light(size.SMALL) or QFont("Arial", size.SMALL)
         for obj in [self.authorLabel, self.sourceLabel, self.dateLabel, self.tagLabel]:
             obj.setFont(tinyFont)
 

@@ -5,7 +5,7 @@ from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QFrame
 
-from app.windows.Fonts import *
+from app.config.fonts import RobotoSemiBold, Exo2Light, FontSizePoint
 from app.windows.ArticleExpandFrame import ArticleExpand
 from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.paths import getFrozenPath
@@ -60,11 +60,12 @@ class ArticleItem(QFrame):
         self.sourceLabel.setText(self.source)
     
     def setFonts(self):
-        font = RobotoSemiBold(9) or QFont('Arial', 9)
+        size = FontSizePoint
+        font = RobotoSemiBold(size.SMALL) or QFont('Arial', size.SMALL)
         for obj in [self.titleLabel]:
             obj.setFont(font)
         
-        tinyFont = Exo2Light(9) or QFont("Arial", 9)
+        tinyFont = Exo2Light(size.SMALL) or QFont("Arial", size.SMALL)
         for obj in [self.authorLabel, self.sourceLabel]:
             obj.setFont(tinyFont)
 

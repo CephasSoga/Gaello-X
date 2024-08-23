@@ -14,6 +14,7 @@ from app.windows.BottomWidget import Bottom
 from utils.appHelper import stackOnCurrentWindow, setRelativeToMainWindow, isFrozen, adjustForDPI
 from utils.paths import constructPath, getFrozenPath, getFileSystemPath
 from utils.envHandler import getenv
+from app.config.renderer import ViewController
 
 class MainWindow(QMainWindow):
     finishedLoading = pyqtSignal()
@@ -29,10 +30,11 @@ class MainWindow(QMainWindow):
 
     def initUI(self):
         try:
-            adjustForDPI(self)
+            w, h = adjustForDPI(self)
+            print(f"Window size: {w} x {h}")
             self.setWFlags()
             self.setWIcon()
-            self.setLayout()
+            self.setLayout(w=w, h=h)
             self.connectSlots()
         finally:
             self.finishedLoading.emit()
@@ -44,7 +46,7 @@ class MainWindow(QMainWindow):
         iconPath = getFrozenPath(os.path.join("assets", "logo", "cube-log-big.png"))
         self.setWindowIcon(QIcon(iconPath))
 
-    def setLayout(self):
+    def setLayout(self, w: int, h: int):
         screenGeometry = QApplication.primaryScreen().availableGeometry()
         self.setGeometry(screenGeometry)
 
@@ -58,15 +60,14 @@ class MainWindow(QMainWindow):
         self.scrollWidget = QWidget()
         self.scrollWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.scrollLayout = QVBoxLayout(self.scrollWidget)
-        self.scrollLayout.setContentsMargins(0, 0, 0, 0)
-        self.scrollLayout.setSpacing(0)
+        self.scrollLayout.setContentsMargins(*ViewController.SCROLL_NO_MARGINS)
+        self.scrollLayout.setSpacing(ViewController.NO_SPACING)
         self.scrollWidget.setLayout(self.scrollLayout)
         self.scrollArea.setWidget(self.scrollWidget)
 
-        w, h = 1900, 1080
         self.header = Header(self)
         self.bottom = Bottom(self)
-        self.showMaximized()  # or self.showFullScreen()
+        #self.showMaximized()  # or self.showFullScreen()
         self.header.setMinimumSize(w, h)
         self.bottom.setMinimumSize(w, h)
 

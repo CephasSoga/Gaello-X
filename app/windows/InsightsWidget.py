@@ -4,11 +4,12 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QApplication, QGridLayout
 
-from app.windows.Fonts import RobotoRegular, MontserratRegular
+from app.config.fonts import RobotoRegular, MontserratRegular, FontSizePoint
 from app.windows.InsightItems import InsightItem
 from app.inferential.ExportInsights import insights
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
+from app.config.renderer import ViewController
 
 class JanineInsights(QWidget):
 
@@ -32,9 +33,9 @@ class JanineInsights(QWidget):
 
     def setupLayout(self):
         self.insightslayout = QGridLayout()
-        self.insightslayout.setContentsMargins(20, 20, 20, 20)
+        self.insightslayout.setContentsMargins(*ViewController.SCROLL_MARGINS)
         self.insightslayout.setAlignment(Qt.AlignTop)
-        self.insightslayout.setSpacing(10)
+        self.insightslayout.setSpacing(ViewController.DEFAULT_SPACING)
         self.widget = QWidget()
         self.widget.setLayout(self.insightslayout)
 
@@ -68,8 +69,9 @@ class JanineInsights(QWidget):
 
 
     def setFonts(self):
-        regularFont = RobotoRegular(10) or QFont("Arial", 10)
-        tinyFont = MontserratRegular(8) or QFont("Arial", 8)
+        size = FontSizePoint
+        regularFont = RobotoRegular(size.MEDIUM) or QFont("Arial", size.MEDIUM)
+        tinyFont = MontserratRegular(size.TINY) or QFont("Arial", size.TINY)
         self.filterLabel.setFont(regularFont)
         self.tuneLabel.setFont(regularFont)
         self.temperatureLabel.setFont(tinyFont)

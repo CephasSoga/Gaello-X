@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFrame, QLayout, QLineEdit, QMessageBox
 
-from app.windows.Fonts import RobotoRegular
+from app.config.fonts import RobotoRegular, FontSizePoint
 from app.windows.NewAccountPlan import NewAccountPlan
 from utils.appHelper import setRelativeToMainWindow, showWindow, adjustForDPI
 from utils.paths import getFrozenPath
@@ -197,7 +197,8 @@ class NewAccountSetup(QFrame):
         pass
 
     def setFonts(self):
-        font = RobotoRegular(9) or QFont("Arial", 9)
+        size = FontSizePoint
+        font = RobotoRegular(size.SMALL) or QFont("Arial", size.SMALL)
         for item in self.children():
             if not isinstance(item, QLayout):
                 item.setFont(font)

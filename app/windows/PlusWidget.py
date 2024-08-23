@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QFont
 from PyQt5 import uic
 
-from app.windows.Fonts import loadFont
+from app.config.fonts import RobotoRegular, FontSizePoint
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
@@ -33,12 +33,8 @@ class ProjectHome(QWidget):
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
     
     def setFonts(self):
-        fontFam = loadFont(r"rsrc/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf")
-        if fontFam:
-            font = QFont(fontFam)
-            font.setPointSize(14)
-        else:
-            font = QFont("Arial", 14)
+        size = FontSizePoint
+        font = RobotoRegular(size.BIGGER) or QFont("Arial", size.BIGGER)
         self.setFont(font)
         for item in self.children():
             item.setFont(font)

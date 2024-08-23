@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QFrame, QGridLayout, QWidget, QApplication
 from qasync import QEventLoop, asyncSlot
 
-from utils.asyncJobs import quickFetchBytes, quickFetchJson
+from utils.asyncJobs import quickFetchBytes, quickFetchJson,  asyncWrap
 from utils.databases import mongoGet
 from utils.graphics import chartWithSense
 from app.windows.ForexItemFrame import ForexItem
@@ -19,6 +19,9 @@ from app.windows.CommodityItemFrame import CommodityItem
 from app.windows.Styles import scrollBarStyle
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
+from app.config.scheduler import Schedule
+from app.config.balancer import BatchBalance
+from app.config.renderer import ViewController
 
 class ExploreMarket(QFrame):
     def __init__(self, parent=None):
@@ -53,7 +56,7 @@ class ExploreMarket(QFrame):
         self.commoditiesRawSize = 2
 
         self.initUI()
-        self.startLazyLoad(self.completeJobs)
+        QTimer.singleShot(Schedule.BATCH_MARKET_JOBS_DELAY, lambda: self.startLazyLoad(self.completeJobs))
         
     def initUI(self):
         adjustForDPI(self)
@@ -68,8 +71,8 @@ class ExploreMarket(QFrame):
         # Forex
         self.forexLayout = QGridLayout()
         self.forexLayout.setAlignment(Qt.AlignTop)
-        self.forexLayout.setContentsMargins(10, 10, 10, 10)
-        self.forexLayout.setSpacing(10)
+        self.forexLayout.setContentsMargins(*ViewController.SCROLL_MARGINS)
+        self.forexLayout.setSpacing(ViewController.DEFAULT_SPACING)
 
         self.forexWidget = QWidget()
         self.forexWidget.setLayout(self.forexLayout)
@@ -78,8 +81,8 @@ class ExploreMarket(QFrame):
         # Indices
         self.indicesLayout = QGridLayout()
         self.indicesLayout.setAlignment(Qt.AlignTop)
-        self.indicesLayout.setContentsMargins(10, 10, 10, 10)
-        self.indicesLayout.setSpacing(10)
+        self.indicesLayout.setContentsMargins(*ViewController.SCROLL_MARGINS)
+        self.indicesLayout.setSpacing(ViewController.DEFAULT_SPACING)
 
         self.indicesWidget = QWidget()
         self.indicesWidget.setLayout(self.indicesLayout)
@@ -88,8 +91,8 @@ class ExploreMarket(QFrame):
         # Cryptos
         self.cryptosLayout = QGridLayout()
         self.cryptosLayout.setAlignment(Qt.AlignTop)
-        self.cryptosLayout.setContentsMargins(10, 10, 10, 10)
-        self.cryptosLayout.setSpacing(10)
+        self.cryptosLayout.setContentsMargins(*ViewController.SCROLL_MARGINS)
+        self.cryptosLayout.setSpacing(ViewController.DEFAULT_SPACING)
 
         self.cryptosWidget = QWidget()
         self.cryptosWidget.setLayout(self.cryptosLayout)
@@ -98,8 +101,8 @@ class ExploreMarket(QFrame):
         # Commodities
         self.commoditiesLayout = QGridLayout()
         self.commoditiesLayout.setAlignment(Qt.AlignTop)
-        self.commoditiesLayout.setContentsMargins(10, 10, 10, 10)
-        self.commoditiesLayout.setSpacing(10)
+        self.commoditiesLayout.setContentsMargins(*ViewController.SCROLL_MARGINS)
+        self.commoditiesLayout.setSpacing(ViewController.DEFAULT_SPACING)
 
         self.commoditiesWidget = QWidget()
         self.commoditiesWidget.setLayout(self.commoditiesLayout)
@@ -121,10 +124,10 @@ class ExploreMarket(QFrame):
     def connectSlots(self):
         self.close_.clicked.connect(self.close)
 
-    def startLazyLoad(self, execFunc: Callable, timeout: int = 100, *args, **kwargs):
+    def startLazyLoad(self, execFunc: Callable, timeout: int = BatchBalance.RELOADING_MSEC, *args, **kwargs):
         self.lazyLoadTimer = QTimer()
         self.lazyLoadTimer.singleShot(timeout, lambda: execFunc(*args, **kwargs))
-        self.BatchSize = 5
+        self.BatchSize = BatchBalance.MARKET_REMOTE_LOADING_SIZE
 
     def completeJobs(self):
         self.loadNextBatch(self.forexList, self.forexCurrentIndex, self.forexBatchSize, self.forexRawSize, self.forexTask)
@@ -166,7 +169,8 @@ class ExploreMarket(QFrame):
         flag1 = await self.getFlagPixmap(flag1Url)
         flag2 = await self.getFlagPixmap(flag2Url)
 
-        forexData = mongoGet(collection='forex', name=forexPair)
+        asyncMongoGet = asyncWrap(mongoGet)
+        forexData = await asyncMongoGet(collection='forex', name=forexPair)
         if not forexData:
             return
 
@@ -207,7 +211,8 @@ class ExploreMarket(QFrame):
     async def indexTask(self, indexName, row, col):
         await asyncio.sleep(1)
 
-        indexData = mongoGet(collection='indices', name=indexName)
+        asyncMongoGet = asyncWrap(mongoGet)
+        indexData = await asyncMongoGet(collection='indices', name=indexName)
 
         if not indexData:
             return
@@ -234,7 +239,8 @@ class ExploreMarket(QFrame):
 
     @asyncSlot()
     async def cryptoTask(self, cryptoSymbol: str, row, col):
-        cryptoData = mongoGet(collection="crypto", symbol=cryptoSymbol)
+        asyncMongoGet = asyncWrap(mongoGet)
+        cryptoData = await asyncMongoGet(collection="crypto", symbol=cryptoSymbol)
 
         if not cryptoData:
             return
@@ -297,7 +303,8 @@ class ExploreMarket(QFrame):
 
     @asyncSlot()
     async def commodityTask(self, commoditySymbol, row, col):
-        comData = mongoGet(collection="commodities", symbol=commoditySymbol)
+        asyncMongoGet = asyncWrap(mongoGet)
+        comData = await asyncMongoGet(collection="commodities", symbol=commoditySymbol)
 
         if not comData:
             return

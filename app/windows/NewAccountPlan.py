@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QFrame, QMessageBox
 from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.databases import mongoUpdate
 from utils.paths import getFrozenPath
-from app.windows.Fonts import RobotoMedium, RobotoBold, QuicksandMedium, RobotoLight
+from app.config.fonts import RobotoMedium, RobotoBold, QuicksandMedium, RobotoLight, FontSizePoint
 from app.windows.PaymentForm import PaymentForm
 from app.windows.NewAccountOk import AccountAllSet,  AccountInitFailure
 from models.reader.cache import cached_credentials
@@ -109,20 +109,21 @@ class NewAccountPlan(QFrame):
             self.hide()
 
     def setFonts(self):
-        boldFont = RobotoBold(9) or QFont("Arial", 9)
+        size = FontSizePoint
+        boldFont = RobotoBold(size.SMALL) or QFont("Arial", size.SMALL)
         for titleItem in [self.FreeTierTitle, self.StandardTierTitle, self.AdvancedTierTitle]:
             titleItem.setFont(boldFont)
 
-        mediumFont = QuicksandMedium(9) or QFont("Arial", 9)
+        mediumFont = QuicksandMedium(size.SMALL) or QFont("Arial", size.SMALL)
         for priceItem in [self.FreeTierPrice, self.StandardTierPrice, self.AdvancedTierPrice]:
             priceItem.setFont(mediumFont)
 
-        lightFont = RobotoLight(9) or QFont("Arial", 9)
+        lightFont = RobotoLight(size.SMALL) or QFont("Arial", size.SMALL)
         for label in [self.freelabel1, self.freelabel2, self.freelabel3, self.stdlabel1, self.stdlabel2, self.stdlabel3,
                       self.advlabel1, self.advlabel2]:
             label.setFont(lightFont)
 
-        buttonFont = RobotoMedium(9) or QFont("Arial", 9)
+        buttonFont = RobotoMedium(size.SMALL) or QFont("Arial", size.SMALL)
         for button in [self.freeTierButton, self.standardTierButton, self.advancedTierButton]:
             button.setFont(buttonFont)
 

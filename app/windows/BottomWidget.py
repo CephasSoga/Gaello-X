@@ -1,4 +1,5 @@
 import os
+import asyncio
 
 from PyQt5  import uic
 from PyQt5.QtCore import Qt, QUrl, QEvent, QTimer
@@ -7,14 +8,15 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import QWidget, QMainWindow, QVBoxLayout, QSizePolicy, QFrame
 
-from app.windows.AuthHandler import  handleAuth
+from app.handlers.AuthHandler import  handleAuth
 from utils.appHelper import *
 from utils.paths import resourcePath
-from app.windows.Fonts import RobotoRegular
+from app.config.fonts import RobotoRegular, FontSizePoint
 from app.windows.InsightsWidget import JanineInsights
 from app.windows.CommunityWidget import JanineCommunity
 from app.windows.PlusWidget import ProjectHome
 from utils.paths import getFrozenPath
+from app.config.renderer import ViewController
 
 # ffmpeg binaries at assets\binaries\w64\ffmpeg\bin
 ffmpeg_path = resourcePath(os.path.join('assets', 'binaries', 'w64', 'ffmpeg', 'bin'))
@@ -30,7 +32,7 @@ class PressInsigthsFrame(QFrame):
     def openInsights(self):
         if not self.insightsWindow:
             self.insightsWindow = JanineInsights(self.parent())
-            handleAuth(2, stackOnCurrentWindow, self.insightsWindow)
+            asyncio.ensure_future(handleAuth(2, stackOnCurrentWindow, self.insightsWindow))
         else:
             self.insightsWindow = None
 
@@ -51,7 +53,7 @@ class PressCommunityFrame(QFrame):
     def openCommunity(self):
         if not self.communityWindow:
             self.communityWindow = JanineCommunity(self.parent())
-            handleAuth(1, stackOnCurrentWindow, self.communityWindow)
+            asyncio.ensure_future(handleAuth(1, stackOnCurrentWindow, self.communityWindow))
         else:
             self.communityWindow = None
 
@@ -107,7 +109,8 @@ class Bottom(QMainWindow):
         self.installEventFilters()
 
     def setFonts(self):
-        font = RobotoRegular(10) or QFont("Arial", 10)
+        size = FontSizePoint
+        font = RobotoRegular(size.MEDIUM) or QFont("Arial", size.MEDIUM)
         self.exploreProject.setFont(font)
         self.kickstart.setFont(font)
         self.insights.setFont(font)
@@ -121,7 +124,7 @@ class Bottom(QMainWindow):
 
     def createMediaPlayer(self, path, widget: QWidget):
         layout = QVBoxLayout(widget)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(*ViewController.SCROLL_NO_MARGINS)
 
         videoWidget = QVideoWidget(widget)
         videoWidget.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)

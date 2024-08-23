@@ -4,7 +4,7 @@ from PyQt5 import  uic
 from PyQt5.QtCore import QEvent, Qt
 from PyQt5.QtWidgets import QFrame
 
-from app.windows.AuthHandler import read_user_id
+from app.handlers.AuthHandler import read_user_id
 from app.windows.NewAccountPlan import NewAccountPlan
 from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.paths import getFrozenPath

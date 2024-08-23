@@ -8,16 +8,19 @@ from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QFrame, QWidget, QGridLayout, QApplication
 from qasync import QEventLoop, asyncSlot
 
-from app.windows.AuthHandler import handleAuth
+from app.handlers.AuthHandler import handleAuth
 from app.handlers.ShortLiveSeries import Series
 from app.handlers.ExportAssets import symbolList
 from app.windows.AssetPreviewFrame import AssetPreview
 from app.windows.AssetFocusFrame import AssetFocus
 from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.databases import mongoGet
-from utils.asyncJobs import quickFetchBytes
+from utils.asyncJobs import quickFetchBytes, asyncWrap
 from utils.graphics import chartWithSense
 from utils.paths import getFrozenPath
+from app.config.scheduler import Schedule
+from app.config.balancer import BatchBalance
+from app.config.renderer import ViewController
 
 
 class ExploreAsset(QFrame):
@@ -37,9 +40,10 @@ class ExploreAsset(QFrame):
 
         self.baseImgesUrl = "https://financialmodelingprep.com/image-stock/"
 
-        self.rowLength = 4
+        self.rowLength = ViewController.MAX_DISPLAY_ROWS
 
         self.initUI()
+        QTimer.singleShot(Schedule.BATCH_ASSETS_JOBS_DELAY, self.startLazyLoad)
 
     def initUI(self):
         adjustForDPI(self)
@@ -56,24 +60,23 @@ class ExploreAsset(QFrame):
 
     def setupLayout(self):
         self.scrollLayout = QGridLayout()
-        self.scrollLayout.setContentsMargins(10, 10, 10, 10)
+        self.scrollLayout.setContentsMargins(*ViewController.SCROLL_MARGINS)
         self.scrollLayout.setAlignment(Qt.AlignTop)
-        self.scrollLayout.setSpacing(10)
+        self.scrollLayout.setSpacing(ViewController.DEFAULT_SPACING)
 
         self.scrollWidget = QWidget()
         self.scrollWidget.setLayout(self.scrollLayout)
         self.searchScroll.setWidget(self.scrollWidget)
 
-        self.startLazyLoad()
 
     def startLazyLoad(self):
         self.lazyLoadTimer = QTimer()
         self.lazyLoadTimer.timeout.connect(self.loadNextBatch)
-        self.lazyLoadTimer.start(1000)  # Load next batch every 100 ms
+        self.lazyLoadTimer.start(BatchBalance.RELOADING_MSEC)  # Load next batch every ... ms
 
         #self.lazyLoadTimer.singleShot(1000, self.loadNextBatch)
 
-        self.batchSize = 5
+        self.batchSize = BatchBalance.ASSET_REMOTE_LOADING_SIZE
         self.currentIndex = 0
 
     def loadNextBatch(self):
@@ -97,7 +100,8 @@ class ExploreAsset(QFrame):
     @asyncSlot()
     async def task(self, symbol, row, col):
         symbol:str = symbol.symbol
-        data = mongoGet(collection="ticker", symbol=symbol)
+        asyncMongoGet = asyncWrap(mongoGet)
+        data = await asyncMongoGet(collection="ticker", symbol=symbol)
         if not data:
             print(f'{symbol} Not Found.')
             return
@@ -130,7 +134,7 @@ class ExploreAsset(QFrame):
         imagePixmap = await self.getTickerPixmap(imageUrl)
 
         item = AssetPreview(symbol, name, currentPrice, growth, imagePixmap, chartPixmap, self)
-        item.clicked.connect(lambda: handleAuth(2, self.expand, item, symbol))
+        item.clicked.connect(lambda: asyncio.ensure_future(handleAuth(2, self.expand, item, symbol)))
         self.scrollLayout.addWidget(item, row, col)
         self.assetPreviews.append(item)
 

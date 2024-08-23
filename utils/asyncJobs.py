@@ -1,7 +1,8 @@
 import asyncio
 import aiohttp
-
+from functools import wraps, partial
 from typing import Dict
+
 from utils.logs import Logger
 
 async def async_generate(arg):
@@ -74,3 +75,44 @@ async def quickFetchJson(target: str, params: Dict = None, headers: Dict = None,
         if logger:
             logger.log('info', f"An error occurred while fetching data with params <{params}>", e)
         return None
+
+def asyncWrap(func):
+    """
+    Wraps a synchronous function into an asynchronous one using `asyncio.run_in_executor`.
+
+    Args:
+        func (callable): The synchronous function to wrap.
+
+    Returns:
+        callable: The wrapped asynchronous function.
+
+    Keyword Args:
+        loop (asyncio.AbstractEventLoop, optional): The event loop to use. Defaults to `asyncio.get_event_loop()`.
+        executor (concurrent.futures.Executor, optional): The executor to use. Defaults to `None`.
+
+    Example:
+    >>> import time
+    >>> async_sleep = asyncWrap(time.sleep)
+
+    >>> async def count(*args, **kwargs):
+    >>>    print("func start")
+    >>>    await async_sleep(1)
+    >>>    print(args, kwargs)
+    >>>    print("func end")
+    >>>    return True
+
+
+    >>> async def main():
+    >>>     r = await count(1, 2, 3)
+    >>>     print("res: ", r)
+
+    >>>  "res":  True
+    """
+    @wraps(func)
+    async def run(*args, loop=None, executor=None, **kwargs):
+        if loop is None:
+            loop = asyncio.get_event_loop()
+        pfunc = partial(func, *args, **kwargs)
+        return await loop.run_in_executor(executor, pfunc)
+    return run
+

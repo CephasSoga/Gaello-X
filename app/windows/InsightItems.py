@@ -7,7 +7,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFrame
 
-from app.windows.Fonts import QuicksandBold, QuicksandRegular
+from app.config.fonts import QuicksandBold, QuicksandRegular, FontSizePoint
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
@@ -46,8 +46,9 @@ class InsightItem(QFrame):
         self.insightPreview.setText(self.text)
 
     def setFonts(self):
-        boldFont = QuicksandBold(12) or QFont("Arial", 12)
-        regularFont = QuicksandRegular(10) or QFont("Arial", 10)
+        size = FontSizePoint
+        boldFont = QuicksandBold(size.BIG) or QFont("Arial", size.BIG)
+        regularFont = QuicksandRegular(size.MEDIUM) or QFont("Arial", size.MEDIUM)
         self.insightTitle.setFont(boldFont)
         self.insightPreview.setFont(regularFont)
 

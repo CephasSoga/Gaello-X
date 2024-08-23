@@ -96,7 +96,7 @@ def exec_all():
     A function that executes both the API and client components in a try-finally block.
     """
     try:
-        system_check()
+        system_check(resolution_check_enabled=False)
     except SystemExit:
         return
     except Exception:

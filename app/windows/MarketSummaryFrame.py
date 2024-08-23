@@ -15,9 +15,10 @@ from app.windows.ArticleItemFrame import ArticleItem
 from app.windows.Outliners import MarketOutliner, Outline, OutlineTitle
 from app.handlers.ExportAssets import IndexList
 from utils.databases import mongoGet
-from utils.asyncJobs import quickFetchBytes
+from utils.asyncJobs import quickFetchBytes, asyncWrap
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
+from app.config.renderer import ViewController
 
 class MarketSummary(QFrame):
     dataFetched = pyqtSignal(str, list)
@@ -52,8 +53,8 @@ class MarketSummary(QFrame):
     def setupLayout(self):
         self.gridScrollLayout = QGridLayout()
         self.gridScrollLayout.setAlignment(Qt.AlignTop)
-        self.gridScrollLayout.setSpacing(10)
-        self.gridScrollLayout.setContentsMargins(10, 10, 10, 10)
+        self.gridScrollLayout.setSpacing(ViewController.DEFAULT_SPACING)
+        self.gridScrollLayout.setContentsMargins(*ViewController.SCROLL_MARGINS)
         self.focusScroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.focusScroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.gridScrollWidget = QWidget()
@@ -62,8 +63,8 @@ class MarketSummary(QFrame):
 
         self.vboxScrollLayout = QVBoxLayout()
         self.vboxScrollLayout.setAlignment(Qt.AlignTop)
-        self.vboxScrollLayout.setSpacing(10)
-        self.vboxScrollLayout.setContentsMargins(10, 10, 10, 10)
+        self.vboxScrollLayout.setSpacing(ViewController.DEFAULT_SPACING)
+        self.vboxScrollLayout.setContentsMargins(*ViewController.SCROLL_MARGINS)
         self.outlineScroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.outlineScroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.outlineScroll.setAlignment(Qt.AlignTop)
@@ -205,7 +206,8 @@ class MarketSummary(QFrame):
         await self.sectorPerformances()
 
     async def setFocus(self):
-        articles: List[Dict] = mongoGet(collection='articles',limit=10)
+        asyncMomgoGet = asyncWrap(mongoGet)
+        articles: List[Dict] = await asyncMomgoGet(collection='articles',limit=10)
 
         for pos, article in enumerate(articles):
             title = article.get('title', '')

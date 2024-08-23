@@ -1,4 +1,5 @@
 import os
+import asyncio
 
 from PyQt5 import uic
 from PyQt5.QtCore import QEvent, QTimer
@@ -12,13 +13,13 @@ from app.windows.MarketSummaryFrame import MarketSummary
 from app.windows.ExploreAssetsFrame import ExploreAsset
 from app.windows.ExploreMarketFrame import ExploreMarket
 
-from app.windows.AuthHandler import  handleAuth
+from app.handlers.AuthHandler import  handleAuth
 from app.windows.WebEngine import DocWebEngineView
 from app.windows.LoginFrame import SignInFrame
 from app.windows.NotificationsFrame import Notifications
 from app.windows.HelpFrame import Help
 from app.windows.MenuFrame import Menu
-from app.windows.Fonts import *
+from app.config.fonts import QuicksandBold, RobotoBold, RobotoRegular, FontSizePoint
 from utils.paths import getFrozenPath
 
 class PressChatFrame(QFrame):
@@ -31,7 +32,7 @@ class PressChatFrame(QFrame):
     def openChat(self):
         if not self.janineWindow:
             self.janineWindow = JanineChat(self.parent())
-            handleAuth(1, stackOnCurrentWindow, self.janineWindow)
+            asyncio.ensure_future(handleAuth(1, stackOnCurrentWindow, self.janineWindow))
         else:
             self.janineWindow = None
 
@@ -51,7 +52,7 @@ class PressExploreFrame(QFrame):
     def openExploreArea(self):
         if not self.summaryWindow:
             self.summaryWindow = MarketSummary(self.parent())
-            handleAuth(1, stackOnCurrentWindow, self.summaryWindow)
+            asyncio.ensure_future(handleAuth(1, stackOnCurrentWindow, self.summaryWindow))
         else:
             self.summaryWindow = None
 
@@ -85,8 +86,9 @@ class Header(QMainWindow):
         self.installEventFilters()
 
     def setFonts(self):
-        labelFont = RobotoRegular(10) or QFont('Arial', 10)
-        titleFont = RobotoBold(11) or QFont('Arial', 11)
+        size = FontSizePoint
+        labelFont = RobotoRegular(size.MEDIUM) or QFont('Arial', size.MEDIUM)
+        titleFont = RobotoBold(size.BIG) or QFont('Arial', size.BIG)
 
         self.exploreForexLabel.setFont(labelFont)
         self.exploreStocksLabel.setFont(labelFont)
@@ -94,7 +96,7 @@ class Header(QMainWindow):
         self.exploreForexTitle.setFont(titleFont)
         self.exploreStocksTitle.setFont(titleFont)
 
-        tinyFont = QuicksandBold(9) or QFont('Arial', 9)
+        tinyFont = QuicksandBold(size.TINY) or QFont('Arial', size.TINY)
         self.chat_p.setFont(tinyFont)
         self.explore_p.setFont(tinyFont)
 
@@ -118,13 +120,13 @@ class Header(QMainWindow):
         assets = ExploreAsset(self)
         assets.hide()
         self.assetButton.clicked.connect(
-            lambda: handleAuth(1, stackOnCurrentWindow, assets)
+            lambda: asyncio.ensure_future(handleAuth(1, stackOnCurrentWindow, assets))
         )
 
         market = ExploreMarket(self)
         market.hide()
         self.marketButton.clicked.connect(
-            lambda: handleAuth(1, stackOnCurrentWindow, market)
+            lambda: asyncio.ensure_future(handleAuth(1, stackOnCurrentWindow, market))
         )
 
         self.docWebEngineView = DocWebEngineView()

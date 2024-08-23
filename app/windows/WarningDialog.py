@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QDialog
 
-from app.windows.Fonts import RobotoBold
+from app.config.fonts import RobotoBold, FontSizePoint
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
@@ -43,6 +43,7 @@ class Warning(QDialog):
 
 
     def setFonts(self):
-        font = RobotoBold(9) or QFont("Arial", 9)
+        size = FontSizePoint
+        font = RobotoBold(size.SMALL) or QFont("Arial", size.SMALL)
         for item in self.children():
             item.setFont(font)
