@@ -1,13 +1,17 @@
 import os
+import time
+from pathlib import Path
 
 from PyQt5 import  uic
 from PyQt5.QtCore import QEvent, Qt
-from PyQt5.QtWidgets import QFrame
+from PyQt5.QtWidgets import QFrame, QMessageBox
 
-from app.handlers.AuthHandler import read_user_id
+from app.handlers.AuthHandler import sync_read_user_cred_file
 from app.windows.NewAccountPlan import NewAccountPlan
 from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.paths import getFrozenPath
+from utils.paths import getFrozenPath, getFileSystemPath
+from utils.envHandler import getenv
 
 class Menu(QFrame):
     def __init__(self, parent=None):
@@ -53,14 +57,35 @@ class AccountMenu(QFrame):
         return super().eventFilter(obj, event)
     
     def setContents(self):
-        id = read_user_id()
+        id = sync_read_user_cred_file().get("id", None)
         if id:
             self.idLabel.setText(f"Account ID: {id}")
             self.idLabel.setAlignment(Qt.AlignCenter)
 
     def connectSlots(self):
+        self.logoutButton.clicked.connect(self.logout)
         self.changePlanButton.clicked.connect(self.spawnAccountPlan)
         self.settingsButton.clicked.connect(self.spawnSettings)
+
+    def logout(self):
+        pathOnSystem = os.path.join(
+            getenv('APP_BASE_PATH'), 'credentilas', 'credentials.json'
+        )
+        targetFile = Path(getFileSystemPath(pathOnSystem))
+
+        if targetFile.exists():
+            try:
+                targetFile.unlink()
+            except Exception:
+                try: 
+                    os.remove(targetFile)
+                except Exception:
+                    QMessageBox.critical(self, "Error", "Failed to delete credentials. Please try again later.")
+
+            QMessageBox.information(self, "Logged Out", "You have been logged out.\nOptionally restart the app to make the logout effective.")
+            _delayAfterLogout = 0.5
+            time.sleep(_delayAfterLogout) # sleep to make sure operation was completed
+
 
     def spawnAccountPlan(self):
         parent = self.parent() # Stands for TopWidget widget
