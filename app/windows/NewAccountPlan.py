@@ -13,7 +13,7 @@ from utils.paths import getFrozenPath
 from app.config.fonts import RobotoMedium, RobotoBold, QuicksandMedium, RobotoLight, FontSizePoint
 from app.windows.PaymentForm import PaymentForm
 from app.windows.NewAccountOk import AccountAllSet,  AccountInitFailure
-from models.reader.cache import cached_credentials
+from app.handlers.AuthHandler import sync_read_user_cred_file
 
 
 class NewAccountPlan(QFrame):
@@ -48,10 +48,10 @@ class NewAccountPlan(QFrame):
         self.advancedTierButton.clicked.connect(self.submitAdvancedTier)
 
     def getEmail(self):
-        email: str = cached_credentials.get("email", "")
-        if not self.email:
+        email: str = sync_read_user_cred_file().get("email", "")
+        if not email:
             QMessageBox.warning(
-                self, 
+                None, 
                 "Unable to find user credentials", 
                 "Credentials Json file might be missing or corrupted. Please, try again."
             )
@@ -79,7 +79,7 @@ class NewAccountPlan(QFrame):
                 setRelativeToMainWindow(paymentFailed, parent, 'center')
                 self.close()
         else:
-            QMessageBox.warning(self, "Missing Credentials", "Close this App and retry creating an account.")
+            QMessageBox.warning(None, "Missing Credentials", "Close this App and retry creating an account.")
         
 
     def submitStandardTier(self):
@@ -131,6 +131,7 @@ class NewAccountPlan(QFrame):
         if event.type() == QEvent.MouseButtonPress:
             if not self.geometry().contains(event.globalPos()):
                 self.close()
+                return True
         return super().eventFilter(obj, event)
     
 if __name__ == "__main__":

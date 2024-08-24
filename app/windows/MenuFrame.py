@@ -6,9 +6,10 @@ from PyQt5 import  uic
 from PyQt5.QtCore import QEvent, Qt
 from PyQt5.QtWidgets import QFrame, QMessageBox
 
+from app.windows.LoginFrame import SignInFrame
 from app.handlers.AuthHandler import sync_read_user_cred_file
 from app.windows.NewAccountPlan import NewAccountPlan
-from utils.appHelper import setRelativeToMainWindow, adjustForDPI
+from utils.appHelper import setRelativeToMainWindow, adjustForDPI, showWindow
 from utils.paths import getFrozenPath
 from utils.paths import getFrozenPath, getFileSystemPath
 from utils.envHandler import getenv
@@ -57,11 +58,15 @@ class AccountMenu(QFrame):
         return super().eventFilter(obj, event)
     
     def setContents(self):
-        id = sync_read_user_cred_file().get("id", None)
-        if id:
-            self.idLabel.setText(f"Account ID: {id}")
-            self.idLabel.setAlignment(Qt.AlignCenter)
-
+        try:
+            id = sync_read_user_cred_file().get("id", None)
+            if id:
+                self.idLabel.setText(f"Account ID: {id}")
+                self.idLabel.setAlignment(Qt.AlignCenter)
+        except FileNotFoundError:
+            sign_in = SignInFrame()
+            showWindow(sign_in)
+            
     def connectSlots(self):
         self.logoutButton.clicked.connect(self.logout)
         self.changePlanButton.clicked.connect(self.spawnAccountPlan)
@@ -69,7 +74,7 @@ class AccountMenu(QFrame):
 
     def logout(self):
         pathOnSystem = os.path.join(
-            getenv('APP_BASE_PATH'), 'credentilas', 'credentials.json'
+            getenv('APP_BASE_PATH'), 'credentials', 'credentials.json'
         )
         targetFile = Path(getFileSystemPath(pathOnSystem))
 
@@ -80,12 +85,13 @@ class AccountMenu(QFrame):
                 try: 
                     os.remove(targetFile)
                 except Exception:
-                    QMessageBox.critical(self, "Error", "Failed to delete credentials. Please try again later.")
+                    QMessageBox.critical(None, "Error", "Failed to delete credentials. Please try again later.")
 
-            QMessageBox.information(self, "Logged Out", "You have been logged out.\nOptionally restart the app to make the logout effective.")
+            QMessageBox.information(None, "Logged Out", "You have been logged out.\nOptionally restart the app to make the logout effective.")
             _delayAfterLogout = 0.5
             time.sleep(_delayAfterLogout) # sleep to make sure operation was completed
-
+        else:
+            QMessageBox.information(None, "Not Logged In", "You are already logged out.")
 
     def spawnAccountPlan(self):
         parent = self.parent() # Stands for TopWidget widget

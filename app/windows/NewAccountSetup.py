@@ -46,10 +46,12 @@ class NewAccountSetup(QFrame):
     def eventFilter(self, obj, event):
         if event.type() in (QEvent.FocusIn, QEvent.FocusOut, QEvent.WindowActivate, QEvent.WindowDeactivate):
             self.handleFocusEvents()
+            return True
 
         if event.type() == QEvent.MouseButtonPress:
             if not self.geometry().contains(event.globalPos()):
-                return
+                return False
+            return super().eventFilter(obj, event)
         return super().eventFilter(obj, event)
 
     def handleFocusEvents(self):

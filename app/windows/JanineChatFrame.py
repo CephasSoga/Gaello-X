@@ -84,6 +84,8 @@ class JanineChat(QFrame):
 
         self.basePath = getFileSystemPath(getenv("APP_BASE_PATH"))
 
+        self.currentChat = None
+
     def setFontOnObjects(self, font, objects:list):
         for obj in objects:
             obj.setFont(font)
@@ -394,15 +396,28 @@ class JanineChat(QFrame):
             self.db.insert({'title': title}) # insert dummy data into collection to properly initialize collection
             self.db.delete({'title': title}) # delete right away
 
+            # Then enable chat action buttons if they were disabled
+            self.send.setEnabled(True)
+            self.attach.setEnabled(True)
+            self.voicemail.setEnabled(True)
+
     async def getCollections(self):
         await asyncio.sleep(0.1)
         self.db.connect()
         collections = self.db.getCollections()
-        print("collections: ", collections)
+        # Emit signal with the gathered chat history
         if collections and len(collections) > 0:
             self.gatheredChats.emit(collections)
+            # At least 1 collection is found, enable chat actions
+            self.send.setEnabled(True)
+            self.attach.setEnabled(True)
+            self.voicemail.setEnabled(True)
         else:
             self.gatheredChats.emit([])
+            # No collection is found, so disable message actions buttons
+            self.send.setEnabled(False)
+            self.attach.setEnabled(False)
+            self.voicemail.setEnabled(False)
 
     def gatherChatHistory(self, collectionNames: List[str]):
         for collection in collectionNames:
@@ -470,6 +485,9 @@ class JanineChat(QFrame):
             self.startNewChat()
         else:
             self.gatherChatHistory(collections)
+            # get the user to see the dispaly of the latest chat they created 
+            self.currentChat = collections[0]
+            self.showFullChat(self.currentChat)
 
     def runAsyncforHistory(self):
         spinner = Spinner(parent=self)
