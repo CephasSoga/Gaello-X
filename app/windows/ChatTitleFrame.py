@@ -46,8 +46,7 @@ class ChatTitleSelector(QFrame):
         if event.type() == QEvent.MouseButtonPress:
             if not self.geometry().contains(event.globalPos()):
                 self.close()
-        else:
-            return super().eventFilter(obj, event)
+        return super().eventFilter(obj, event)
 
 
 class ChatTitle(QFrame):

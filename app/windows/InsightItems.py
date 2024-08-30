@@ -7,12 +7,27 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFrame
 
+from dataclasses import dataclass
+
 from app.config.fonts import QuicksandBold, QuicksandRegular, FontSizePoint
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
+@dataclass
+class Insight:
+    title: str
+    description: str
+    date: str
+    description: str
+    content: str
+    image_url: str | list[str]
+    urls: list[str]
+    labels: list[str]
+    tags: list[str]
+
 class InsightItem(QFrame):
-    def __init__(self, imagePathOrUrl: Union[Path, str] = None, title:str = None, text: str = None, parent=None):
+    def __init__(self, insight: Insight, parent=None):
+        self.insight = insight
         super(InsightItem, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", 'UI', 'insightItem.ui'))
         if os.path.exists(path):
@@ -20,9 +35,9 @@ class InsightItem(QFrame):
         else:
            raise FileNotFoundError(f"{path} not found")
 
-        self.title = title
-        self.text = text
-        self.imagePathOrUrl = imagePathOrUrl
+        self.title = self.insight.title
+        self.text = self.insight.content
+        self.imageUrl = self.insight.image_url
 
         # Set a unique object name
         self.setObjectName("InsightItem")

@@ -1,6 +1,10 @@
 import os
+import asyncio
+from datetime import datetime, timedelta
+from dataclasses import dataclass
+
 from PyQt5 import uic
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QApplication, QGridLayout
 
@@ -10,6 +14,21 @@ from app.inferential.ExportInsights import insights
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 from app.config.renderer import ViewController
+from utils.databases import mongoGet
+from utils.asyncJobs import asyncWrap, enumerate_async
+from utils.envHandler import getenv
+
+@dataclass
+class Insight:
+    title: str
+    description: str
+    date: str
+    description: str
+    content: str
+    image_url: str | list[str]
+    urls: list[str]
+    labels: list[str]
+    tags: list[str]
 
 class JanineInsights(QWidget):
 
@@ -59,12 +78,28 @@ class JanineInsights(QWidget):
                 self.hide()
         return super().eventFilter(obj, event)
     
-    def setContents(self):
-        for idx, insight in enumerate(insights):
+
+    async def gatherInsights(self):
+        async_mongGet = asyncWrap(mongoGet)
+        today = datetime.now().date().isoformat()
+        yesterday = (datetime.now() - timedelta(days=1)).date().isoformat()
+        latest_collection = today
+        data = await async_mongGet(database='insights', collection=latest_collection, limit=int(1e6))
+        if not data:
+            latest_collection = yesterday
+            data = await async_mongGet(database='insights', collection=latest_collection, limit=int(1e6))
+            if not data:
+                return []
+        for doc in data:
+            yield doc
+    
+    async def setContents(self):
+        async for idx, insight in enumerate_async(self.gatherInsights()):
             max_per_row = 3
             row = idx // max_per_row
             col = idx % max_per_row
-            insight_widget = InsightItem(insight.imagePath, insight.title, insight.content, None)
+            insight = Insight(**insight)
+            insight_widget = InsightItem(insight, self)
             self.insightslayout.addWidget(insight_widget, row, col)
 
 

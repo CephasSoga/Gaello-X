@@ -18,6 +18,12 @@ async def async_generate(arg):
     yield arg
     await asyncio.sleep(1)
 
+async def enumerate_async(async_gen):
+    index = 0
+    async for value in async_gen:
+        yield index, value
+        index += 1
+
 async def quickFetchBytes(target: str, params: Dict = None, headers: Dict = None, logger: Logger = None):
     """
     Asynchronously fetches bytes from a given target URL using the aiohttp library.

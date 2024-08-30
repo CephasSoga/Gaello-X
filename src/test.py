@@ -1,44 +1,24 @@
-from PyQt5.QtWidgets import QMessageBox, QApplication
-import sys
+import os
+import subprocess
 
-def show_custom_message_box():
-    msg_box = QMessageBox()
-    
-    # Set the title and text of the QMessageBox
-    msg_box.setWindowTitle("Custom Message")
-    msg_box.setText("This is a custom message box with a styled appearance.")
-    
-    # Add standard buttons
-    msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-    
-    # Apply the custom stylesheet
-    msg_box.setStyleSheet("""
-        QMessageBox {
-            background-color: #f0f0f0;  /* Background color of the QMessageBox */
-            font: 14px 'Arial';  /* Font size and family */
-            color: #333333;  /* Text color */
-        }
-        QPushButton {
-            background-color: #4CAF50;  /* Button background color */
-            color: white;  /* Button text color */
-            border-radius: 5px;  /* Rounded corners */
-            padding: 5px 10px;  /* Padding inside the button */
-        }
-        QPushButton:hover {
-            background-color: #45a049;  /* Button color on hover */
-        }
-        QPushButton:pressed {
-            background-color: #388E3C;  /* Button color when pressed */
-        }
-        QLabel {
-            color: #333333;  /* Label text color */
-        }
-    """)
+# Specify the port you want to close
+port = 8888
 
-    # Show the QMessageBox
-    msg_box.exec()
+# Find the process ID (PID) using the port
+try:
+    result = subprocess.check_output(f"netstat -ano | findstr :{port}", shell=True)
+    lines = result.decode().splitlines()
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    show_custom_message_box()
-    sys.exit(app.exec_())
+    for line in lines:
+        parts = line.split()
+        if parts[-1].isdigit():
+            pid = int(parts[-1])
+
+            # Kill the process
+            os.kill(pid, 9)
+            print(f"Closed port {port} by terminating process {pid}")
+
+except subprocess.CalledProcessError:
+    print(f"No process is using port {port}")
+except Exception as e:
+    print(f"An error occurred: {e}")

@@ -14,33 +14,28 @@ from app.windows.NewAccountOk import AccountAllSet, AccountInitFailure
 from utils.appHelper import setRelativeToMainWindow
 from utils.databases import mongoGet
 from utils.appHelper import browse
-from utils.system import restoreSystemPath
+from utils.system import restoreSystemPath, killPortProcess
 from utils.paths import getFrozenPath, resourcePath
 from models.reader.cache import cached_credentials
 
 PORT = 8888
 IP = 'http://localhost'
-CONNECTION_TIMEOUT = 10
 
 class PaymentForm(QFrame):
 
     success = pyqtSignal()
     failure = pyqtSignal()
 
-    def __init__(self, execPath: Path | str = ".", serverPath: Path = Path('server/server.js'), parent=None):
+    def __init__(self, nodeAppPath: Path | str, execPath: Path | str = ".", parent=None):
         path = getFrozenPath(os.path.join("assets", "UI", "paymentForm.ui"))
         super(PaymentForm, self).__init__(parent)
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
             raise FileNotFoundError(f"{path} not found")
-
-        # assets\binaries\w64\node-v22.6.0\node.exe
-        self.NODE = resourcePath(
-            os.path.join('assets', 'binaries', 'w64', 'node-v22.6.0', 'node.exe') # assets\binaries\w64\node-v22.6.0\node-v22.6.0-win-x64\node.exe
-        )
+      
+        self.nodeAppPath = nodeAppPath
         self.execPath = execPath
-        self.serverPath = serverPath
         self.nodeProcess = None
         self.email: str = None
         self.timer = QTimer()
@@ -146,9 +141,6 @@ class PaymentForm(QFrame):
             if not self.geometry().contains(event.globalPos()):
                 self.hide()
         return super().eventFilter(obj, event)
-    
-    def showEvent(self, event):
-        super().showEvent(event)
 
     def closeEvent(self, event):
         self.stop_node_server()
@@ -157,32 +149,19 @@ class PaymentForm(QFrame):
     def start_node_server(self):
         if self.nodeProcess is None:
             try:
+                killPortProcess(PORT) # free port first
                 self.nodeProcess = subprocess.Popen(
-                    [self.NODE, str(self.serverPath)], 
+                    [self.nodeAppPath], 
                     cwd=self.execPath, 
                     stdout=subprocess.PIPE, 
-                    stderr=subprocess.PIPE, 
+                    stderr=subprocess.PIPE,
+                    shell=True, 
                     text=True
                 )
-                QMessageBox.information(self, 'Info', 'Node.js server started')
-
-                stdout, stderr = self.nodeProcess.communicate(timeout=CONNECTION_TIMEOUT)
-
-                if stdout and not stderr:
-                        print("Output: ", stdout)
-                        self.success.emit()
-                elif stderr:
-                    QMessageBox.warning(self, "Server Error", f"Unable to start server. Error: {stderr}")
-                    self.failure.emit()
-                else:
-                    QMessageBox.warning(self, "Server Error", "Server returned no output")
-                    self.failure.emit()
-            except subprocess.TimeoutExpired:
-                self.failure.emit()
-                QMessageBox.warning(self, "Server Timeout", "Unable to start server. Please check your internet connection.")
             except Exception as e:
-                self.failure.emit()
                 QMessageBox.warning(self, "Server Error", f"Unable to start server. Error: {str(e)}")
+                self.close()
+                return
             finally:
                 # Ensure the system’s default DLL search path on Windows systems is restored
                 restoreSystemPath()
@@ -193,6 +172,7 @@ class PaymentForm(QFrame):
                 self.nodeProcess.send_signal(signal.SIGTERM)
                 self.nodeProcess.wait()
                 self.nodeProcess = None
+                killPortProcess(PORT) # free port then
                 QMessageBox.information(self, 'Info', 'Node.js server stopped')
             except Exception as e:
                 QMessageBox.warning(self, "Server Error", f"Unable to stop server. Error: {str(e)}")

@@ -84,9 +84,9 @@ class NewAccountPlan(QFrame):
 
     def submitStandardTier(self):
         parent = self.parent()
-        serverPathStr = getFrozenPath(os.path.join('server', 'standard.js'))
+        nodeAppPath = getFrozenPath(os.path.join('assets', 'binaries', 'checkouts','standard', 'Gaello-webpaypal-standard-tier.exe'))
         execPath = getFrozenPath(".")
-        self.paymentForm = PaymentForm(execPath=execPath, serverPath=Path(serverPathStr))
+        self.paymentForm = PaymentForm(nodeAppPath=nodeAppPath, execPath=execPath)
         if self.paymentForm:
             self.paymentForm.hide()
             if parent:
@@ -97,9 +97,9 @@ class NewAccountPlan(QFrame):
 
     def submitAdvancedTier(self):
         parent = self.parent()
-        serverPathStr = getFrozenPath(os.path.join('server', 'advanced.js'))
+        nodeAppPath = getFrozenPath(os.path.join('assets', 'binaries', 'checkouts','advanced', 'Gaello-webpaypal-advanced-tier.exe'))
         execPath = getFrozenPath(".")
-        self.paymentForm = PaymentForm(execPath=execPath, serverPath=Path(serverPathStr))
+        self.paymentForm = PaymentForm(nodeAppPath=nodeAppPath, execPath=execPath)
         if self.paymentForm:
             self.paymentForm.hide()
             if parent:
@@ -131,7 +131,6 @@ class NewAccountPlan(QFrame):
         if event.type() == QEvent.MouseButtonPress:
             if not self.geometry().contains(event.globalPos()):
                 self.close()
-                return True
         return super().eventFilter(obj, event)
     
 if __name__ == "__main__":

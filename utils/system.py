@@ -1,3 +1,4 @@
+import os
 import socket
 import subprocess
 
@@ -51,4 +52,42 @@ def restoreSystemPath():
     if sys.platform == "win32":
         import ctypes
         ctypes.windll.kernel32.SetDllDirectoryA(None)
+
+
+def killPortProcess(port: int | str):
+    # Find the process ID (PID) using the port
+    """
+    Kills the process using the specified port.
+
+    This function finds the process ID (PID) associated with the specified port and terminates the process.
+
+    Parameters:
+        port (int): The port number to identify the process.
+
+    Returns:
+        None
+
+    Raises:
+        subprocess.CalledProcessError: If no process is using the specified port.
+        Exception: If an error occurs while executing the command to find the process ID.
+
+    """
+    try:
+        result = subprocess.check_output(f"netstat -ano | findstr :{port}", shell=True)
+        lines = result.decode().splitlines()
+
+        for line in lines:
+            parts = line.split()
+            if parts[-1].isdigit():
+                pid = int(parts[-1])
+
+                # Kill the process
+                os.kill(pid, 9)
+                print(f"Closed port {port} by terminating process {pid}")
+
+    except subprocess.CalledProcessError:
+        print(f"No process is using port {port}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
 
