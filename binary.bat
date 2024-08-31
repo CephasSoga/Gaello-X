@@ -28,7 +28,7 @@ if exist "%FFMPEG_PATH%\ffmpeg.exe" (
 
 :: Call your application or any other command that needs FFmpeg
 :: For example, starting your PyQt5 application
-python src/main.py
-
+:: This is done in src/main.py where this batch of commands is called from subprocess
+:: and then the main program is called.
 :: Keep the command prompt open (useful for debugging)
-pause
+:: DO NOT USE `pause` here, otherwise all processes will pause until user responds to prompt.

@@ -4,7 +4,7 @@ build
 dist
 datas.txt
 node_modules
-assets/binaries
+assets
 app/Temp
 **/__pycache__
 packages

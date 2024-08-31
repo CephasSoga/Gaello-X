@@ -66,19 +66,15 @@ def system_check(resolution_check_enabled: bool = True):
             main_logger.log("info", "The optimal requirements for the application's DPI or screen resolution are met. No adjustments needed.")
 
 
+def binary_exec():
+    subprocess.Popen([r".\binary.bat"], shell=True)
+
 def thread_exec(func):
     thread = threading.Thread(target=func)
     thread.setDaemon(True)  # Daemonize the thread, so it will exit when the main program exits.
     thread.start()
 
 def exec_client():
-    """
-    Executes the client by creating an instance of the Client class and calling its run method.
-
-    This function does not take any parameters.
-
-    This function does not return any values.
-    """
     cl = Client()
     cl.run()
 
@@ -92,9 +88,6 @@ def exec_api():
         main_logger.log("error", "Failed to start the API", e)
 
 def exec_all():
-    """
-    A function that executes both the API and client components in a try-finally block.
-    """
     try:
         system_check(resolution_check_enabled=False)
     except SystemExit:
@@ -102,6 +95,19 @@ def exec_all():
     except Exception:
         main_logger.log("error", "Unexpected error", exc_info=True)
         return
+    
+    try:
+        binary_exec()
+    except (SystemExit, SystemError) as sys_err:  # Exits the program if the binary cannot be executed:
+        main_logger.log("error", "System error while executing the binary. Returning...", sys_err)
+        return
+    except KeyboardInterrupt:  # Exits the program if the user presses Ctrl+C:
+        main_logger.log("error", "User interrupted the program. Returning...")
+        return
+    except Exception as e:
+        main_logger.log("error", "Failed to execute the binary. Returning...", e)
+        return
+    
     try:
         main_logger.log("info", "Starting the Gaello Application...")
         exec_api()
@@ -113,6 +119,9 @@ def exec_all():
         exec_client()
 
 if __name__ == "__main__":
-
+    import time
     # Calls the exec_all function to execute both the API and client components.
+    s = time.perf_counter()
     exec_all()
+    e = time.perf_counter()
+    main_logger.log("info", f"Execution time: {e - s:.4f} seconds")
