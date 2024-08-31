@@ -114,7 +114,7 @@ border: none;</string>
     </size>
    </property>
   </widget>
-  <widget class="QPushButton" name="more">
+  <widget class="QPushButton" name="moreButton">
    <property name="geometry">
     <rect>
      <x>340</x>

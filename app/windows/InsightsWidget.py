@@ -2,9 +2,10 @@ import os
 import asyncio
 from datetime import datetime, timedelta
 from dataclasses import dataclass
+from typing import Callable
 
 from PyQt5 import uic
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QApplication, QGridLayout
 
@@ -16,22 +17,23 @@ from utils.appHelper import adjustForDPI
 from app.config.renderer import ViewController
 from utils.databases import mongoGet
 from utils.asyncJobs import asyncWrap, enumerate_async
-from utils.envHandler import getenv
+from app.config.balancer import BatchBalance
+from app.config.renderer import ViewController
+from app.windows.Spinner import Spinner, Worker
 
 @dataclass
 class Insight:
     title: str
-    description: str
     date: str
     description: str
     content: str
-    image_url: str | list[str]
+    image: bytes
     urls: list[str]
     labels: list[str]
     tags: list[str]
 
 class JanineInsights(QWidget):
-
+    gatheredInsights = pyqtSignal(list)
     def __init__(self, parent=None):
         super(JanineInsights, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI" , "insightsWidget.ui"))
@@ -41,13 +43,14 @@ class JanineInsights(QWidget):
             raise FileNotFoundError(f"{path} not found")
 
         self.initUI()
+        QTimer.singleShot(10, self.syncSetContents)
+
 
     def initUI(self):
         adjustForDPI(self)
         self.setupWFlags()
         self.connectSlots()
         self.setupLayout()
-        self.setContents()
         self.setFonts()
 
     def setupLayout(self):
@@ -78,29 +81,50 @@ class JanineInsights(QWidget):
                 self.hide()
         return super().eventFilter(obj, event)
     
-
+    def startLazyLoad(self, execFunc: Callable, timeout: int = BatchBalance.RELOADING_MSEC, *args, **kwargs):
+        self.lazyLoadTimer = QTimer()
+        self.lazyLoadTimer.singleShot(timeout, lambda: execFunc(*args, **kwargs))
+        self.BatchSize = BatchBalance.MARKET_REMOTE_LOADING_SIZE
+    
+    @pyqtSlot()
     async def gatherInsights(self):
         async_mongGet = asyncWrap(mongoGet)
         today = datetime.now().date().isoformat()
         yesterday = (datetime.now() - timedelta(days=1)).date().isoformat()
         latest_collection = today
+
         data = await async_mongGet(database='insights', collection=latest_collection, limit=int(1e6))
         if not data:
             latest_collection = yesterday
             data = await async_mongGet(database='insights', collection=latest_collection, limit=int(1e6))
             if not data:
-                return []
+                yield {}
         for doc in data:
-            yield doc
+            yield {
+                "title": doc["title"],
+                "description": doc["description"],
+                "date": doc["date"],
+                "content": doc["content"],
+                "image": doc["image"],
+                "urls": doc["urls"],
+                "labels": doc["labels"],
+                "tags": doc["tags"],
+
+            }
     
+    @pyqtSlot()
     async def setContents(self):
-        async for idx, insight in enumerate_async(self.gatherInsights()):
-            max_per_row = 3
+        async for idx, doc in enumerate_async(self.gatherInsights()):
+            max_per_row = ViewController.DEFAULT_DISPLAY_ROWS
             row = idx // max_per_row
             col = idx % max_per_row
-            insight = Insight(**insight)
+            insight = Insight(**doc)
             insight_widget = InsightItem(insight, self)
             self.insightslayout.addWidget(insight_widget, row, col)
+
+    @pyqtSlot()
+    def syncSetContents(self):
+        asyncio.ensure_future(self.setContents())
 
 
     def setFonts(self):
@@ -119,9 +143,14 @@ class JanineInsights(QWidget):
 
 if __name__ == "__main__":
     import sys
+    from qasync import QApplication, QEventLoop
+
     app = QApplication(sys.argv)
+    loop = QEventLoop(app)
+    asyncio.set_event_loop(loop)
 
     window = JanineInsights()
     window.show()
 
-    sys.exit(app.exec_())
+    with loop:
+        loop.run_forever()
