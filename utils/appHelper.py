@@ -3,7 +3,7 @@ import webbrowser
 from typing import Tuple
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QLabel
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QLabel, QApplication, QDesktopWidget
 
 def stackOnCurrentWindow(window:QWidget) -> None:
     """
@@ -92,6 +92,116 @@ def setRelativeToMainWindow(stackedWindow:QWidget, parentWindow:QWidget, option:
     else:
         stackedWindow.show()
 
+def moveWidget(widget: QWidget, parent: QWidget = None, x: str = 'left', y: str = 'top'):
+    """
+    Moves the specified widget to the edge of the screen based on the provided x and y coordinates.
+    If a parent widget is provided, the widget will be moved relative to the parent's geometry.
+    If no parent widget is provided, the widget will be moved relative to the primary screen.
+
+    This function can lead to overlapping when the new coords conflict with exisiting widgets.
+    If such behaviour is not desired, use the `moveWithoutOverlap` function instead.
+
+    Parameters:
+    - widget (QWidget): The widget to be moved.
+    - parent (QWidget, optional): The parent widget. If not provided, the primary screen will be used. Defaults to None.
+    - x (str, optional): The x-coordinate position. It can be either 'center' or 'left' or 'right'. Defaults to 'left'.
+    - y (str, optional): The y-coordinate position. It can be either 'center' or 'top' or 'bottom'. Defaults to 'top'.
+
+    Raises:
+    - ValueError: If the provided x or y coordinates are not valid.
+
+    Returns:
+    - None
+    """
+    if not parent:
+        geometry = QApplication.desktop().screenGeometry()
+    else:
+        widget.setParent(parent)
+        geometry = parent.geometry()
+
+    if x == 'left':
+        new_x = 0
+    elif x == 'right':
+        new_x = geometry.width() - widget.width()
+    elif x == 'center':
+        new_x = (geometry.width() - widget.width()) // 2
+    else:
+        raise ValueError("x must be 'left' or 'right'.")
+
+    if y == 'top':
+        new_y = 0
+    elif y == 'bottom':
+        new_y = geometry.height() - widget.height()
+    elif y == 'center':
+        new_y = (geometry.height() - widget.height()) // 2
+    else:
+        raise ValueError("y must be 'top' or 'bottom'.")
+
+    widget.move(new_x, new_y)
+
+
+def moveWithoutOverlap(widget: QWidget, parent: QWidget = None, x: str = 'left', y: str = 'top'):
+    """
+    Moves the specified widget to the edge of the screen based on the provided x and y coordinates.
+    If a parent widget is provided, the widget will be moved relative to the parent's geometry.
+    If no parent widget is provided, the widget will be moved relative to the primary screen.
+
+    This function takes into account the positions of other widgets to avoid overlapping.
+
+    Parameters:
+    - widget (QWidget): The widget to be moved.
+    - parent (QWidget, optional): The parent widget. If not provided, the primary screen will be used. Defaults to None.
+    - x (str, optional): The x-coordinate position. It can be either 'left' or 'right'. Defaults to 'left'.
+    - y (str, optional): The y-coordinate position. It can be either 'top' or 'bottom'. Defaults to 'top'.
+
+    Raises:
+    - ValueError: If the provided x or y coordinates are not valid.
+
+    Returns:
+    - None
+    """
+    if not parent:
+        desktop = QDesktopWidget()
+        geometry = desktop.screenGeometry()
+    else:
+        geometry = parent.geometry()
+
+    if x == 'left':
+        new_x = 0
+    elif x == 'right':
+        new_x = geometry.width() - widget.width()
+    else:
+        raise ValueError("x must be 'left' or 'right'.")
+
+    if y == 'top':
+        new_y = 0
+    elif y == 'bottom':
+        new_y = geometry.height() - widget.height()
+    else:
+        raise ValueError("y must be 'top' or 'bottom'.")
+
+    # Check if there are any other visible windows on the screen
+    windows = desktop.topLevelWidgets()
+    for window in windows:
+        if window != widget and window.isVisible():
+            window_geometry = window.geometry()
+            if x == 'left':
+                if window_geometry.right() > new_x:
+                    new_x = window_geometry.right()
+            elif x == 'right':
+                if window_geometry.left() < new_x + widget.width():
+                    new_x = window_geometry.left() - widget.width()
+
+            if y == 'top':
+                if window_geometry.bottom() > new_y:
+                    new_y = window_geometry.bottom()
+            elif y == 'bottom':
+                if window_geometry.top() < new_y + widget.height():
+                    new_y = window_geometry.top() - widget.height()
+
+    widget.move(new_x, new_y)
+
+    
 def showWindow(window: QWidget):
     window.show()
 

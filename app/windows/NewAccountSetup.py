@@ -6,6 +6,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFrame, QLayout, QLineEdit, QMessageBox
+from pymongo import MongoClient
 
 from app.config.fonts import RobotoRegular, FontSizePoint
 from app.windows.NewAccountPlan import NewAccountPlan
@@ -189,11 +190,37 @@ class NewAccountSetup(QFrame):
         credentials = UserCredentials(**userInfo)
         registration = self.userAuth.register(credentials)
         print("registration?: ", registration)
+        
+        if registration ==True:
+            client = self.userAuth.client
+            welcome = self.welcomeNewUser(email, client)
+            print("welcome?: ", welcome)
 
         self.spawnAccountPlanSelector()
 
     def saveCredentials(credentials: Dict):
         pass
+
+    def welcomeNewUser(self, email: str, client: MongoClient):
+        from datetime import datetime
+        with open(os.path.join("assets", "txt", "welcome.txt")) as f:
+            message_content = f.read()
+        message = {
+            "email": email,
+            "title": "Welcome to the Gaello family!",
+            "contnet": message_content,
+            "date": datetime.now().date().isoformat(),
+            "time": datetime.now().time().isoformat(),
+            "status": "unread"
+        }
+        db = client['noftifications']
+        collection = db['from_system']
+        try:
+            result = collection.insert_one(message)
+            return result.inserted_id is not None
+        except Exception as e:
+            print(e)
+            return False
 
     def setFonts(self):
         size = FontSizePoint

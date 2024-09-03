@@ -19,3 +19,18 @@ class Help(QFrame):
             if not self.geometry().contains(event.globalPos()):
                 self.hide()
         return super().eventFilter(obj, event)
+    
+    def connectSlots(self):
+        self.docsButton.clicked.connect(self.readDocs)
+        self.demoButton.clicked.connect(self.viewDemo)
+        self.feedbackButton.clicked.connect(self.giveFeedback)
+        self.contributeButton.clicked.connect(self.contributeToProject)
+
+    def readDocs(self):pass
+
+    def viewDemo(self):pass
+
+    def giveFeedback(self):pass
+
+
+    def contributeToProject(self):pass
