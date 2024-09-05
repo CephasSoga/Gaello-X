@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass
 from typing import Callable
 
+from pymongo.mongo_client import MongoClient
+
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QFont
@@ -19,7 +21,8 @@ from utils.databases import mongoGet
 from utils.asyncJobs import asyncWrap, enumerate_async
 from app.config.balancer import BatchBalance
 from app.config.renderer import ViewController
-from app.windows.Spinner import Spinner, Worker
+from app.handlers.AuthHandler import  handleAuth
+from utils.appHelper import stackOnCurrentWindow
 
 @dataclass
 class Insight:
@@ -34,13 +37,15 @@ class Insight:
 
 class JanineInsights(QWidget):
     gatheredInsights = pyqtSignal(list)
-    def __init__(self, parent=None):
+    def __init__(self, connection: MongoClient, parent=None):
         super(JanineInsights, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI" , "insightsWidget.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
             raise FileNotFoundError(f"{path} not found")
+        
+        self.connection = connection
 
         self.initUI()
         QTimer.singleShot(10, self.syncSetContents)
@@ -52,6 +57,15 @@ class JanineInsights(QWidget):
         self.connectSlots()
         self.setupLayout()
         self.setFonts()
+
+    def mousePressEvent(self, event):
+        self.open()
+        super().mousePressEvent(event)
+        
+
+    def open(self):
+        asyncio.ensure_future(handleAuth(2, stackOnCurrentWindow, self))
+        
 
     def setupLayout(self):
         self.insightslayout = QGridLayout()
@@ -93,10 +107,10 @@ class JanineInsights(QWidget):
         yesterday = (datetime.now() - timedelta(days=1)).date().isoformat()
         latest_collection = today
 
-        data = await async_mongGet(database='insights', collection=latest_collection, limit=int(1e6))
+        data = await async_mongGet(database='insights', collection=latest_collection, limit=int(1e6), connection=self.connection)
         if not data:
             latest_collection = yesterday
-            data = await async_mongGet(database='insights', collection=latest_collection, limit=int(1e6))
+            data = await async_mongGet(database='insights', collection=latest_collection, limit=int(1e6), connection=self.connection)
             if not data:
                 yield {}
         for doc in data:
@@ -115,12 +129,15 @@ class JanineInsights(QWidget):
     @pyqtSlot()
     async def setContents(self):
         async for idx, doc in enumerate_async(self.gatherInsights()):
-            max_per_row = ViewController.DEFAULT_DISPLAY_ROWS
-            row = idx // max_per_row
-            col = idx % max_per_row
-            insight = Insight(**doc)
-            insight_widget = InsightItem(insight, self)
-            self.insightslayout.addWidget(insight_widget, row, col)
+            try:
+                max_per_row = ViewController.DEFAULT_DISPLAY_ROWS
+                row = idx // max_per_row
+                col = idx % max_per_row
+                insight = Insight(**doc)
+                insight_widget = InsightItem(insight, self)
+                self.insightslayout.addWidget(insight_widget, row, col)
+            except TypeError: #  in case no  data was found
+                return
 
     @pyqtSlot()
     def syncSetContents(self):

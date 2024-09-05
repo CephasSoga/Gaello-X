@@ -2,6 +2,8 @@ import os
 import asyncio
 from typing import Any, Dict, List
 
+from pymongo.mongo_client import MongoClient
+
 from PyQt5 import uic
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFrame
@@ -14,16 +16,18 @@ from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
 class MarketOutliner:
-    def __init__(self):
+    def __init__(self, connection: MongoClient) -> None:
         self.logger = Logger("Market-Outlines")
         self.default_outline_type = "default_void"
         self.default_outline_data = [{self.default_outline_type: None}]
+
+        self.connection = connection
 
     async def get(self, endpoint: str) -> List[Dict]:
         await asyncio.sleep(0.1)
         try:
             asyncMongoGet = asyncWrap(mongoGet)
-            res: Any = await asyncMongoGet(database="market", collection="marketSummary")
+            res: Any = await asyncMongoGet(database="market", collection="marketSummary", connection=self.connection)
             doc: Dict = res[0] if res else {}
             target = doc["content"]["performances"]
             return target[endpoint]

@@ -1,7 +1,10 @@
 import os
+import random
 import asyncio
 from io import BytesIO
-from typing import List, Callable
+from typing import List, Dict, Callable
+
+from pymongo.mongo_client import MongoClient
 
 from PyQt5.QtGui import QPixmap
 from PyQt5 import uic
@@ -9,8 +12,9 @@ from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QFrame, QGridLayout, QWidget, QApplication
 from qasync import QEventLoop, asyncSlot
 
-from utils.asyncJobs import quickFetchBytes, quickFetchJson,  asyncWrap
+from utils.asyncJobs import quickFetchBytes, quickFetchJson,  asyncWrap, ThreadRun
 from utils.databases import mongoGet
+from utils.envHandler import getenv
 from utils.graphics import chartWithSense
 from app.windows.ForexItemFrame import ForexItem
 from app.windows.IndexItemFrame import IndexItem
@@ -24,16 +28,23 @@ from app.config.balancer import BatchBalance
 from app.config.renderer import ViewController
 
 class ExploreMarket(QFrame):
-    def __init__(self, parent=None):
+    def __init__(self, connection: MongoClient, parent=None):
         super(ExploreMarket, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "exploreMarket.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
             raise FileNotFoundError(f"{path} not found")
+        
+        self.connection = connection
+
+        self.cryptos: List[Dict] = []
+        self.commodities: List[Dict] = []
+        self.indices: List[Dict] = []
+        self.forexes: List[Dict] = []
 
         self.flagsSource = "https://flagcdn.com"
-        self.chartDisplayWidth, self.chartDisplayHeigth = 120, 60
+        self.chartDisplayWidth, self.chartDisplayHeigth = 130, 60
 
         self.forexList = ['ARS/MXN', 'TND/ZAR', 'XAG/RUB', 'ILS/NOK']
         self.forexCurrentIndex = 0
@@ -56,6 +67,7 @@ class ExploreMarket(QFrame):
         self.commoditiesRawSize = 2
 
         self.initUI()
+        QTimer.singleShot(Schedule.NO_DELAY, self.syncGetAllData)
         QTimer.singleShot(Schedule.BATCH_MARKET_JOBS_DELAY, lambda: self.startLazyLoad(self.completeJobs))
         
     def initUI(self):
@@ -159,43 +171,64 @@ class ExploreMarket(QFrame):
 
     @asyncSlot()
     async def forexTask(self, forexPair: str, row: int, col: int):
-        codes = forexPair.split("/")
-        flag1Code = codes[0][:2].lower()
-        flag2Code = codes[1][:2].lower()
+        def func_1(forexPair: str):
+            codes = forexPair.split("/")
+            flag1Code = codes[0][:2].lower()
+            flag2Code = codes[1][:2].lower()
 
-        flag1Url = f"https://flagcdn.com/w40/{flag1Code}.png"
-        flag2Url = f"https://flagcdn.com/w40/{flag2Code}.png"
+            flag1Url = f"https://flagcdn.com/w40/{flag1Code}.png"
+            flag2Url = f"https://flagcdn.com/w40/{flag2Code}.png"
 
-        flag1 = await self.getFlagPixmap(flag1Url)
-        flag2 = await self.getFlagPixmap(flag2Url)
+            return flag1Url, flag2Url
+        
+        def func_2(forexList: List[Dict], forexPair: str):
+            forexData = [forex for forex in forexList if forex.get("name")==forexPair]
+            print("Forex data: ", forexData is not None or len(forexData) > 0)
 
-        asyncMongoGet = asyncWrap(mongoGet)
-        forexData = await asyncMongoGet(collection='forex', name=forexPair)
-        if not forexData:
-            return
+            if not forexData:
+                return
 
-        quoteTarget = forexData[0]["price"]["quote"]
+            quoteTarget = forexData[0]["price"]["quote"]
 
-        price = quoteTarget[0]["price"]
-        growth = quoteTarget[0]["changesPercentage"]
+            price = quoteTarget[0]["price"]
+            growth = quoteTarget[0]["changesPercentage"]
 
-        historicalTarget = forexData[0]["price"]["historical"]["quotes"]
+            historicalTarget = forexData[0]["price"]["historical"]["quotes"]
 
-        # only for testing
-        chartVoidInputs = (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], [100, 123, 146, 122, 122, 129, 129, 133, 131, 134])
-        if not historicalTarget:
-            chartInputs = chartVoidInputs
-            chartOutput = chartWithSense(chartInputs[0], chartInputs[1], self.chartDisplayWidth, self.chartDisplayHeigth)
-            chartPixmap = QPixmap(str(chartOutput))
-            item = ForexItem(flag1, flag2, forexPair, price, growth, chartPixmap, self)
-        else:
-            chartInputs = ([point["date"] for point in historicalTarget], [point["adjClose"] for point in historicalTarget])
-            chartOutput = chartWithSense(chartInputs[0], chartInputs[1], self.chartDisplayWidth, self.chartDisplayHeigth)
-            chartPixmap = QPixmap(str(chartOutput))
+            # only for testing
+            chartVoidInputs = (list(range(1000)), [random.randrange(200, 420) for _ in range(1000)])
+            if not historicalTarget:
+                chartInputs = chartVoidInputs
+                chartOutput = chartWithSense(chartInputs[0], chartInputs[1], self.chartDisplayWidth, self.chartDisplayHeigth)
+                chartPixmap = QPixmap(str(chartOutput))
+            else:
+                chartInputs = ([point["date"] for point in historicalTarget], [point["adjClose"] for point in historicalTarget])
+                chartOutput = chartWithSense(chartInputs[0], chartInputs[1], self.chartDisplayWidth, self.chartDisplayHeigth)
+                chartPixmap = QPixmap(str(chartOutput))
 
-            item = ForexItem(flag1, flag2, forexPair, price, growth, chartPixmap, self)
+            return price, growth, chartPixmap
 
-        self.forexLayout.addWidget(item, row, col)
+        def func_3(forexPair: str, price: float, growth: float, flag1: QPixmap, flag2: QPixmap, chartPixmap: QPixmap):
+            item = ForexItem(
+                flag1Pixmap=flag1, 
+                flag2Pixmap=flag2, 
+                pair=forexPair, 
+                price=price, 
+                growth=growth, 
+                historicalPixmap=chartPixmap,
+                parent=self)
+
+            return item
+
+        res = await ThreadRun(func_2, self.forexes, forexPair)
+        if res:
+            price, growth, chart = res
+            flag1Url, flag2Url = await ThreadRun(func_1, forexPair)
+            flag1 = await self.getFlagPixmap(flag1Url)
+            flag2 = await self.getFlagPixmap(flag2Url)
+            item = func_3(forexPair, price, growth, flag1, flag2, chart)
+
+            self.forexLayout.addWidget(item, row, col)
 
     async def getFlagPixmap(self, url):
         response = await quickFetchBytes(url, {}, {"User-Agent": "GaelloX/1.0"})
@@ -208,67 +241,96 @@ class ExploreMarket(QFrame):
         return pixmap
 
     @asyncSlot()
-    async def indexTask(self, indexName, row, col):
-        await asyncio.sleep(1)
+    async def indexTask(self, indexName: str, row: int, col: int):
+        def func_1(indicesList: List, indexName: str):
+            indexData = [index for index in  indicesList if index.get("name")==indexName]
 
-        asyncMongoGet = asyncWrap(mongoGet)
-        indexData = await asyncMongoGet(collection='indices', name=indexName)
+            if not indexData:
+                return
 
-        if not indexData:
-            return
+            target = indexData[0]['historical']['quotes']
+            if not target:
+                raise ValueError('Target was set to render inexistent fields')
 
-        target = indexData[0]['historical']['quotes']
-        if not target:
-            raise ValueError('Target was set to render inexistent fields')
+            currentValues = target[-1]
+            previousValues = target[-2]
+            currentPrice = currentValues['adjClose']
+            previousPrice = previousValues['adjClose']
+            growth = 100 * (currentPrice - previousPrice) / previousPrice
 
-        currentValues = target[-1]
-        previousValues = target[-2]
-        currentPrice = currentValues['adjClose']
-        previousPrice = previousValues['adjClose']
-        growth = 100 * (currentPrice - previousPrice) / previousPrice
-        chartInputs = ([point['date'] for point in target], [point['adjClose'] for point in target])
-        chartOutput = chartWithSense(chartInputs[0], chartInputs[1], self.chartDisplayWidth, self.chartDisplayHeigth)
-        chartPixmap = QPixmap(str(chartOutput))
+            chartInputs = ([point['date'] for point in target], [point['adjClose'] for point in target])
+            chartOutput = chartWithSense(chartInputs[0], chartInputs[1], self.chartDisplayWidth, self.chartDisplayHeigth)
+            chartPixmap = QPixmap(str(chartOutput))
 
-        # Cut long names so they don't harm the display
-        if len(indexName) > 30:
-            indexName = f'{indexName[:30]}.'
-        indexSymbol = indexData[0]['symbol']
-        item = IndexItem(indexSymbol, indexName, currentPrice, growth, chartPixmap)
-        self.indicesLayout.addWidget(item, row, col)
+            # Cut long names so they don't harm the display
+            if len(indexName) > 30:
+                indexName = f'{indexName[:30]}.'
+            indexSymbol = indexData[0]['symbol']
+
+            return indexSymbol, indexName, currentPrice, growth, chartPixmap
+
+        def func_2(indexSymbol, indexName, currentPrice, growth, chartPixmap):
+            item = IndexItem(
+                symbol=indexSymbol, 
+                name=indexName, 
+                price=currentPrice, 
+                growth=growth,
+                historicalPixmap=chartPixmap,
+            )
+            return item
+        
+        res = await ThreadRun(func_1, self.indices, indexName)
+        if res:
+            item = func_2(*res)
+            self.indicesLayout.addWidget(item, row, col)
 
     @asyncSlot()
     async def cryptoTask(self, cryptoSymbol: str, row, col):
-        asyncMongoGet = asyncWrap(mongoGet)
-        cryptoData = await asyncMongoGet(collection="crypto", symbol=cryptoSymbol)
+        def func_1(cryptoList: List[Dict], cryptoSymbol: str):
+            cryptoData = [crypto for crypto in cryptoList if crypto.get("symbol")==cryptoSymbol]
 
-        if not cryptoData:
-            return
+            if not cryptoData:
+                return
 
-        # Refactor crypto name 
-        cryptoName = cryptoData[0]["name"]
-        cryptoName.replace("USD", "/USD")
+            # Refactor crypto name 
+            cryptoName: str = cryptoData[0]["name"]
+            cryptoName = cryptoName.strip().replace("USD", "/USD").replace(" ", "")
 
-        quoteTarget = cryptoData[0]['historicalData']["quote"][0]
-        price = quoteTarget["price"]
-        growth = quoteTarget["changesPercentage"]
-        historicalTarget = cryptoData[0]['historicalData']["daily"]["historical"]
+            quoteTarget = cryptoData[0]['historicalData']["quote"][0]
+            price = quoteTarget["price"]
+            growth = quoteTarget["changesPercentage"]
 
-        chartInputs = ([point["date"] for point in historicalTarget], [point["adjClose"] for point in historicalTarget])
-        chartOutput = chartWithSense(chartInputs[0], chartInputs[1], self.chartDisplayWidth, self.chartDisplayHeigth)
-        chartPixmap = QPixmap(str(chartOutput))
+            historicalTarget = cryptoData[0]['historicalData']["daily"]["historical"]
+            chartInputs = ([point["date"] for point in historicalTarget], [point["adjClose"] for point in historicalTarget])
+            chartOutput = chartWithSense(chartInputs[0], chartInputs[1], self.chartDisplayWidth, self.chartDisplayHeigth)
+            chartPixmap = QPixmap(str(chartOutput))
 
-        # symbol will probably end with 'USD' so we strip it away
-        cryptoSymbol_ = cryptoSymbol.replace("USD", "")
-        # Then get image/logo
-        imagePixmap = await self.getCryptoPixmap(cryptoSymbol_)
+            # symbol will probably end with 'USD' so we strip it away
+            cryptoSymbol_ = cryptoSymbol.replace("USD", "")
+            
+            return cryptoSymbol_, cryptoName, price, growth, chartPixmap
 
-        if not imagePixmap:
-            item = CryptoItem(cryptoSymbol, cryptoName, price, growth, None, chartPixmap)
-        else:
-            item = CryptoItem(cryptoSymbol, cryptoName, price, growth, imagePixmap, chartPixmap)
+        def func_2(cryptoSymbol, cryptoName, price, growth, imagePixmap, chartPixmap):
+            item = CryptoItem(
+                symbol=cryptoSymbol, 
+                name=cryptoName, 
+                price=price, 
+                growth=growth, 
+                imagePixmap=imagePixmap,
+                historicalPixmap=chartPixmap
+            )
 
-        self.cryptosLayout.addWidget(item, row, col)
+            return item
+        
+        res = await ThreadRun(func_1, self.cryptos, cryptoSymbol)
+        if res:
+            cryptoSymbol_, cryptoName, price, growth, chart = res
+            imagePixmap = await self.getCryptoPixmap(cryptoSymbol_)
+            item = func_2(cryptoSymbol, cryptoName, price, growth, imagePixmap, chart)
+
+            self.cryptosLayout.addWidget(item, row, col)
+
+       
 
     async def getCryptoPixmap(self, cryptoSymbol):
         imageUrl = await self.getCryptoImageUrl(cryptoSymbol)
@@ -303,28 +365,58 @@ class ExploreMarket(QFrame):
 
     @asyncSlot()
     async def commodityTask(self, commoditySymbol, row, col):
+        def func_1(commoditiesList: List, commoditySymbol: str):
+            comData = [com for com in  commoditiesList if com.get("symbol")==commoditySymbol]
+        
+            if not comData:
+                return
+
+            comName = comData[0]["name"]
+            # some dummy data
+            price = 100
+            growth = 1.001
+            return commoditySymbol, comName, price, growth
+        
+        def func_2(commoditySymbol, comName, price, growth):
+            item = CommodityItem(commoditySymbol, comName, price, growth)
+            return item
+        
+        res = await ThreadRun(func_1, self.commodities, commoditySymbol)
+        if res:
+            item = func_2(*res)
+            self.commoditiesLayout.addWidget(item, row, col)
+
+    async def getAllData(self):
         asyncMongoGet = asyncWrap(mongoGet)
-        comData = await asyncMongoGet(collection="commodities", symbol=commoditySymbol)
+        self.cryptos = await asyncMongoGet(collection="crypto", limit=int(5e4), connection=self.connection)
+        self.commodities = await asyncMongoGet(collection="commodities", limit=int(5e4), connection=self.connection)
+        self.indices = await asyncMongoGet(collection='indices', limit=int(5e4), connection=self.connection)
+        self.forexes = await asyncMongoGet(collection='forex', limit=int(5e4), connection=self.connection)
+        for l in self.cryptos, self.commodities, self.indices, self.forexes:
+            print(f"Length: {len(l)}")
 
-        if not comData:
-            return
-
-        comName = comData[0]["name"]
-
-        # some dummy data
-        item = CommodityItem(commoditySymbol, comName, 100, 1.001)
-        self.commoditiesLayout.addWidget(item, row, col)
+    def syncGetAllData(self):
+        asyncio.ensure_future(self.getAllData())
+        
 
 
 if __name__ == "__main__":
     import sys
+    from pymongo.server_api import ServerApi
+
+    uri = getenv("MONGO_URI")
+
+    # Create a new client and connect to the server
+    mongo_client = MongoClient(uri, server_api=ServerApi('1'))
+
 
     app = QApplication(sys.argv)
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
 
-    window = ExploreMarket()
+    window = ExploreMarket(mongo_client)
     window.show()
 
     with loop:
         loop.run_forever()
+

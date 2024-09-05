@@ -12,10 +12,10 @@ from app.config.fonts import RobotoRegular, FontSizePoint
 from app.windows.NewAccountPlan import NewAccountPlan
 from utils.appHelper import setRelativeToMainWindow, showWindow, adjustForDPI
 from utils.paths import getFrozenPath
-from databases.mongodb.UsersAuth import UserCredentials, userAuthInstance
+from databases.mongodb.UsersAuth import UserCredentials, UserAuthentification
 
 class NewAccountSetup(QFrame):
-    def __init__(self, parent=None):
+    def __init__(self, connection: MongoClient, parent=None):
         super(NewAccountSetup, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "newAccountSetup.ui"))
         if os.path.exists(path):
@@ -23,7 +23,10 @@ class NewAccountSetup(QFrame):
         else:
             raise FileNotFoundError(f"{path} not found")
 
-        self.userAuth = userAuthInstance
+        # MongoDB connection string
+        connection_str = os.getenv("MONGO_URI")
+        self.connection = connection
+        self.userAuth = UserAuthentification(connection_str=connection_str, connection=connection)
 
         self.initUI()
 
@@ -192,7 +195,7 @@ class NewAccountSetup(QFrame):
         print("registration?: ", registration)
         
         if registration ==True:
-            client = self.userAuth.client
+            client = self.connection
             welcome = self.welcomeNewUser(email, client)
             print("welcome?: ", welcome)
 

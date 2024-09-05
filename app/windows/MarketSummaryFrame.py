@@ -4,6 +4,8 @@ import asyncio
 from typing import Optional, List, Dict
 from io import BytesIO
 
+from pymongo.mongo_client import MongoClient
+
 from PyQt5 import uic
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, pyqtSignal
@@ -24,15 +26,17 @@ class MarketSummary(QFrame):
     dataFetched = pyqtSignal(str, list)
     updateFocus = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, connection: MongoClient, parent=None):
         super(MarketSummary, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "marketSummary.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
             raise FileNotFoundError(f"{path} not found")
+        
+        self.connection = connection
 
-        self.outliner = MarketOutliner()
+        self.outliner = MarketOutliner(connection)
         self.initUI()
 
     def initUI(self):
@@ -207,7 +211,7 @@ class MarketSummary(QFrame):
 
     async def setFocus(self):
         asyncMomgoGet = asyncWrap(mongoGet)
-        articles: List[Dict] = await asyncMomgoGet(collection='articles',limit=10)
+        articles: List[Dict] = await asyncMomgoGet(collection='articles',limit=100, connection=self.connection)
 
         for pos, article in enumerate(articles):
             title = article.get('title', '')

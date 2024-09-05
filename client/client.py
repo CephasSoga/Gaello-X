@@ -3,10 +3,13 @@ import asyncio
 from PyQt5.QtCore import pyqtSignal, QObject, QThread, Qt
 from qasync import QEventLoop, QApplication as QAsyncApplication
 
+from pymongo.mongo_client import MongoClient
+
 from app.windows.Spinner import Spinner
 from app.windows.MainWindow import MainWindow
 from app.windows.WarningFrame import Warning
 from utils.connection import deviceIsConnected
+from utils.envHandler import getenv
 
 INIT_TIMEOUT = 3
 SLEEP_SEC = 1
@@ -44,12 +47,14 @@ class Client(QObject):
     """
     The main client class that initializes the application, handles connection errors, and starts the worker thread.
     """
-    def __init__(self):
+    def __init__(self, connection: MongoClient):
         super().__init__()
         Qt.AA_EnableHighDpiScaling = True  # Set this attribute before creating QAsyncApplication
         self.app = QAsyncApplication(sys.argv)
         #self.app.setAttribute(Qt.AA_EnableHighDpiScaling)
         self.app.setStyle("Oxygen")
+
+        self.connection = connection
 
         self.spinner = Spinner()
         self.worker_thread = WorkerThread()
@@ -61,7 +66,7 @@ class Client(QObject):
         """
         Shows the main window.
         """
-        self.window = MainWindow()
+        self.window = MainWindow(connection=self.connection)
         self.window.show()
         if getattr(sys, 'frozen', False):
             # If the application is frozen (bundled executable) the pyinstall bootloader will close the splash screen

@@ -1,6 +1,8 @@
 import os
 import asyncio
 
+from pymongo.mongo_client import MongoClient
+
 from PyQt5  import uic
 from PyQt5.QtCore import Qt, QUrl, QEvent, QTimer
 from PyQt5.QtGui import QFont, QMovie
@@ -23,15 +25,16 @@ ffmpeg_path = resourcePath(os.path.join('assets', 'binaries', 'w64', 'ffmpeg', '
 os.environ['PATH'] = ffmpeg_path + os.pathsep + os.environ['PATH']
 
 class PressInsigthsFrame(QFrame):
-    def __init__(self, widget: QWidget, parent=None):
+    def __init__(self, connection: MongoClient, widget: QWidget, parent=None):
         super().__init__(parent)
         self.widget = widget
         self.insightsWindow = None
+        self.connection = connection
         self.widget.installEventFilter(self)
 
     def openInsights(self):
         if not self.insightsWindow:
-            self.insightsWindow = JanineInsights(self.parent())
+            self.insightsWindow = JanineInsights(connection=self.connection, parent=self.parent())
             asyncio.ensure_future(handleAuth(2, stackOnCurrentWindow, self.insightsWindow))
         else:
             self.insightsWindow = None
@@ -86,7 +89,7 @@ class PressPlusFrame(QFrame):
             return super().eventFilter(obj, event)
 
 class Bottom(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, connection: MongoClient, parent=None):
         super(Bottom, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "bottom.ui"))
         if os.path.exists(path):
@@ -94,6 +97,7 @@ class Bottom(QMainWindow):
         else:
             raise FileNotFoundError(f"{path} not found")
         
+        self.connection = connection
         self.exploreProjectUrl = 'https://www.janine.ai'
         self.kickstartUrl = 'https://www.janine.ai/start'
 
@@ -164,7 +168,7 @@ class Bottom(QMainWindow):
         self.createMediaPlayer(plusMoviePath, self.plusWidget)
 
     def connectSlots(self):
-        self.insightsFrame_ = PressInsigthsFrame(self.insightsFrame)
+        self.insightsFrame_ = PressInsigthsFrame(connection=self.connection, widget=self.insightsFrame)
         self.communityFrame_ = PressCommunityFrame(self.communityFrame)
         self.plusFrame_ = PressPlusFrame(self.plusFrame)
 

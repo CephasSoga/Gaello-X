@@ -7,6 +7,7 @@ from typing import List, Union
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QEvent, pyqtSlot, QTimer, pyqtSignal
 from PyQt5.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox
+from pymongo import MongoClient
 from qasync import asyncSlot, QApplication, QEventLoop
 
 from app.windows.Spinner import Spinner, Worker
@@ -32,7 +33,7 @@ HISTORY_LIMIT = 100
 
 class JanineChat(QFrame):
     gatheredChats = pyqtSignal(list)
-    def __init__(self, parent=None):
+    def __init__(self, connection: MongoClient, parent=None):
         super(JanineChat, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "chat_.ui"))
         if os.path.exists(path):
@@ -40,6 +41,7 @@ class JanineChat(QFrame):
         else:
             raise FileNotFoundError(f"{path} not found")
 
+        self.connection = connection
         self.waiter = Waiter()
 
         self.initUI()
@@ -68,7 +70,7 @@ class JanineChat(QFrame):
         self.lastMessageIndex = -1
         self.requestManager = RequestManager()
 
-        self.db = JanineMongoDatabase()
+        self.db = JanineMongoDatabase(connection=self.connection)
         self.recorder = Recorder()
         self.janine = Janine(self.db)
 

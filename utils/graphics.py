@@ -38,6 +38,13 @@ def chartWithSense(dates: list[str], values: list[int], width=120, height=60):
 
         The function returns the path to the saved chart image.
     """
+    if  not dates or not values:
+        return ""
+    
+    if (not dates and values) or (dates and not values):
+        raise ValueError("Both dates and values must be provided")
+    
+    
     color = "red" if values[-2] > values[-1] else "green"
     
     trace = go.Scatter(

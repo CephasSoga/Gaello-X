@@ -3,6 +3,8 @@ import uuid
 import json
 from pathlib import Path
 
+from pymongo.mongo_client import MongoClient
+
 from PyQt5 import uic
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
@@ -19,7 +21,7 @@ from databases.mongodb.Common import mongoGet
 
 
 class SignInFrame(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, connection: MongoClient, parent=None):
         super(SignInFrame, self).__init__(parent)
         self.newAccountSetupWidget = None  # Initialize as None
         path = getFrozenPath(os.path.join("assets", "UI", "login.ui"))
@@ -28,6 +30,7 @@ class SignInFrame(QMainWindow):
         else:
             raise FileNotFoundError(f"{path} not found")
 
+        self.connection = connection
         self.parent_ = self.parent()
         self.userAuth = userAuthInstance
 
@@ -107,7 +110,7 @@ class SignInFrame(QMainWindow):
         return email
 
     def retreiveAndSave(self, email: str):
-        users = mongoGet(database='UsersAuth', collection="users")
+        users = mongoGet(database='UsersAuth', collection="users", connection=self.connection, limit=int(1e7))
         this_user = [user for user in users if user['user']['email'] == email]
         user = this_user[0] if this_user else None
 
@@ -126,7 +129,7 @@ class SignInFrame(QMainWindow):
 
     def spawnSetup(self):
         if self.newAccountSetupWidget is None:  # Create only when needed
-            self.newAccountSetupWidget = NewAccountSetup(self.parent_)
+            self.newAccountSetupWidget = NewAccountSetup(connection=self.connection, parent=self.parent_)
         self.newAccountSetupWidget.hide()
         if self.parent_ is not None:
             setRelativeToMainWindow(self.newAccountSetupWidget, self.parent_, 'center')

@@ -1,24 +1,92 @@
-import os
-import subprocess
+import time
 
-# Specify the port you want to close
-port = 8888
+def timer(func, logger=None):
+    """
+    A decorator that logs the time taken to execute a function.
 
-# Find the process ID (PID) using the port
-try:
-    result = subprocess.check_output(f"netstat -ano | findstr :{port}", shell=True)
-    lines = result.decode().splitlines()
+    Args:
+        func: The function to be timed.
+        logger: An optional logger to log the time taken.
 
-    for line in lines:
-        parts = line.split()
-        if parts[-1].isdigit():
-            pid = int(parts[-1])
+    Returns:
+        The result of the function.
+    """
 
-            # Kill the process
-            os.kill(pid, 9)
-            print(f"Closed port {port} by terminating process {pid}")
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        if logger:
+            logger.log("info", f"{func.__name__} took: {end - start:.4f} seconds to complete.")
+        else:
+            print(f"{func.__name__} took: {end - start:.4f} seconds to complete.")
+        return result
+    return wrapper
 
-except subprocess.CalledProcessError:
-    print(f"No process is using port {port}")
-except Exception as e:
-    print(f"An error occurred: {e}")
+@timer
+def factorial(n):
+    """
+    Calculate the factorial of a number.
+
+    Args:
+        n: The number to calculate the factorial of.
+
+    Returns:
+        The factorial of the number.
+    """
+    result = 1
+    for i in range(1, n + 1):
+        result *= i
+    return result
+
+
+print(factorial(10))
+
+import time
+
+def timer(func, logger: Logger|None = None):
+    """
+    A decorator that logs the time taken to execute a synchronous function.
+
+    Args:
+        func: The function to be timed.
+        logger: An optional logger to log the time taken.
+
+    Returns:
+        The result of the function.
+    """
+
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = func(*args, **kwargs)
+        end = time.perf_counter()
+        if logger:
+            logger.log("info", f"{func.__name__} took: {end - start:.4f} seconds to complete.")
+        else:
+            print(f"{func.__name__} took: {end - start:.4f} seconds to complete.")
+        return result
+    return wrapper
+
+
+def async_timer(func, logger: Logger|None = None):
+    """
+    A decorator that logs the time taken to execute an asynchronous function.
+
+    Args:
+        func: The function to be timed.
+        logger: An optional logger to log the time taken.
+
+    Returns:
+        The result of the function.
+    """
+
+    async def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = await func(*args, **kwargs)
+        end = time.perf_counter()
+        if logger:
+            logger.log("info", f"{func.__name__} took: {end - start:.4f} seconds to complete.")
+        else:
+            print(f"{func.__name__} took: {end - start:.4f} seconds to complete.")
+        return result
+    return wrapper

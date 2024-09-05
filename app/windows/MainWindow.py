@@ -2,6 +2,8 @@ import json
 import os
 from pathlib import Path
 
+from pymongo.mongo_client import MongoClient
+
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, pyqtSignal
@@ -18,13 +20,15 @@ from app.config.renderer import ViewController
 
 class MainWindow(QMainWindow):
     finishedLoading = pyqtSignal()
-    def __init__(self):
+    def __init__(self, connection: MongoClient):
         super(MainWindow, self).__init__()
         path = getFrozenPath(os.path.join("assets", "UI", "mainwindow.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
             raise FileNotFoundError(f"{path} not found")
+        
+        self.connection = connection
         
         self.initUI()
 
@@ -65,8 +69,8 @@ class MainWindow(QMainWindow):
         self.scrollWidget.setLayout(self.scrollLayout)
         self.scrollArea.setWidget(self.scrollWidget)
 
-        self.header = Header(self)
-        self.bottom = Bottom(self)
+        self.header = Header(connection=self.connection, parent=self)
+        self.bottom = Bottom(connection=self.connection, parent=self)
         #self.showMaximized()  # or self.showFullScreen()
         self.header.setMinimumSize(w, h)
         self.bottom.setMinimumSize(w, h)
@@ -76,6 +80,7 @@ class MainWindow(QMainWindow):
 
     def closeAndExit(self):
         self.close()
+        self.connection.close()
         if not isFrozen():
             exit(0)
 

@@ -3,6 +3,8 @@ import bson
 import asyncio
 from dataclasses import dataclass
 
+from pymongo.mongo_client import MongoClient
+
 from PyQt5 import uic
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import QTimer, QEvent, Qt, pyqtSlot, pyqtSignal
@@ -181,7 +183,7 @@ class NotificationItem(QFrame):
         self.timeLabel.setFont(smallFont)
 
 class Notifications(QFrame):
-    def __init__(self, parent=None):
+    def __init__(self, connection: MongoClient, parent=None):
         super(Notifications, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI" , "notifications.ui"))
         if os.path.exists(path):
@@ -189,6 +191,7 @@ class Notifications(QFrame):
         else:
             raise FileNotFoundError(f"{path} not found")
         
+        self.connection = connection
         self.dbName = 'notifications'
         self.collection = 'from_system'
         self.unreadsCount = 0
@@ -274,7 +277,7 @@ class Notifications(QFrame):
         if not user_email:
             return [], []
         asyncMoongoGet = asyncWrap(mongoGet)
-        data = await asyncMoongoGet(database=self.dbName, collection=self.collection, limit=int(1e2), email=user_email)
+        data = await asyncMoongoGet(database=self.dbName, collection=self.collection, limit=int(1e2), email=user_email, connection=self.connection)
         if not data:
             return [], []
         unreads = [d for d in data if d.get('status', None).lower() == 'unread']

@@ -17,7 +17,7 @@ uri = getenv("MONGO_URI")
 # Create a new client and connect to the server
 client = MongoClient(uri, server_api=ServerApi('1'))
 
-def mongoGet(database: str = "market", collection: str = ..., sortField: str = "date", limit: int = 1, **kwargs) -> List[Dict]:
+def mongoGet(database: str = "market", collection: str = ..., sortField: str = "date", limit: int = 1, connection: MongoClient = client, **kwargs) -> List[Dict]:
     """
     This function retrieves documents from a specified MongoDB collection based on the provided parameters.
 
@@ -26,11 +26,15 @@ def mongoGet(database: str = "market", collection: str = ..., sortField: str = "
     - collection (str): The name of the MongoDB collection. This parameter is required.
     - sortField (str): The field to sort the documents by. Default is "date".
     - limit (int): The maximum number of documents to retrieve. Default is 1.
+    - connection (MongoClient): The MongoDB client to use. If not provided, a new client will be created.
     - kwargs (Dict): Additional query parameters to filter the documents.
 
     Returns:
     - List[Dict]: A list of dictionaries representing the retrieved documents. If no documents are found, an empty list is returned.
     """
+    if connection:
+        client = connection
+    
     try:
         #confirm successful connection
         state = client.admin.command('ping')

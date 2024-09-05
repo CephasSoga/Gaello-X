@@ -82,3 +82,43 @@ class Logger(object):
 
 
 
+import time
+
+def timer(func):
+    """
+    A decorator that logs the time taken to execute a synchronous function.
+
+    Args:
+        func: The function to be timed.
+
+    Returns:
+        The result of the function.
+    """
+
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = func(*args, **kwargs)
+        end = time.perf_counter()
+        print(f"\n*** Runtime check: {func.__name__} took: {end - start:.4f} seconds to complete.\n")
+        return result
+    return wrapper
+
+
+def async_timer(func):
+    """
+    A decorator that logs the time taken to execute an asynchronous function.
+
+    Args:
+        func: The async function to be timed.
+
+    Returns:
+        The result of the function.
+    """
+
+    async def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = await func(*args, **kwargs)
+        end = time.perf_counter()
+        print(f"{func.__name__} took: {end - start:.4f} seconds to complete.\n")
+        return result
+    return wrapper

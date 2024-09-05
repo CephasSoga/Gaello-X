@@ -111,8 +111,8 @@ class UserAuthentification:
     delete_user(email: str) -> bool
         Deletes a user from the database based on their email.
     """
-    def __init__(self, connection_str: str):
-        self.client = MongoClient(connection_str, server_api=ServerApi('1'))
+    def __init__(self, connection_str: str, connection: MongoClient = None):
+        self.client = connection or MongoClient(connection_str, server_api=ServerApi('1'))
         self.database: Database = self.client.UsersAuth
         self.users: Collection = self.database.users
 

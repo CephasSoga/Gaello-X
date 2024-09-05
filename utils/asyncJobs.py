@@ -1,7 +1,7 @@
 import asyncio
 import aiohttp
 from functools import wraps, partial
-from typing import Dict
+from typing import Dict, Callable
 
 from utils.logs import Logger
 
@@ -122,3 +122,38 @@ def asyncWrap(func):
         return await loop.run_in_executor(executor, pfunc)
     return run
 
+async def ThreadRun(func: Callable, *args, **kwargs):
+    """
+    Runs a function in a separate thread and waits for its result.
+
+    This is a convenient way to run I/O-bound operations without blocking the event loop.
+
+    Args:
+        func (callable): The function to run in a separate thread.
+        *args: The positional arguments to pass to the function.
+        **kwargs: The keyword arguments to pass to the function.
+
+    Returns:
+        Any: The result of the function.
+
+    Example:
+    >>> async def main():
+    >>>     result = await ThreadRun(time.sleep, 1)
+    >>>     print("result:", result)
+
+    >>>  "result":  None
+    """
+    result = await asyncio.to_thread(func, *args, **kwargs)
+    return result
+
+
+def add(a, b):
+    return [a for a in [a, b] if a == b]
+
+async def main():
+    import time
+    result = await ThreadRun(add, 1, 3)
+    print("result:", result)
+
+if __name__ == "__main__":
+    asyncio.run(main())

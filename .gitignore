@@ -10,3 +10,4 @@ app/Temp
 packages
 pyproject.toml
 .config
+**/test*

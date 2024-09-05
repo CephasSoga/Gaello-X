@@ -4,6 +4,9 @@ import ctypes
 import subprocess
 import threading
 
+# 0-.
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 # Help pyinstaller detect used packages
 # 1- Pypi packages
 import asyncio, PyQt5, qasync, pyqtspinner, json, pathlib, requests, aiohttp, audioread, bcrypt, numpy, plotly, pymongo, pyaudio, waitress, dotenv, flask
@@ -38,13 +41,16 @@ from app.inferential import ExportInsights, Insights
 from client.client import Client
 from utils.system import restoreSystemPath
 from utils.paths import getFrozenPath, getFrozenPath2
-from  utils.appHelper import getScreenSize, getDPI
+from utils.appHelper import getScreenSize, getDPI
+from utils.envHandler import getenv
+from utils.logs import Logger, timer
 
 _cwd = os.getcwd()
 main_logger = Logger("Main")
 main_logger.log("info", "Starting the application...")
 main_logger.log("info", f"Current working directory: {_cwd}")
 
+@timer
 def system_check(resolution_check_enabled: bool = True):
     BASE_DPI = 144
     BASE_PROPS = 1920, 1080
@@ -65,9 +71,26 @@ def system_check(resolution_check_enabled: bool = True):
         else:
             main_logger.log("info", "The optimal requirements for the application's DPI or screen resolution are met. No adjustments needed.")
 
+@timer
+def create_mongo_connection():
+    uri = getenv("MONGO_URI")
 
+    # Create a new client and connect to the server
+    mongo_client = MongoClient(uri, server_api=ServerApi('1'))
+
+    # Send a ping to confirm a successful connection
+    try:
+        mongo_client.admin.command('ping')
+        main_logger.log("info", "MongoDB connected successfully!")
+        return mongo_client
+    except Exception as e:
+        main_logger.log("error", "MongoDB connection attempt failed", e)
+        return None
+
+@timer
 def binary_exec():
     subprocess.Popen([r".\binary.bat"], shell=True)
+
 
 def thread_exec(func):
     thread = threading.Thread(target=func)
@@ -75,8 +98,14 @@ def thread_exec(func):
     thread.start()
 
 def exec_client():
-    cl = Client()
-    cl.run()
+    try:
+        mongo_client = create_mongo_connection()
+        if not mongo_client:
+            return
+        cl = Client(connection=mongo_client)
+        cl.run()
+    except Exception as e:
+        main_logger.log("error", "Failed to start the client", e)
 
 def exec_api():
     api = FlaskApplication()
@@ -87,6 +116,7 @@ def exec_api():
     except Exception as e:
         main_logger.log("error", "Failed to start the API", e)
 
+@timer
 def exec_all():
     try:
         system_check(resolution_check_enabled=False)
@@ -97,7 +127,9 @@ def exec_all():
         return
     
     try:
+        print("Applying binaries...")
         binary_exec()
+        #print("Skipping binaries...")
     except (SystemExit, SystemError) as sys_err:  # Exits the program if the binary cannot be executed:
         main_logger.log("error", "System error while executing the binary. Returning...", sys_err)
         return
@@ -119,9 +151,6 @@ def exec_all():
         exec_client()
 
 if __name__ == "__main__":
-    import time
     # Calls the exec_all function to execute both the API and client components.
-    s = time.perf_counter()
     exec_all()
-    e = time.perf_counter()
-    main_logger.log("info", f"Execution time: {e - s:.4f} seconds")
+

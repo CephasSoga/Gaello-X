@@ -67,7 +67,7 @@ class AssetPreview(QFrame):
                     border-style: none;
                 }"""
             )
-            icon = QIcon(r"icons/up.png")
+            icon = QIcon(getFrozenPath(os.path.join("assets", "icons", "up.png")))
             self.icon.setIcon(icon)
             self.icon.setIconSize(QSize(side, side))
 
@@ -80,7 +80,7 @@ class AssetPreview(QFrame):
                     border-style: none;
                 }"""
             )
-            icon = QIcon(r"icons/down.png")
+            icon = QIcon(getFrozenPath(os.path.join("assets", "icons", "down.png")))
             self.icon.setIcon(icon)
             self.icon.setIconSize(QSize(side, side))
 

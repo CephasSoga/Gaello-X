@@ -34,10 +34,12 @@ class SingleFocus(QWidget):
         target = mongoGet(collection=targetCollection, symbol=self.symbol)
         if self.targetCollection =='forex':
             start = 'price'
-        elif self.targetCollection == 'commodities':
+        elif self.targetCollection in ['commodities', 'indices']:
             start = 'historical'
-        else:
+        elif self.targetCollection == 'crypto':
             start = 'historicalData'
+        else:
+            raise ValueError(f"Collection {self.targetCollection} not supported")
         self.target = target[0][start] if target else None
 
         self.initUI()
@@ -71,13 +73,14 @@ class SingleFocus(QWidget):
     async def fetchQuote(self):
         await asyncio.sleep(2)
         if not self.target:
+            end = ''
             return
         if self.targetCollection in ['crypto', 'forex']:
             end = 'quote'
         elif self.targetCollection in ['indices', 'commodities']:
             end = 'quotes'
         else:
-            end = ''
+            raise ValueError(f"Collection {self.targetCollection} not supported")
         subTarget = self.target.get(end)
         # force it to return a list
         return subTarget if subTarget else []

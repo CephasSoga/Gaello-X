@@ -16,7 +16,7 @@ from utils.paths import getFrozenPath
 
 class CommodityItem(QFrame):
     clicked = pyqtSignal()
-    def __init__(self, symbol: str, name: str, price: float, growth: float, historicalPixmap: Optional[QPixmap] = None, parent=None):
+    def __init__(self, symbol: str, name: str, price: float, growth: float, parent=None):
         super(CommodityItem, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "commodityItem.ui"))
         if os.path.exists(path):
@@ -28,7 +28,6 @@ class CommodityItem(QFrame):
         self.name = name
         self.price = price
         self.growth = growth
-        self.historicalPixmap = historicalPixmap
 
         self.initUI()
 
@@ -52,9 +51,6 @@ class CommodityItem(QFrame):
 
         self.nameLabel.setText(self.name)
         self.priceLabel.setText(f"{self.price:.3f}")
-
-        if self.historicalPixmap:
-            self.chartLabel.setPixmap(self.historicalPixmap)
 
         if self.growth >= 0:
             self.growthLabel.setText(f"+{self.growth:.3f}%")

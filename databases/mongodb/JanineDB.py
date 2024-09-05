@@ -23,12 +23,12 @@ if not ID or not EMAIL:
     logger.log('warning', 'Empty user credentials.', ValueError('User credentials not found in cache.'))
 
 class JanineMongoDatabase:
-    def __init__(self, uri: str = connectionStr, user: str=f'{ID}-{EMAIL}', title: str = None):
+    def __init__(self, uri: str = connectionStr, user: str=f'{ID}-{EMAIL}', title: str = None, connection: MongoClient = None):
         self.uri = uri
         self.user = user.split('.')[0][:36] # Comply with mongodb db name max length
         self.id: str  = ID
         self.email: str = EMAIL
-        self.client = None
+        self.client = None if not connection else connection
         self.database: Database = None
         self.chatCollections: list[str] = None
         self.chatHistory: Collection = None
@@ -39,7 +39,8 @@ class JanineMongoDatabase:
         Connects to the MongoDB database.
         """
         try:
-            self.client = MongoClient(self.uri, server_api=ServerApi('1'))
+            if not self.client:
+                self.client = MongoClient(self.uri, server_api=ServerApi('1'))
             self.database = self.client[self.user]
         except ConnectionFailure as  conn_failure:
             logger.log("error", "Failed to connect to MongoDB", conn_failure)
