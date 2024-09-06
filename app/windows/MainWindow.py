@@ -118,11 +118,11 @@ class MainWindow(QMainWindow):
                     self.spawnAccountSettings()
 
     def spawnAccountSettings(self):
-        self.accountConnector = SignInFrame(self)
+        self.accountConnector = SignInFrame(connection=self.connection, parent=self)
         stackOnCurrentWindow(self.accountConnector)
     
     def spawnAccountDetails(self):
-        self.accountMenu = AccountMenu()
+        self.accountMenu = AccountMenu(connection=self.connection)
         setRelativeToMainWindow(self.accountMenu, self.header, 'right')
 
     def reduceWindow(self):

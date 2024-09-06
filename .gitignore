@@ -11,3 +11,4 @@ packages
 pyproject.toml
 .config
 **/test*
+**/logs

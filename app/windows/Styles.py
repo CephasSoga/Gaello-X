@@ -60,3 +60,19 @@ chatScrollBarStyle = """
                 min-height: 10px;
                 border-radius: 5px; /* Make edges round */
             } """
+
+ # Customize the buttons with styles
+msgBoxStyleSheet = """
+    QPushButton {
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+    QPushButton:hover {
+        background-color: rgb(0, 150, 0);
+    }
+    QPushButton:pressed {
+        background-color: #a0a0a0;
+    }
+"""
