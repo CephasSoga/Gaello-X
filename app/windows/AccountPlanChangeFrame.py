@@ -50,7 +50,7 @@ class UpgradePaymentForm(PaymentForm):
 
 class AccountUpgradeFromFree(NewAccountPlan):
     def __init__(self, connection: MongoClient, parent=None):
-        super(AccountUpgradeFromFree, self).__init__(parent=parent)
+        super(AccountUpgradeFromFree, self).__init__(connection=connection, parent=parent)
         self.connection = connection
 
     # override method

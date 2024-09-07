@@ -14,6 +14,7 @@ from utils.appHelper import setRelativeToMainWindow, adjustForDPI, showWindow
 from utils.paths import getFrozenPath
 from utils.paths import getFrozenPath, getFileSystemPath
 from utils.envHandler import getenv
+from utils.databases import mongoGet
 
 
 class Menu(QFrame):
@@ -67,6 +68,18 @@ class AccountMenu(QFrame):
             if id:
                 self.idLabel.setText(f"Account ID: {id}")
                 self.idLabel.setAlignment(Qt.AlignCenter)
+
+            email = sync_read_user_cred_file().get("email", None)
+
+            if email:
+                users = mongoGet(database='UsersAuth', collection="users", limit=int(1e7), connection=self.connection) # Use a verly large limit to avoid returned range not including user
+                this_user = [user for user in users if user['user']['email'] == email]
+                user = this_user[0] if this_user else None
+                if user:
+                    target = "subscription"
+                    self.planLabel.setText(f"Account Current Plan: {user.get(target, "")}")
+                    self.planLabel.setAlignment(Qt.AlignCenter)
+                
         except FileNotFoundError:
             sign_in = SignInFrame()
             showWindow(sign_in)

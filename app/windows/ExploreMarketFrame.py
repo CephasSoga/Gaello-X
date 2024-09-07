@@ -210,6 +210,7 @@ class ExploreMarket(QFrame):
 
         def func_3(forexPair: str, price: float, growth: float, flag1: QPixmap, flag2: QPixmap, chartPixmap: QPixmap):
             item = ForexItem(
+                connection=self.connection,
                 flag1Pixmap=flag1, 
                 flag2Pixmap=flag2, 
                 pair=forexPair, 
@@ -271,6 +272,7 @@ class ExploreMarket(QFrame):
 
         def func_2(indexSymbol, indexName, currentPrice, growth, chartPixmap):
             item = IndexItem(
+                connection=self.connection,
                 symbol=indexSymbol, 
                 name=indexName, 
                 price=currentPrice, 
@@ -312,6 +314,7 @@ class ExploreMarket(QFrame):
 
         def func_2(cryptoSymbol, cryptoName, price, growth, imagePixmap, chartPixmap):
             item = CryptoItem(
+                connection=self.connection,
                 symbol=cryptoSymbol, 
                 name=cryptoName, 
                 price=price, 
@@ -378,7 +381,13 @@ class ExploreMarket(QFrame):
             return commoditySymbol, comName, price, growth
         
         def func_2(commoditySymbol, comName, price, growth):
-            item = CommodityItem(commoditySymbol, comName, price, growth)
+            item = CommodityItem(
+                connection=self.connection, 
+                symbol=commoditySymbol, 
+                name=comName, 
+                price=price, 
+                growth=growth
+            )
             return item
         
         res = await ThreadRun(func_1, self.commodities, commoditySymbol)
