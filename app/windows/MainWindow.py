@@ -83,6 +83,9 @@ class MainWindow(QMainWindow):
         self.connection.close()
         if not isFrozen():
             exit(0)
+        else:
+            import sys
+            sys.exit(0)
 
     def connectSlots(self):
         self.header.minimize.clicked.connect(self.reduceWindow)

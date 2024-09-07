@@ -35,7 +35,7 @@ class PressInsigthsFrame(QFrame):
     def openInsights(self):
         if not self.insightsWindow:
             self.insightsWindow = JanineInsights(connection=self.connection, parent=self.parent())
-            asyncio.ensure_future(handleAuth(2, stackOnCurrentWindow, self.insightsWindow))
+            asyncio.ensure_future(handleAuth(self.connection, 2, stackOnCurrentWindow, self.insightsWindow))
         else:
             self.insightsWindow = None
 
@@ -47,8 +47,9 @@ class PressInsigthsFrame(QFrame):
             return super().eventFilter(obj, event)
         
 class PressCommunityFrame(QFrame):
-    def __init__(self, widget: QWidget, parent=None):
+    def __init__(self, connection: MongoClient, widget: QWidget, parent=None):
         super().__init__(parent)
+        self.connection = connection
         self.widget = widget
         self.communityWindow = None
         self.widget.installEventFilter(self)
@@ -56,7 +57,7 @@ class PressCommunityFrame(QFrame):
     def openCommunity(self):
         if not self.communityWindow:
             self.communityWindow = JanineCommunity(self.parent())
-            asyncio.ensure_future(handleAuth(1, stackOnCurrentWindow, self.communityWindow))
+            asyncio.ensure_future(handleAuth(self.connection, 1, stackOnCurrentWindow, self.communityWindow))
         else:
             self.communityWindow = None
 
@@ -169,7 +170,7 @@ class Bottom(QMainWindow):
 
     def connectSlots(self):
         self.insightsFrame_ = PressInsigthsFrame(connection=self.connection, widget=self.insightsFrame)
-        self.communityFrame_ = PressCommunityFrame(self.communityFrame)
+        self.communityFrame_ = PressCommunityFrame(connection=self.connection, widget=self.communityFrame)
         self.plusFrame_ = PressPlusFrame(self.plusFrame)
 
         self.exploreProject.clicked.connect(lambda: browse(self.exploreProjectUrl))

@@ -113,7 +113,7 @@ class NotificationItem(QFrame):
 
     isExpanded = pyqtSignal()
 
-    def __init__(self, message: Unread | Read, parent=None):
+    def __init__(self, connection: MongoClient, message: Unread | Read, parent=None):
         super(NotificationItem, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI" , "notificationItem.ui"))
         if os.path.exists(path):
@@ -121,6 +121,7 @@ class NotificationItem(QFrame):
         else:
             raise FileNotFoundError(f"{path} not found")
 
+        self.connection = connection
         self.message = message
 
         self.dbName = 'notifications'
@@ -130,6 +131,7 @@ class NotificationItem(QFrame):
 
     def initUI(self):
         adjustForDPI(self)
+        self.connectSlots()
         self.setContents()
         self.setFonts()
         self.installEventFilter(self)
@@ -139,6 +141,10 @@ class NotificationItem(QFrame):
         #self.contentLabel.setText(self.message.content)
         self.dateLabel.setText(self.message.date)
         self.timeLabel.setText(self.message.time)
+
+    def connectSlots(self):
+        self.isExpanded.connect(self.updateTimeout)
+
 
     def eventFiltter(self, obj, event):
         if event.type() == QEvent.MouseButtonPress:
@@ -154,7 +160,6 @@ class NotificationItem(QFrame):
 
     def expand(self):
         self.isExpanded.emit()
-        self.isExpanded.connect(self.updateTimeout)
         try:
             parent = self.parent().parent().parent().parent() # stands for Header widget
         except AttributeError:
@@ -166,12 +171,18 @@ class NotificationItem(QFrame):
         QTimer.singleShot(Schedule.DEFAULT_DELAY, self.syncMongoUpdate)
 
     def syncMongoUpdate(self):
-        asyncio.ensure_future(self.updateMessageStatus)
+        asyncio.ensure_future(self.updateMessageStatus())
 
     async def updateMessageStatus(self):
+        print(f"Updating status for message ID: {self.message._id}")
         asyncMongoUpdate = asyncWrap(mongoUpdate)
-        _ = await asyncMongoUpdate(database=self.dbName, collection=self.collection, query={"id": self.message._id}, update={"$set": {"status": "read"}})
-
+        res = await asyncMongoUpdate(
+            database=self.dbName, 
+            collection=self.collection, 
+            query={"_id": self.message._id}, 
+            update={"$set": {"status": "read"}}, 
+            connection=self.connection)
+        print(f"Update result: {res}")
 
     def setFonts(self):
         size = FontSizePoint
@@ -263,16 +274,20 @@ class Notifications(QFrame):
 
         # Add new items to layouts
         for unread in unreads:
-            item = NotificationItem(unread)
+            item = NotificationItem(connection=self.connection, message=unread)
             self.unreadsLayout.addWidget(item)
 
         for read in reads:
-            item = NotificationItem(read)
+            item = NotificationItem(connection=self.connection, message=read)
             self.readsLayout.addWidget(item)
 
     @pyqtSlot()
     async def getNotifications(self) -> tuple[list[Unread], list[Read]]:
-        user_creds = sync_read_user_cred_file()
+        try:
+            user_creds = sync_read_user_cred_file()
+        except FileNotFoundError:
+            print("No user credentials found, unable to retrieve notifications.")
+            return [], []
         user_email = user_creds.get('email', '')
         if not user_email:
             return [], []

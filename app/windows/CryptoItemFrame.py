@@ -6,6 +6,7 @@ from PyQt5 import uic
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QFrame
+from pymongo import MongoClient
 
 from app.handlers.AuthHandler import handleAuth
 from app.config.fonts import RobotoBold, Exo2Light, FontSizePoint
@@ -15,13 +16,15 @@ from utils.paths import getFrozenPath
 
 class CryptoItem(QFrame):
     clicked = pyqtSignal()
-    def __init__(self, symbol: str, name: str, price: float, growth: float, imagePixmap: Optional[QPixmap], historicalPixmap: Optional[QPixmap], parent=None):
+    def __init__(self, connection: MongoClient, symbol: str, name: str, price: float, growth: float, imagePixmap: Optional[QPixmap], historicalPixmap: Optional[QPixmap], parent=None):
         super().__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "cryptoItem.ui"))
         if os.path.exists(path):
             uic.loadUi(path, self)
         else:
             raise FileNotFoundError(f"{path} not found")
+        
+        self.connection = connection
         self.symbol = symbol
         self.name = name
         self.price = price
@@ -75,10 +78,10 @@ class CryptoItem(QFrame):
         self.tagLabel.setFont(tinyFont)
 
     def connectSlots(self):
-        self.clicked.connect(lambda: asyncio.ensure_future(handleAuth(2, self.spawnFocus)))
+        self.clicked.connect(lambda: asyncio.ensure_future(handleAuth(self.connection, 2, self.spawnFocus)))
 
     def spawnFocus(self):
         ancestorWidget = self.parent().parent().parent().parent() #Stands for ExploreMarket widget
-        item = SingleFocus(symbol=self.symbol, targetCollection='crypto')
+        item = SingleFocus(connection=self.connection, symbol=self.symbol, targetCollection='crypto')
         setRelativeToMainWindow(item, ancestorWidget, "center")
         ancestorWidget.installEventFilter(item)

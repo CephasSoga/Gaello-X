@@ -162,7 +162,7 @@ class ExploreAsset(QFrame):
                 imagePixmap=imagePixmap, 
                 chartPixmap=chartPixmap, 
                 parent=self)
-            item.clicked.connect(lambda: asyncio.ensure_future(handleAuth(2, self.expand, item, symbol)))
+            item.clicked.connect(lambda: asyncio.ensure_future(handleAuth(self.connection, 2, self.expand, item, symbol)))
             self.scrollLayout.addWidget(item, row, col)
             self.assetPreviews.append(item)
 
@@ -193,7 +193,7 @@ class ExploreAsset(QFrame):
         return pixmap
 
     def expand(self, item: AssetPreview, symbol):
-        expand = AssetFocus(symbol, self.parent())
+        expand = AssetFocus(symbol=symbol, connection=self.connection, parent=self.parent())
         setRelativeToMainWindow(expand, self, "center")
         self.installEventFilter(expand)
 

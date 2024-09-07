@@ -8,6 +8,7 @@ from PyQt5 import uic
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QEvent, QThread, pyqtSignal, pyqtSlot, QObject, QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame, QTextEdit
+from pymongo import MongoClient
 
 from utils.databases import mongoGet
 from app.windows.Spinner import Spinner
@@ -21,7 +22,7 @@ from app.config.renderer import ViewController
 
 
 class SingleFocus(QWidget):
-    def __init__(self, symbol:str, targetCollection: str, parent=None):
+    def __init__(self, connection: MongoClient, symbol:str, targetCollection: str, parent=None):
         super().__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI" , "singleFocus.ui"))
         if os.path.exists(path):
@@ -29,9 +30,10 @@ class SingleFocus(QWidget):
         else:
             raise FileNotFoundError(f"{path} not found")
 
+        self.connection = connection
         self.symbol = symbol
         self.targetCollection = targetCollection
-        target = mongoGet(collection=targetCollection, symbol=self.symbol)
+        target = mongoGet(collection=targetCollection, symbol=self.symbol, connection=self.connection)
         if self.targetCollection =='forex':
             start = 'price'
         elif self.targetCollection in ['commodities', 'indices']:

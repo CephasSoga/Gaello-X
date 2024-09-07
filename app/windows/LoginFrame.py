@@ -17,7 +17,7 @@ from app.config.fonts import RobotoRegular, FontSizePoint
 from app.windows.NewAccountSetup import NewAccountSetup
 
 from databases.mongodb.UsersAuth import UserCredentials, userAuthInstance
-from databases.mongodb.Common import mongoGet
+from utils.databases import mongoGet
 
 
 class SignInFrame(QMainWindow):

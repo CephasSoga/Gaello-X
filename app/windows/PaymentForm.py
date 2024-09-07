@@ -8,6 +8,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QEvent
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFrame, QMessageBox
+from pymongo import MongoClient
 
 from app.config.fonts import RobotoBold, FontSizePoint
 from app.windows.NewAccountOk import AccountAllSet, AccountInitFailure
@@ -26,7 +27,7 @@ class PaymentForm(QFrame):
     success = pyqtSignal()
     failure = pyqtSignal()
 
-    def __init__(self, nodeAppPath: Path | str, execPath: Path | str = ".", parent=None):
+    def __init__(self, connection: MongoClient, nodeAppPath: Path | str, execPath: Path | str = ".", parent=None):
         path = getFrozenPath(os.path.join("assets", "UI", "paymentForm.ui"))
         super(PaymentForm, self).__init__(parent)
         if os.path.exists(path):
@@ -34,6 +35,7 @@ class PaymentForm(QFrame):
         else:
             raise FileNotFoundError(f"{path} not found")
       
+        self.connection = connection
         self.nodeAppPath = nodeAppPath
         self.execPath = execPath
         self.nodeProcess = None
@@ -80,7 +82,7 @@ class PaymentForm(QFrame):
     def validatePayment(self) -> bool:
         if not self.email:
            return False
-        data = mongoGet(database="UsersAuth", collection="users", query={"user.email": self.email})
+        data = mongoGet(database="UsersAuth", collection="users", query={"user.email": self.email}, connection=self.connection)
         if not data:
             return False
         subscriptionField = data[0].get('subscription', {}) 

@@ -6,6 +6,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtWidgets import QFrame
+from pymongo import MongoClient
 
 from app.handlers.AuthHandler import handleAuth
 from app.config.fonts import RobotoBold, Exo2Light, FontSizePoint
@@ -18,6 +19,7 @@ class ForexItem(QFrame):
     clicked = pyqtSignal()
     def __init__(self,
                 #symbol: str, 
+                connection: MongoClient,
                 flag1Pixmap: Optional[QPixmap], 
                 flag2Pixmap: Optional[QPixmap], 
                 pair: str, 
@@ -33,6 +35,7 @@ class ForexItem(QFrame):
             raise FileNotFoundError(f"{path} not found")
 
         #self.symbol = symbol
+        self.connection = connection
         self.flag1Pixmap = flag1Pixmap
         self.flag2Pixmap = flag2Pixmap
         self.pair = pair
@@ -91,11 +94,11 @@ class ForexItem(QFrame):
         self.tagLabel.setFont(tinyFont)
 
     def connectSlots(self):
-        self.clicked.connect(lambda: asyncio.ensure_future(handleAuth(2, self.spawnFocus)))
+        self.clicked.connect(lambda: asyncio.ensure_future(handleAuth(self.connection, 2, self.spawnFocus)))
 
     def spawnFocus(self):
         ancestorWidget = self.parent().parent().parent().parent() #Stands for ExploreMarket widget
-        item = SingleFocus(symbol=self.pair.replace("/",""), targetCollection='forex')
+        item = SingleFocus(connection=self.connection, symbol=self.pair.replace("/",""), targetCollection='forex')
         setRelativeToMainWindow(item, ancestorWidget, "center")
         ancestorWidget.installEventFilter(item)
             

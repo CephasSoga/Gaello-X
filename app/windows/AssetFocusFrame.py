@@ -6,6 +6,7 @@ from PyQt5 import uic
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QEvent, QThread, pyqtSignal, pyqtSlot, QObject
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame, QTextEdit
+from pymongo import MongoClient
 
 from utils.databases import mongoGet
 from app.windows.Spinner import Spinner
@@ -54,7 +55,7 @@ class AssetFocusItem(QFrame):
         self.value.setFont(font)
 
 class AssetFocus(QWidget):
-    def __init__(self, symbol:str, parent=None):
+    def __init__(self, symbol:str, connection: MongoClient, parent=None):
         super(AssetFocus, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "assetFocus.ui"))
         if os.path.exists(path):
@@ -65,8 +66,9 @@ class AssetFocus(QWidget):
         self.logger = Logger("Stocks-Focus")
 
         self.symbol = symbol
+        self.connection = connection
         self.apikey = os.getenv("FMP_API_KEY")
-        target = mongoGet(collection='ticker', symbol=self.symbol)
+        target = mongoGet(collection='ticker', symbol=self.symbol, connection=self.connection)
         self.target = target[0]['ticker'] if target else None
 
         self.initUI()

@@ -13,7 +13,6 @@ from PyQt5.QtWidgets import QWidget, QApplication, QGridLayout
 
 from app.config.fonts import RobotoRegular, MontserratRegular, FontSizePoint
 from app.windows.InsightItems import InsightItem
-from app.inferential.ExportInsights import insights
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 from app.config.renderer import ViewController
@@ -21,8 +20,6 @@ from utils.databases import mongoGet
 from utils.asyncJobs import asyncWrap, enumerate_async
 from app.config.balancer import BatchBalance
 from app.config.renderer import ViewController
-from app.handlers.AuthHandler import  handleAuth
-from utils.appHelper import stackOnCurrentWindow
 
 @dataclass
 class Insight:
@@ -57,15 +54,6 @@ class JanineInsights(QWidget):
         self.connectSlots()
         self.setupLayout()
         self.setFonts()
-
-    def mousePressEvent(self, event):
-        self.open()
-        super().mousePressEvent(event)
-        
-
-    def open(self):
-        asyncio.ensure_future(handleAuth(2, stackOnCurrentWindow, self))
-        
 
     def setupLayout(self):
         self.insightslayout = QGridLayout()

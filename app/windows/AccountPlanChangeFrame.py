@@ -24,8 +24,8 @@ from utils.databases  import mongoGet, mongoUpdate
 
 
 class UpgradePaymentForm(PaymentForm):
-    def __init__(self,nodeAppPath: Path | str, execPath: Path | str = ".", parent=None):
-        super(UpgradePaymentForm, self).__init__(nodeAppPath=nodeAppPath, execPath=execPath,parent=parent)
+    def __init__(self, connection: MongoClient, nodeAppPath: Path | str, execPath: Path | str = ".", parent=None):
+        super(UpgradePaymentForm, self).__init__(connection=connection, nodeAppPath=nodeAppPath, execPath=execPath,parent=parent)
     
     # override method
     def spawnTerminated(self):
@@ -49,15 +49,16 @@ class UpgradePaymentForm(PaymentForm):
         self.close()
 
 class AccountUpgradeFromFree(NewAccountPlan):
-    def __init__(self, parent=None):
+    def __init__(self, connection: MongoClient, parent=None):
         super(AccountUpgradeFromFree, self).__init__(parent=parent)
+        self.connection = connection
 
     # override method
     def submitStandardTier(self):
         parent = self.parent()
         nodeAppPath = getFrozenPath(os.path.join('assets', 'binaries', 'checkouts','standard', 'Gaello-webpaypal-standard-tier.exe'))
         execPath = getFrozenPath(".")
-        self.paymentForm = UpgradePaymentForm(nodeAppPath=nodeAppPath, execPath=execPath) # The change is here
+        self.paymentForm = UpgradePaymentForm(connection=self.connection, nodeAppPath=nodeAppPath, execPath=execPath) # The change is here
         if self.paymentForm:
             self.paymentForm.hide()
             if parent:
@@ -71,7 +72,7 @@ class AccountUpgradeFromFree(NewAccountPlan):
         parent = self.parent()
         nodeAppPath = getFrozenPath(os.path.join('assets', 'binaries', 'checkouts','advanced', 'Gaello-webpaypal-advanced-tier.exe'))
         execPath = getFrozenPath(".")
-        self.paymentForm = UpgradePaymentForm(nodeAppPath=nodeAppPath, execPath=execPath) # The change is here
+        self.paymentForm = UpgradePaymentForm(connection=self.connection, nodeAppPath=nodeAppPath, execPath=execPath) # The change is here
         if self.paymentForm:
             self.paymentForm.hide()
             if parent:
@@ -140,7 +141,7 @@ class AccountPlanChange(QFrame):
             messageBox.setStyleSheet(msgBoxStyleSheet)
             result = messageBox.exec_()
             if result == QMessageBox.Ok:
-                accountPlan = AccountUpgradeFromFree(self)
+                accountPlan = AccountUpgradeFromFree(connection=self.connection, parent=self)
                 accountPlan.submitStandardTier()
                 self.hide()
                 return
@@ -201,7 +202,7 @@ class AccountPlanChange(QFrame):
             messageBox.setStyleSheet(msgBoxStyleSheet)
             result = messageBox.exec_()
             if result == QMessageBox.Ok:
-                accountPlan = AccountUpgradeFromFree(self)
+                accountPlan = AccountUpgradeFromFree(connection=self.connection, parent=self)
                 accountPlan.submitAdvancedTier()
                 self.hide()
                 return
@@ -319,7 +320,8 @@ class AccountPlanChange(QFrame):
         asyncMongoUpdate = asyncWrap(mongoUpdate)
         _ = await asyncMongoUpdate(
             database=self.dbName, 
-            collection=self.collection, 
+            collection=self.collection,
+            connection=self.connection,  
             query={"user.email": email}, 
             update={"$set": {
                         "status": "ACTIVE", 

@@ -106,7 +106,7 @@ class NewAccountSetup(QFrame):
 
     def spawnAccountPlanSelector(self):
         parent = self.parent()
-        self.accountPlanSelector = NewAccountPlan(parent)
+        self.accountPlanSelector = NewAccountPlan(connection=self.connection, parent=parent)
         self.accountPlanSelector.hide()
         if not parent:
             showWindow(self.accountPlanSelector)

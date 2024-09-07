@@ -6,6 +6,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFrame, QMessageBox
+from pymongo import MongoClient
 
 from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.databases import mongoUpdate
@@ -17,7 +18,7 @@ from app.handlers.AuthHandler import sync_read_user_cred_file
 
 
 class NewAccountPlan(QFrame):
-    def __init__(self, parent=None):
+    def __init__(self, connection: MongoClient, parent=None):
         super(NewAccountPlan, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI" , "newAccountPlan.ui"))
         if os.path.exists(path):
@@ -25,6 +26,7 @@ class NewAccountPlan(QFrame):
         else:
             raise FileNotFoundError(f"{path} not found")
 
+        self.connection = connection
         self.paymentForm = None
 
         # Set the window modality flag
@@ -86,7 +88,7 @@ class NewAccountPlan(QFrame):
         parent = self.parent()
         nodeAppPath = getFrozenPath(os.path.join('assets', 'binaries', 'checkouts','standard', 'Gaello-webpaypal-standard-tier.exe'))
         execPath = getFrozenPath(".")
-        self.paymentForm = PaymentForm(nodeAppPath=nodeAppPath, execPath=execPath)
+        self.paymentForm = PaymentForm(connection=self.connection, nodeAppPath=nodeAppPath, execPath=execPath)
         if self.paymentForm:
             self.paymentForm.hide()
             if parent:
@@ -99,7 +101,7 @@ class NewAccountPlan(QFrame):
         parent = self.parent()
         nodeAppPath = getFrozenPath(os.path.join('assets', 'binaries', 'checkouts','advanced', 'Gaello-webpaypal-advanced-tier.exe'))
         execPath = getFrozenPath(".")
-        self.paymentForm = PaymentForm(nodeAppPath=nodeAppPath, execPath=execPath)
+        self.paymentForm = PaymentForm(connection=self.connection, nodeAppPath=nodeAppPath, execPath=execPath)
         if self.paymentForm:
             self.paymentForm.hide()
             if parent:

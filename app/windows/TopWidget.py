@@ -35,7 +35,7 @@ class PressChatFrame(QFrame):
     def openChat(self):
         if not self.janineWindow:
             self.janineWindow = JanineChat(connection=self.connection, parent=self.parent())
-            asyncio.ensure_future(handleAuth(1, stackOnCurrentWindow, self.janineWindow))
+            asyncio.ensure_future(handleAuth(self.connection, 1, stackOnCurrentWindow, self.janineWindow))
         else:
             self.janineWindow = None
 
@@ -56,7 +56,7 @@ class PressExploreFrame(QFrame):
     def openExploreArea(self):
         if not self.summaryWindow:
             self.summaryWindow = MarketSummary(connection=self.connection, parent=self.parent())
-            asyncio.ensure_future(handleAuth(1, stackOnCurrentWindow, self.summaryWindow))
+            asyncio.ensure_future(handleAuth(self.connection, 1, stackOnCurrentWindow, self.summaryWindow))
         else:
             self.summaryWindow = None
 
@@ -126,13 +126,13 @@ class Header(QMainWindow):
         assets = ExploreAsset(connection=self.connection, parent=self)
         assets.hide()
         self.assetButton.clicked.connect(
-            lambda: asyncio.ensure_future(handleAuth(1, stackOnCurrentWindow, assets))
+            lambda: asyncio.ensure_future(handleAuth(self.connection, 1, stackOnCurrentWindow, assets))
         )
 
         market = ExploreMarket(connection=self.connection, parent=self)
         market.hide()
         self.marketButton.clicked.connect(
-            lambda: asyncio.ensure_future(handleAuth(1, stackOnCurrentWindow, market))
+            lambda: asyncio.ensure_future(handleAuth(self.connection, 1, stackOnCurrentWindow, market))
         )
 
         self.docWebEngineView = DocWebEngineView()

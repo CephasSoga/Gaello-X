@@ -3,8 +3,10 @@ import json
 import asyncio
 from typing import Callable
 
+from pymongo.mongo_client import MongoClient
+
 from app.windows.WarningDialog import Warning
-from databases.mongodb.Common import mongoGet
+from utils.databases import mongoGet
 from utils.paths import getFileSystemPath
 from utils.envHandler import getenv
 from utils.asyncJobs import asyncWrap
@@ -46,7 +48,7 @@ def read_user_id() -> str:
 
 
 
-async def read_auth_level() -> int:
+async def read_auth_level(connection: MongoClient) -> int:
 
     try:
         file_res = await read_user_cred_file()
@@ -57,7 +59,7 @@ async def read_auth_level() -> int:
 
         if user_email:
             asyncMongoGet = asyncWrap(mongoGet)
-            users = await asyncMongoGet(database='UsersAuth', collection="users", limit=int(1e7)) # Use a verly large limit to avoid returned range not including user
+            users = await asyncMongoGet(database='UsersAuth', collection="users", limit=int(1e7), connection=connection) # Use a verly large limit to avoid returned range not including user
 
             this_user = [user for user in users if user['user']['email'] == user_email]
 
@@ -72,8 +74,8 @@ async def read_auth_level() -> int:
         raise(e)
 
 
-async def exec_with_reserve(req: int, func: Callable,  *args, **kwargs):
-    level = await read_auth_level()
+async def exec_with_reserve(connection: MongoClient, req: int, func: Callable,  *args, **kwargs):
+    level = await read_auth_level(connection=connection)
     #loop.close()
     if level >= req:
         func(*args, **kwargs)
@@ -83,10 +85,10 @@ async def exec_with_reserve(req: int, func: Callable,  *args, **kwargs):
         raise PermissionError("You don't have the permissions to access this resource.")
     
 
-async def handleAuth(req: int, func: Callable,  *args, **kwargs):
+async def handleAuth(connection: MongoClient, req: int, func: Callable,  *args, **kwargs):
 
     try:
-        await exec_with_reserve(req, func, *args, **kwargs)
+        await exec_with_reserve(connection, req, func, *args, **kwargs)
     except PermissionError as e:
         msg = Warning('Permission Denied', str(e))
         msg.exec()

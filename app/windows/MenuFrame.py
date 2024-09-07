@@ -1,25 +1,20 @@
 import os
 import time
-import asyncio
-import aiohttp
 from pathlib import Path
-from typing import Callable
 
 from PyQt5 import  uic
 from PyQt5.QtCore import QEvent, Qt
 from PyQt5.QtWidgets import QFrame, QMessageBox
 
 from app.windows.AccountPlanChangeFrame import AccountPlanChange
+from app.windows.AccountDeletionFrame import AccountDeleteTrigger
 from app.windows.LoginFrame import SignInFrame
 from app.handlers.AuthHandler import sync_read_user_cred_file
-from app.windows.NewAccountPlan import NewAccountPlan
-from app.windows.NewAccountOk import AccountAllSet, AccountInitFailure
 from utils.appHelper import setRelativeToMainWindow, adjustForDPI, showWindow
 from utils.paths import getFrozenPath
 from utils.paths import getFrozenPath, getFileSystemPath
 from utils.envHandler import getenv
-from utils.asyncJobs import asyncWrap
-from utils.databases  import mongoGet
+
 
 class Menu(QFrame):
     def __init__(self, parent=None):
@@ -80,6 +75,7 @@ class AccountMenu(QFrame):
         self.logoutButton.clicked.connect(self.logout)
         self.changePlanButton.clicked.connect(self.changePlan)
         self.settingsButton.clicked.connect(self.spawnSettings)
+        self.deleteAccountButton.clicked.connect(self.deleteAccount)
 
     def logout(self):
         pathOnSystem = os.path.join(
@@ -112,12 +108,9 @@ class AccountMenu(QFrame):
     def spawnSettings(self):pass
 
 
-    async def deleteSubscription(self, subscriptionId: str, accessToken: str, mode: str = "live"):
-        pass
+    def deleteAccount(self):
+        accountDeletor = AccountDeleteTrigger(self.connection)
+        self.hide()
+        setRelativeToMainWindow(accountDeletor, self.parent(), 'center')
 
-    async def deleteSubscriptionWithNoFail(self, subscriptionId: str, accessToken: str, mode: str = "live"):
-        pass
-
-    def asyncTosync(self, func: Callable, *args, **kwargs):
-        return asyncio.ensure_future(func(*args, **kwargs))
-
+    

@@ -1,6 +1,4 @@
-import os
-from typing import List, Dict
-from urllib.parse import quote_plus
+from typing import List, Dict, Optional
 
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -8,16 +6,10 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 
 from utils.logs import Logger
-from utils.envHandler import getenv
 
 logger = Logger("Utils-Databases")
 
-uri = getenv("MONGO_URI")
-
-# Create a new client and connect to the server
-client = MongoClient(uri, server_api=ServerApi('1'))
-
-def mongoGet(database: str = "market", collection: str = ..., sortField: str = "date", limit: int = 1, connection: MongoClient = client, **kwargs) -> List[Dict]:
+def mongoGet(database: str = "market", collection: str = ..., sortField: str = "date", limit: int = 1, connection: Optional[MongoClient] = None, **kwargs) -> List[Dict]:
     """
     This function retrieves documents from a specified MongoDB collection based on the provided parameters.
 
@@ -31,9 +23,15 @@ def mongoGet(database: str = "market", collection: str = ..., sortField: str = "
 
     Returns:
     - List[Dict]: A list of dictionaries representing the retrieved documents. If no documents are found, an empty list is returned.
+    
+    Raises:
+    - ValueError: If the connection argument is not provided.
     """
-    if connection:
-        client = connection
+
+    if connection is None:
+        raise ValueError("MongoDB > Retrieval:: Connection not provided.")
+    
+    client = connection
     
     try:
         #confirm successful connection
@@ -66,7 +64,7 @@ def mongoGet(database: str = "market", collection: str = ..., sortField: str = "
         #client.close()
         pass
 
-def mongoUpdate(database: str = "market", collection: str = ..., query: Dict = {}, update: Dict = {}, scale: str = 'one'):
+def mongoUpdate(database: str = "market", collection: str = ..., query: Dict = {}, update: Dict = {}, scale: str = 'one', connection: Optional[MongoClient] = None):
     """
     This function updates documents in a specified MongoDB collection based on the provided parameters.
 
@@ -80,7 +78,15 @@ def mongoUpdate(database: str = "market", collection: str = ..., query: Dict = {
     Returns:
     - bool: Returns True if the update operation is successful and at least one document is modified.
             Returns False if the update operation fails or no document is modified.
+
+    Raises:
+    - ValueError: If the connection argument is not provided or the scale argument is not 'one' or 'many'.
     """
+    if connection is None:
+        raise ValueError("MongoDB > Retrieval:: Connection not provided.")
+    
+    client = connection
+
     try:
         #confirm successful connection
         state = client.admin.command('ping')
@@ -117,3 +123,51 @@ def mongoUpdate(database: str = "market", collection: str = ..., query: Dict = {
     finally:
         #client.close()
         pass
+
+
+def mongoDeleteOne(database: str, collection: str, filter: Dict, connection: Optional[MongoClient] = None):
+    """
+    This function deletes one document from a specified MongoDB collection based on the provided filter.
+    
+    Parameters:
+    - database (str): The name of the MongoDB database.
+    - collection (str): The name of the MongoDB collection.
+    - filter (Dict): A dictionary representing the filter to identify the document to delete.
+    - connection (MongoClient): The MongoDB client to use. If not provided, a new client will be created.
+    
+    Returns:
+    - bool: Returns True if the deletion operation is successful. Returns False if the deletion operation fails.
+    
+    Raises:
+    - ValueError: If the connection argument is not provided.
+    """
+
+    if connection is None:
+        raise ValueError("MongoDB > Retrieval:: Connection not provided.")
+    
+    client = connection
+    
+    try:
+        #confirm successful connection
+        state = client.admin.command('ping')
+        if state['ok'] == 1:
+            db: Database = client[database]
+            collection: Collection = db[collection]
+            result = collection.delete_one(filter)
+            return result.deleted_count > 0
+        else:
+            e = Exception("MongoDB > Delete:: Connection failed.")
+            logger.log(level='error', message="", error=e)
+            return False
+        
+    except Exception as e:
+        logger.log(
+            level='error',
+            message="MongoDB > Delete:: An error occurred while deleting documents.",  
+            error=e,
+            params={
+                'database': database,
+                'collection': collection,
+                'filter': filter
+            })
+        return False
