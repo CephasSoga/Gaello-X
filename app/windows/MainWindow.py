@@ -1,13 +1,16 @@
-import json
 import os
+import sys
+import json
+import asyncio
+import subprocess
 from pathlib import Path
 
 from pymongo.mongo_client import MongoClient
 
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QWidget, QMainWindow, QApplication, QVBoxLayout, QSizePolicy
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer
+from PyQt5.QtWidgets import QWidget, QMessageBox, QMainWindow, QApplication, QVBoxLayout, QSizePolicy
 
 from app.windows.LoginFrame import SignInFrame
 from app.windows.MenuFrame import AccountMenu
@@ -17,9 +20,14 @@ from utils.appHelper import stackOnCurrentWindow, setRelativeToMainWindow, isFro
 from utils.paths import constructPath, getFrozenPath, getFileSystemPath
 from utils.envHandler import getenv
 from app.config.renderer import ViewController
+from app.versions.control import VersionController
+from app.versions.download import VersionDownloadManager
+from app.versions.info import Version
 
 class MainWindow(QMainWindow):
     finishedLoading = pyqtSignal()
+    closedBeforeUpdateTimeout = pyqtSignal() # handle cases where user closes app before update timeout
+
     def __init__(self, connection: MongoClient):
         super(MainWindow, self).__init__()
         path = getFrozenPath(os.path.join("assets", "UI", "mainwindow.ui"))
@@ -81,10 +89,10 @@ class MainWindow(QMainWindow):
     def closeAndExit(self):
         self.close()
         self.connection.close()
+        self.closedBeforeUpdateTimeout.emit()
         if not isFrozen():
             exit(0)
         else:
-            import sys
             sys.exit(0)
 
     def connectSlots(self):
@@ -130,3 +138,71 @@ class MainWindow(QMainWindow):
 
     def reduceWindow(self):
         self.showMinimized()  # This keeps the window in a reduced state (icon in taskbar)
+    
+    async def proceedWithUpdate(self):
+        new_version_available = await self.checkForUpdate(getenv("VERSION_CONTROL_URL"))
+        if not new_version_available:
+            return
+        
+        permission = self.promptUserForDownload()
+        if not permission:
+            return
+
+        download = await self.download(new_version_available)
+        if not download:
+            return
+
+        user_wants_to_update_now = self.promptUserForUpdate()
+        if not user_wants_to_update_now:
+            return
+
+        # if app was closed before timeout
+        self.closedBeforeUpdateTimeout.connect(self.execUpdateScript)
+        delay = 15
+        self.warnForRestart(delay=delay)
+        await asyncio.sleep(delay)
+        self.execUpdateScript()
+        sys.exit(0)
+
+    async def download(self, version: Version):
+        downloader = VersionDownloadManager()
+        return await downloader.download(version)
+
+    async def checkForUpdate(self, url):
+        controller = VersionController()
+        return await controller.check_for_update(url)
+    
+    def promptUserForDownload(self) -> bool:
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Question)
+        msgBox.setText("New version available. Would you like to download it?")
+        msgBox.setWindowTitle("Update Available")
+        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msgBox.setDefaultButton(QMessageBox.Yes)
+        return msgBox.exec_() == QMessageBox.Yes
+    
+
+    def promptUserForUpdate(self) -> bool:
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Question)
+        msgBox.setText("Would you like to update now?")
+        msgBox.setWindowTitle("Update Available")
+        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msgBox.setDefaultButton(QMessageBox.Yes)
+        return msgBox.exec_() == QMessageBox.Yes
+    
+    def warnForRestart(self, delay: int = 15):
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Warning)
+        msgBox.setText(f"Update downloaded. The application will restart in {delay} seconds.")
+        msgBox.setWindowTitle("Update Downloaded")
+        msgBox.setStandardButtons(QMessageBox.Ok)
+        msgBox.setDefaultButton(QMessageBox.Ok)
+        msgBox.exec_()
+
+    def execUpdateScript(self):
+        script_to_exec = getFrozenPath(
+            os.path.join("app", "version", "update.py")
+        )
+
+        subprocess.Popen(["python", script_to_exec])
