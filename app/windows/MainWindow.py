@@ -140,6 +140,7 @@ class MainWindow(QMainWindow):
         self.showMinimized()  # This keeps the window in a reduced state (icon in taskbar)
     
     async def proceedWithUpdate(self):
+        path_to_store_binary = getFileSystemPath(os.path.join("C:", "Program Files", "Gaello X", "updates", "gaello.exe"))
         new_version_available = await self.checkForUpdate(getenv("VERSION_CONTROL_URL"))
         if not new_version_available:
             return
@@ -148,7 +149,7 @@ class MainWindow(QMainWindow):
         if not permission:
             return
 
-        download = await self.download(new_version_available)
+        download = await self.download(path_to_store_binary, new_version_available)
         if not download:
             return
 
@@ -164,9 +165,9 @@ class MainWindow(QMainWindow):
         self.execUpdateScript()
         sys.exit(0)
 
-    async def download(self, version: Version):
-        downloader = VersionDownloadManager()
-        return await downloader.download(version)
+    async def download(self, path_to_store_binary: str | Path, version: Version):
+        downloader = VersionDownloadManager(path_to_store_binary=path_to_store_binary)
+        return await downloader.download_new_binary(version)
 
     async def checkForUpdate(self, url):
         controller = VersionController()

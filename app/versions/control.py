@@ -21,11 +21,12 @@ class VersionController:
                     # Validate version data
                     if not all(key in version_data for key in ["version", "name", "target_resolutions", "url"]):
                         logger.log(
-                            "error", 
-                            "Invalid version data format.", 
-                            ValueError("Invalid version data format. one or many of the following keys are missing: 'version', 'name', 'target_resolutions', 'url'."))
+                            "error",
+                            "Invalid version data format.",
+                            ValueError("Invalid version data format. one or many of the following keys are missing: 'version', 'name', 'target_resolutions', 'url'.")
+                        )
                         return None
-
+                    
                     # Create a new Version object from the data
                     latest_version = Version(**version_data)
 
@@ -36,10 +37,10 @@ class VersionController:
                     else:
                         logger.log("info", f"You are using the latest version ({self.current_version.version}).")
                         return None
-                
-        except aiohttp.ClientError as e:
-            logger.log("error", f"Client error during version check: {e}")
+
+        except aiohttp.ClientError as ce:
+            logger.log("error", "Client error during version check.", ce)
             return None
         except Exception as e:
-            logger.log("error", f"Unexpected error during version check: {e}")
+            logger.log("error", "Unexpected error during version check.", e)
             return None
