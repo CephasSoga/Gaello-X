@@ -172,6 +172,14 @@ class UserAuthentification:
         credDict = credentials.toDict(id=uuid.uuid4().hex)
         self.users.insert_one(credDict)
 
+        # welcome user by sending a notification targeted to them
+        user_welcomed = self.welcome_user(
+            connection=self.client,
+            email=email,
+            firstname=credentials.userField.get('firstName', ''),
+        )
+        print("User welcomed: ", user_welcomed)
+
         # Dump none-sensible fields into a local persistent file
         self.save(
             {
@@ -229,6 +237,46 @@ class UserAuthentification:
         """
         result = self.users.delete_one({"user.email": email})
         return result.deleted_count > 0
+    
+    def welcome_user(self, connection: MongoClient, email: str, firstname: str ):
+        from datetime import datetime
+
+        date = datetime.now().date().isoformat()
+        time = datetime.now().time().isoformat()
+
+        message_title = f"Welcome to the Gaello family, {firstname}!"
+        message_content = """
+        Welcome to the already-big and growing family of Gaello.\n
+        We are thrilled to have you onboard and embark with us on the journey towards a more inclusive trading ecosysytem.\n
+
+        As you should know already, Gaello wraps around our AI model, Janine who is your ally for better investment/trading decision making. Feel free to give the chat section a go and see what benefits that could yield to you.\n
+
+        Also, any feedback from you will be highly appreciated. We won't throw it in our spams, we promise! Instead, we will take it into account to improve upcoming versions.\n
+
+        Best regards,\n
+        The Gaello team.\n
+
+        """
+
+        message_status = "unread"
+
+        message = {
+            'title': message_title,
+            'content': message_content,
+            'status': message_status,
+            'date': date,
+            'time': time,
+            'email': email
+        }
+
+        target_collection = connection['notifications']['from_system']
+
+        result = target_collection.insert_one(message)
+
+        if result.acknowledged:
+            return True
+        else:
+            return False
 
 
 # MongoDB connection string

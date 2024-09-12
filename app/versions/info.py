@@ -1,10 +1,18 @@
 import json
 
 class Version:
-    version: float = 1.411
-    name: str = "Gaello"
-    target_resolutions: list[str] = ["1920x1080"]
-    url: str = "http://www.gaello.com/downloads/1920x1080/gaello.exe"
+    # Default arguments at class  init time are the current version info.
+    def __init__(
+        self, 
+        version: str = "1.411",
+        name: str = "Gaello",
+        target_resolutions: list[str] = ["1920x1080"],
+        url: str = "https://www.gaello.io/downloads",
+    ):
+        self.version = float(version)
+        self.name = name
+        self.target_resolutions = target_resolutions
+        self.url = url
 
     def __eq__(self, other):
         if not isinstance(other, Version):

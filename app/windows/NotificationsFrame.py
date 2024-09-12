@@ -15,6 +15,7 @@ from utils.databases import mongoGet, mongoUpdate
 from app.config.renderer import ViewController
 from app.config.scheduler import Schedule
 from app.config.fonts import FontSizePoint, QuicksandRegular, RobotoBold
+from app.windows.Styles import chatScrollBarStyle
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI, moveWidget, clearLayout, stackOnCurrentWindow, setRelativeToMainWindow
 from utils.asyncJobs import asyncWrap
@@ -94,7 +95,9 @@ class NotificationExpand(QFrame):
     
     def setContents(self):
         self.titleLabel.setText(self.message.title)
-        self.contentLabel.setText(self.message.content)
+        self.contentTextEdit.setPlainText(self.message.content)
+        self.contentTextEdit.verticalScrollBar().setStyleSheet(chatScrollBarStyle)  
+        self.contentTextEdit.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.dateLabel.setText(self.message.date)
         self.timeLabel.setText(self.message.time)
 
@@ -102,7 +105,7 @@ class NotificationExpand(QFrame):
         size = FontSizePoint
         font = QuicksandRegular(size.SMALL) or QFont('Arial', size.SMALL)
         self.titleLabel.setFont(font)
-        self.contentLabel.setFont(font)
+        self.contentTextEdit.setFont(font)
         self.dateLabel.setFont(font)
         self.timeLabel.setFont(font)
     

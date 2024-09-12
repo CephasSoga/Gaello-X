@@ -9,14 +9,16 @@ from pymongo.mongo_client import MongoClient
 
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import Qt, pyqtSignal, QTimer
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QMessageBox, QMainWindow, QApplication, QVBoxLayout, QSizePolicy
 
+from app.config.scheduler import Schedule
 from app.windows.LoginFrame import SignInFrame
 from app.windows.MenuFrame import AccountMenu
 from app.windows.TopWidget import Header
 from app.windows.BottomWidget import Bottom
-from utils.appHelper import stackOnCurrentWindow, setRelativeToMainWindow, isFrozen, adjustForDPI
+from app.windows.Styles import msgBoxStyleSheet
+from utils.appHelper import stackOnCurrentWindow, setRelativeToMainWindow, isFrozen, adjustForDPI, moveWidget
 from utils.paths import constructPath, getFrozenPath, getFileSystemPath
 from utils.envHandler import getenv
 from app.config.renderer import ViewController
@@ -39,6 +41,10 @@ class MainWindow(QMainWindow):
         self.connection = connection
         
         self.initUI()
+        QTimer.singleShot(
+            Schedule.DEFAULT_DELAY, 
+            lambda: asyncio.ensure_future(self.proceedWithUpdate())
+        )
 
     def initUI(self):
         try:
@@ -89,7 +95,6 @@ class MainWindow(QMainWindow):
     def closeAndExit(self):
         self.close()
         self.connection.close()
-        self.closedBeforeUpdateTimeout.emit()
         if not isFrozen():
             exit(0)
         else:
@@ -139,9 +144,11 @@ class MainWindow(QMainWindow):
     def reduceWindow(self):
         self.showMinimized()  # This keeps the window in a reduced state (icon in taskbar)
     
+    @pyqtSlot()
     async def proceedWithUpdate(self):
         path_to_store_binary = getFileSystemPath(os.path.join("C:", "Program Files", "Gaello X", "updates", "gaello.exe"))
-        new_version_available = await self.checkForUpdate(getenv("VERSION_CONTROL_URL"))
+        target_screen_resolution = (1920, 1080)
+        new_version_available = await self.checkForUpdate(target_screen_resolution, self.connection)
         if not new_version_available:
             return
         
@@ -159,19 +166,19 @@ class MainWindow(QMainWindow):
 
         # if app was closed before timeout
         self.closedBeforeUpdateTimeout.connect(self.execUpdateScript)
-        delay = 15
-        self.warnForRestart(delay=delay)
-        await asyncio.sleep(delay)
+        self.warnForRestart()
         self.execUpdateScript()
         sys.exit(0)
 
     async def download(self, path_to_store_binary: str | Path, version: Version):
         downloader = VersionDownloadManager(path_to_store_binary=path_to_store_binary)
+        moveWidget(downloader, parent=self, x="left", y="bottom")
+        stackOnCurrentWindow(downloader)
         return await downloader.download_new_binary(version)
 
-    async def checkForUpdate(self, url):
+    async def checkForUpdate(self, screen_resource: tuple[int, int], connection: MongoClient):
         controller = VersionController()
-        return await controller.check_for_update(url)
+        return await controller.check_for_update(screen_resolution=screen_resource, connection=connection)
     
     def promptUserForDownload(self) -> bool:
         msgBox = QMessageBox()
@@ -180,6 +187,7 @@ class MainWindow(QMainWindow):
         msgBox.setWindowTitle("Update Available")
         msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         msgBox.setDefaultButton(QMessageBox.Yes)
+        msgBox.setStyleSheet(msgBoxStyleSheet)
         return msgBox.exec_() == QMessageBox.Yes
     
 
@@ -190,20 +198,27 @@ class MainWindow(QMainWindow):
         msgBox.setWindowTitle("Update Available")
         msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         msgBox.setDefaultButton(QMessageBox.Yes)
+        msgBox.setStyleSheet(msgBoxStyleSheet)
         return msgBox.exec_() == QMessageBox.Yes
     
-    def warnForRestart(self, delay: int = 15):
+    def warnForRestart(self):
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Warning)
-        msgBox.setText(f"Update downloaded. The application will restart in {delay} seconds.")
+        msgBox.setText(f"Application will restart now for the update to take effect.")
         msgBox.setWindowTitle("Update Downloaded")
         msgBox.setStandardButtons(QMessageBox.Ok)
         msgBox.setDefaultButton(QMessageBox.Ok)
+        msgBox.setStyleSheet(msgBoxStyleSheet)
+        self.closedBeforeUpdateTimeout.emit()
         msgBox.exec_()
 
     def execUpdateScript(self):
         script_to_exec = getFrozenPath(
             os.path.join("app", "version", "update.py")
         )
-
-        subprocess.Popen(["python", script_to_exec])
+        try:
+            subprocess.Popen(["python", script_to_exec])
+        except OSError as oe:
+            raise RuntimeError(f"An OS Error prevented the update script to execute properly: {oe}.")
+        except Exception as e:
+            raise

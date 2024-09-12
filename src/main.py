@@ -35,6 +35,7 @@ from models.api.app import Application as FlaskApplication
 from models.reader.cache import CredentialsReader, cached_credentials
 #8- Dispatched imports from app
 from app.windows import *
+from app.versions.control import *
 from app.handlers import HashWorker, ExportAssets, Patterns, ShortLiveSeries
 from app.config import scheduler, balancer, fonts, renderer
 #9- Dispatched imports from ...

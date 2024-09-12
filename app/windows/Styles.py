@@ -76,3 +76,23 @@ msgBoxStyleSheet = """
         background-color: #a0a0a0;
     }
 """
+
+progressBarStyle = """
+        QProgressBar {
+                border: 2px solid black;
+                border-radius: 0px;
+                background-color: #E0E0E0;
+                text-align: center;
+                padding: 1px; /* Adjust padding if necessary */
+            }
+
+            QProgressBar::chunk {
+                background-color: #00BFFF;
+                width: 10px;
+                margin: 1px;
+            }
+
+            QProgressBar::text {
+                color: transparent; /* Hide the text */
+            }
+        """

@@ -65,6 +65,7 @@ class NewAccountPlan(QFrame):
         email = self.getEmail()
         if email:
             res = mongoUpdate(
+                connection=self.connection,
                 database='UsersAuth', 
                 collection='users', 
                 query={'user.email': email}, 
