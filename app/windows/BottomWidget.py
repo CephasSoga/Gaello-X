@@ -90,7 +90,7 @@ class PressPlusFrame(QFrame):
             return super().eventFilter(obj, event)
 
 class Bottom(QMainWindow):
-    def __init__(self, connection: MongoClient, parent=None):
+    def __init__(self, connection: MongoClient, async_tasks: list, parent=None):
         super(Bottom, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "bottom.ui"))
         if os.path.exists(path):
@@ -99,6 +99,7 @@ class Bottom(QMainWindow):
             raise FileNotFoundError(f"{path} not found")
         
         self.connection = connection
+        self.async_tasks = async_tasks
         self.exploreProjectUrl = 'https://www.cube.ai'
         self.kickstartUrl = 'https://www.gaello.io/docs'
 

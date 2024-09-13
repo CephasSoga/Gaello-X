@@ -68,7 +68,7 @@ class PressExploreFrame(QFrame):
             return super().eventFilter(obj, event)
 
 class Header(QMainWindow):
-    def __init__(self, connection: MongoClient, parent=None):
+    def __init__(self, connection: MongoClient, async_tasks: list, parent=None):
         super(Header, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "header.ui"))
         if os.path.exists(path):
@@ -77,6 +77,8 @@ class Header(QMainWindow):
             raise FileNotFoundError(f"{path} not found")
         
         self.connection = connection
+
+        self.async_tasks = async_tasks
 
         self.aboutUsUrl = 'https://www.gaello.io'
         self.demoUrl =  'https://www.gaello.io'
@@ -123,13 +125,13 @@ class Header(QMainWindow):
         self.chatFrame = PressChatFrame(connection=self.connection, frame=self.chat)
         self.summaryFrame = PressExploreFrame(connection=self.connection, frame=self.explore)
 
-        assets = ExploreAsset(connection=self.connection, parent=self)
+        assets = ExploreAsset(connection=self.connection, async_tasks=self.async_tasks, parent=self)
         assets.hide()
         self.assetButton.clicked.connect(
             lambda: asyncio.ensure_future(handleAuth(self.connection, 1, stackOnCurrentWindow, assets))
         )
 
-        market = ExploreMarket(connection=self.connection, parent=self)
+        market = ExploreMarket(connection=self.connection, async_tasks=self.async_tasks, parent=self)
         market.hide()
         self.marketButton.clicked.connect(
             lambda: asyncio.ensure_future(handleAuth(self.connection, 1, stackOnCurrentWindow, market))
@@ -153,7 +155,7 @@ class Header(QMainWindow):
             lambda: showWindow(self.accountWindow)
         )
 
-        self.notificationsWindow = Notifications(connection=self.connection, parent=self)
+        self.notificationsWindow = Notifications(connection=self.connection,  async_tasks=self.async_tasks, parent=self)
         setRelativeToMainWindow(self.notificationsWindow, self)
         self.notificationsWindow.hide()
         self.notifications.clicked.connect(

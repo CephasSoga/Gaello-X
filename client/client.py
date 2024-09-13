@@ -1,12 +1,13 @@
 import sys
 import asyncio
-from PyQt5.QtCore import pyqtSignal, QObject, QThread, Qt
+from PyQt5.QtCore import pyqtSignal, QObject, QThread, Qt, QTimer
 from qasync import QEventLoop, QApplication as QAsyncApplication
 
 from pymongo.mongo_client import MongoClient
 
 from app.windows.Spinner import Spinner
 from app.windows.MainWindow import MainWindow
+from app.config.scheduler import Schedule
 from app.windows.WarningFrame import Warning
 from utils.connection import deviceIsConnected
 from utils.envHandler import getenv
@@ -47,6 +48,9 @@ class Client(QObject):
     """
     The main client class that initializes the application, handles connection errors, and starts the worker thread.
     """
+    async_tasks = []
+    old_len = 0 
+
     def __init__(self, connection: MongoClient):
         super().__init__()
         Qt.AA_EnableHighDpiScaling = True  # Set this attribute before creating QAsyncApplication
@@ -66,12 +70,42 @@ class Client(QObject):
         """
         Shows the main window.
         """
-        self.window = MainWindow(connection=self.connection)
+        self.window = MainWindow(connection=self.connection, async_tasks=self.async_tasks)
         self.window.show()
+        # then schedule async tasks to complete
+        QTimer.singleShot(Schedule.NO_DELAY, self.activelyCompleteNewTasks)
         if getattr(sys, 'frozen', False):
             # If the application is frozen (bundled executable) the pyinstall bootloader will close the splash screen
             import pyi_splash
             pyi_splash.close()
+
+    def checkForNewTasks(self):
+        if len(self.async_tasks) > self.old_len:
+            async_tasks_len = len(self.async_tasks)
+            diff = async_tasks_len - self.old_len
+            start_pos = self.old_len
+            end_pos = async_tasks_len
+            self.old_len = async_tasks_len
+            print("Total tasks: ", async_tasks_len)
+            print("New tasks: ", diff)
+            return diff, start_pos, end_pos
+            
+        
+    async def completeNewTasks(self):
+        result = self.checkForNewTasks()
+        if result:
+            diff, start_pos, end_pos = result
+            news_tasks = self.async_tasks[start_pos:end_pos]
+            try:
+                await asyncio.gather(*news_tasks, return_exceptions=True)
+            except Exception:
+                raise
+
+    def activelyCompleteNewTasks(self):
+        self.timer = QTimer()
+        self.timer.setInterval(Schedule.LONG_WAITING_DELAY) 
+        self.timer.timeout.connect(lambda: asyncio.ensure_future(self.completeNewTasks()))
+        self.timer.start()
 
     def raiseConnectionError(self):
         """
@@ -97,7 +131,6 @@ class Client(QObject):
             self.raiseConnectionError()
             self.installEventFilter(self)
             self.warningBox.installEventFilter(self.warningBox)
-            sys.exit(self.app.exec_())
 
         else:
             self.worker_thread.start()
@@ -106,5 +139,6 @@ class Client(QObject):
 
             with loop:
                 loop.run_forever()
-            sys.exit(self.app.exec_())
+
+        sys.exit(self.app.exec_())
  

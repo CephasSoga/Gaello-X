@@ -1,6 +1,9 @@
-from PyQt5.QtWidgets import QMessageBox
-from app.windows.Styles import msgBoxStyleSheet
+import asyncio
+from typing import *
 
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import pyqtSignal, QThread, QMetaObject, Qt
+from app.windows.Styles import msgBoxStyleSheet
 
 class MessageBox(QMessageBox):
     def __init__(self, title: str = None, message: str = None, level: str = None, buttons: tuple[str, str] | tuple[str] = None, parent=None):
@@ -17,6 +20,8 @@ class MessageBox(QMessageBox):
        
         if buttons is not None:
             self.buttons(buttons)
+
+        self.thread_exec_result = None
         
     def buttons(self, options: tuple[str, str] | tuple[str] = ("Ok", "Cancel")):
         buttons = {
@@ -48,3 +53,34 @@ class MessageBox(QMessageBox):
 
     def message(self, message: str):
         self.setText(message)
+
+    def exec_on_thread(self):
+        self.worker = MessageBoxWorker(self)
+        self.worker.result_signal.connect(self.return_result)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.worker.start()
+
+
+    def return_result(self, result: int):
+        if hasattr(result, 'thread_exec_result'):
+            self.thread_exec_result = None # clean up result first
+        self.thread_exec_result = result
+        return self.thread_exec_result
+        
+
+class MessageBoxWorker(QThread):
+    result_signal = pyqtSignal(int)
+    finished_signal = pyqtSignal()
+
+    def __init__(self, message_box: MessageBox):
+        super().__init__()
+        self.message_box = message_box
+        self.message_box.moveToThread(self)
+
+    def run(self, *args, **kwargs):
+       result = self.message_box.exec_(*args, **kwargs)
+       self.result_signal.emit(result)
+       self.finished_signal.emit()
+
+            
+    

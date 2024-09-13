@@ -28,7 +28,7 @@ from app.config.balancer import BatchBalance
 from app.config.renderer import ViewController
 
 class ExploreMarket(QFrame):
-    def __init__(self, connection: MongoClient, parent=None):
+    def __init__(self, connection: MongoClient, async_tasks: list, parent=None):
         super(ExploreMarket, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "exploreMarket.ui"))
         if os.path.exists(path):
@@ -37,6 +37,8 @@ class ExploreMarket(QFrame):
             raise FileNotFoundError(f"{path} not found")
         
         self.connection = connection
+
+        self.async_tasks = async_tasks
 
         self.cryptos: List[Dict] = []
         self.commodities: List[Dict] = []
@@ -134,12 +136,14 @@ class ExploreMarket(QFrame):
         self.commoditiesScroll.setWidgetResizable(True)       
 
     def connectSlots(self):
-        self.close_.clicked.connect(self.close)
+        self.close_.clicked.connect(self.hide) # only hide to preserve state
 
     def startLazyLoad(self, execFunc: Callable, timeout: int = BatchBalance.RELOADING_MSEC, *args, **kwargs):
         self.lazyLoadTimer = QTimer()
-        self.lazyLoadTimer.singleShot(timeout, lambda: execFunc(*args, **kwargs))
+        self.lazyLoadTimer.setInterval(timeout)
+        self.lazyLoadTimer.timeout.connect(lambda: execFunc(*args, **kwargs))
         self.BatchSize = BatchBalance.MARKET_REMOTE_LOADING_SIZE
+        self.lazyLoadTimer.start(Schedule.LONG_WAITING_DELAY)
 
     def completeJobs(self):
         self.loadNextBatch(self.forexList, self.forexCurrentIndex, self.forexBatchSize, self.forexRawSize, self.forexTask)
@@ -151,12 +155,14 @@ class ExploreMarket(QFrame):
         totalLength = len(items)
         if currentIndex >= totalLength:
             self.lazyLoadTimer.stop()
+            print("NO MORE DATA!")
             return
 
         tasks = []
 
         for pos, item in enumerate(items):
             if currentIndex >= totalLength:
+                print("NO MORE DATA! Index exceeds list size.")
                 break
 
             row = pos // rawSize
@@ -167,7 +173,7 @@ class ExploreMarket(QFrame):
 
             currentIndex += 1
 
-        asyncio.ensure_future(asyncio.gather(*tasks))
+        self.async_tasks.extend(tasks)
 
     @asyncSlot()
     async def forexTask(self, forexPair: str, row: int, col: int):
@@ -183,7 +189,6 @@ class ExploreMarket(QFrame):
         
         def func_2(forexList: List[Dict], forexPair: str):
             forexData = [forex for forex in forexList if forex.get("name")==forexPair]
-            print("Forex data: ", forexData is not None or len(forexData) > 0)
 
             if not forexData:
                 return
@@ -228,8 +233,8 @@ class ExploreMarket(QFrame):
             flag1 = await self.getFlagPixmap(flag1Url)
             flag2 = await self.getFlagPixmap(flag2Url)
             item = func_3(forexPair, price, growth, flag1, flag2, chart)
-
             self.forexLayout.addWidget(item, row, col)
+        
 
     async def getFlagPixmap(self, url):
         response = await quickFetchBytes(url, {}, {"User-Agent": "GaelloX/1.0"})
@@ -402,10 +407,10 @@ class ExploreMarket(QFrame):
         self.indices = await asyncMongoGet(collection='indices', limit=int(5e4), connection=self.connection)
         self.forexes = await asyncMongoGet(collection='forex', limit=int(5e4), connection=self.connection)
         for l in self.cryptos, self.commodities, self.indices, self.forexes:
-            print(f"Length: {len(l)}")
+            pass
 
     def syncGetAllData(self):
-        asyncio.ensure_future(self.getAllData())
+        self.async_tasks.append(self.getAllData())
         
 
 

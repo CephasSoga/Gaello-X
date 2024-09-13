@@ -1,5 +1,6 @@
 import os
 import aiohttp
+import asyncio
 from pathlib import Path
 
 from PyQt5 import uic
@@ -74,14 +75,22 @@ class VersionDownloadManager(QWidget):
                                 return True
                         except Exception as e:
                             logger.log("error", f"Error downloading version {version.version}", e)
+                            await self.display_error(f"Error downloading version {version.version}.")
                             return False
                     else:
                         logger.log("error", f"Content-Length header not found.")
+                        await self.display_error("Content-Length header not found.")
                         return False
                 else:
                     logger.log("error", f"Download failed with status {response.status}.")
+                    await self.display_error(f"Download failed with status {response.status}.")
                     return False
         
+    async def display_error(self, error: str):
+        self.progressLabel.setText(error)
+        await asyncio.sleep(5)
+        self.close()
+
     def update_label(self, percentage: float):
         self.progressLabel.setText(f"Download progress: {percentage:.2f}% ...")
         self.progressBar.setValue(int(percentage))  # Set progress bar value to percentage

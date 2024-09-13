@@ -197,7 +197,7 @@ class NotificationItem(QFrame):
         self.timeLabel.setFont(smallFont)
 
 class Notifications(QFrame):
-    def __init__(self, connection: MongoClient, parent=None):
+    def __init__(self, connection: MongoClient, async_tasks: list, parent=None):
         super(Notifications, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI" , "notifications.ui"))
         if os.path.exists(path):
@@ -206,6 +206,7 @@ class Notifications(QFrame):
             raise FileNotFoundError(f"{path} not found")
         
         self.connection = connection
+        self.async_tasks = async_tasks
         self.dbName = 'notifications'
         self.collection = 'from_system'
         self.unreadsCount = 0
@@ -214,7 +215,7 @@ class Notifications(QFrame):
         self.initUI()
 
         QTimer.singleShot(Schedule.DEFAULT_DELAY, self.hotReload)
-        QTimer.singleShot(Schedule.DEFAULT_RELOAD_DELAY * Schedule.MAX_MULTIPLIER, self.showPopup) # give it enough time to spot unreadCounts updates
+        QTimer.singleShot(Schedule.DEFAULT_RELOAD_DELAY, self.showPopup) # give it enough time to spot unreadCounts updates
 
     def initUI(self):
         adjustForDPI(self)
@@ -254,11 +255,11 @@ class Notifications(QFrame):
 
     @pyqtSlot()
     def syncSetContents(self):
-        asyncio.ensure_future(self.setContents())
+        self.async_tasks.append(self.setContents())
 
     def hotReload(self):
         self.hotReloader = QTimer()
-        self.hotReloader.start(Schedule.DEFAULT_RELOAD_DELAY)
+        self.hotReloader.start(Schedule.DEFAULT_DELAY)
         self.hotReloader.timeout.connect(self.syncSetContents)
 
 

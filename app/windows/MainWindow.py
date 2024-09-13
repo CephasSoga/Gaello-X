@@ -9,7 +9,7 @@ from pymongo.mongo_client import MongoClient
 
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import Qt, pyqtSignal, QTimer, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QThread
 from PyQt5.QtWidgets import QWidget, QMainWindow, QApplication, QVBoxLayout, QSizePolicy
 
 from app.windows.MessageBox import MessageBox
@@ -18,7 +18,6 @@ from app.windows.LoginFrame import SignInFrame
 from app.windows.MenuFrame import AccountMenu
 from app.windows.TopWidget import Header
 from app.windows.BottomWidget import Bottom
-from app.windows.Styles import msgBoxStyleSheet
 from utils.appHelper import stackOnCurrentWindow, setRelativeToMainWindow, isFrozen, adjustForDPI, moveWidget
 from utils.paths import constructPath, getFrozenPath, getFileSystemPath
 from utils.envHandler import getenv
@@ -30,8 +29,15 @@ from app.versions.info import Version
 class MainWindow(QMainWindow):
     finishedLoading = pyqtSignal()
     closedBeforeUpdateTimeout = pyqtSignal() # handle cases where user closes app before update timeout
+    downloadFinished = pyqtSignal()
+    updateAvailable = pyqtSignal()
+    userWantsToDownload = pyqtSignal()
+    userWantsToUpdateNow = pyqtSignal()
 
-    def __init__(self, connection: MongoClient):
+
+    new_version = None
+
+    def __init__(self, connection: MongoClient, async_tasks: list[asyncio.Task], parent=None):
         super(MainWindow, self).__init__()
         path = getFrozenPath(os.path.join("assets", "UI", "mainwindow.ui"))
         if os.path.exists(path):
@@ -40,11 +46,12 @@ class MainWindow(QMainWindow):
             raise FileNotFoundError(f"{path} not found")
         
         self.connection = connection
+        self.async_tasks = async_tasks
         
         self.initUI()
         QTimer.singleShot(
-            Schedule.DEFAULT_DELAY, 
-            lambda: asyncio.ensure_future(self.proceedWithUpdate())
+            Schedule.NO_DELAY, 
+            self.proceedWithUpdate
         )
 
     def initUI(self):
@@ -84,8 +91,8 @@ class MainWindow(QMainWindow):
         self.scrollWidget.setLayout(self.scrollLayout)
         self.scrollArea.setWidget(self.scrollWidget)
 
-        self.header = Header(connection=self.connection, parent=self)
-        self.bottom = Bottom(connection=self.connection, parent=self)
+        self.header = Header(connection=self.connection, async_tasks=self.async_tasks, parent=self)
+        self.bottom = Bottom(connection=self.connection, async_tasks=self.async_tasks, parent=self)
         #self.showMaximized()  # or self.showFullScreen()
         self.header.setMinimumSize(w, h)
         self.bottom.setMinimumSize(w, h)
@@ -145,26 +152,22 @@ class MainWindow(QMainWindow):
     def reduceWindow(self):
         self.showMinimized()  # This keeps the window in a reduced state (icon in taskbar)
     
-    @pyqtSlot()
-    async def proceedWithUpdate(self):
+    def proceedWithUpdate(self):
         path_to_store_binary = getFileSystemPath(os.path.join("C:", "Program Files", "Gaello X", "updates", "gaello.exe"))
         target_screen_resolution = (1920, 1080)
-        new_version_available = await self.checkForUpdate(target_screen_resolution, self.connection)
-        if not new_version_available:
-            return
+        self.async_tasks.append(self.checkForUpdate(target_screen_resolution, self.connection))
+
+        # connect updateAvailable & userWantsToDownload signals
+        self.updateAvailable.connect(self.promptUserForDownload)
+        self.userWantsToDownload.connect(
+            lambda: self.async_tasks.append(self.download(path_to_store_binary, self.new_version))
+        )
+
+        # connect downloadFinished & userWantsToUpdateNow signals
+        self.downloadFinished.connect(self.promptUserForUpdate)
+        self.userWantsToUpdateNow.connect(self.makeUpadte)
         
-        permission = self.promptUserForDownload()
-        if not permission:
-            return
-
-        download = await self.download(path_to_store_binary, new_version_available)
-        if not download:
-            return
-
-        user_wants_to_update_now = self.promptUserForUpdate()
-        if not user_wants_to_update_now:
-            return
-
+    def makeUpadte(self):
         # if app was closed before timeout
         self.closedBeforeUpdateTimeout.connect(self.execUpdateScript)
         self.warnForRestart()
@@ -175,12 +178,19 @@ class MainWindow(QMainWindow):
         downloader = VersionDownloadManager(path_to_store_binary=path_to_store_binary)
         moveWidget(downloader, parent=self, x="left", y="bottom")
         stackOnCurrentWindow(downloader)
-        return await downloader.download_new_binary(version)
+        result = await downloader.download_new_binary(version)
+        if result:
+            self.downloadFinished.emit()
+        return result
 
     async def checkForUpdate(self, screen_resource: tuple[int, int], connection: MongoClient):
         controller = VersionController()
-        return await controller.check_for_update(screen_resolution=screen_resource, connection=connection)
-    
+        result = await controller.check_for_update(screen_resolution=screen_resource, connection=connection)
+        if result:
+            self.new_version = result
+            self.updateAvailable.emit()
+        return result
+
     def promptUserForDownload(self) -> bool:
         msgBox = MessageBox()
         msgBox.level("question")
@@ -188,8 +198,9 @@ class MainWindow(QMainWindow):
         msgBox.title("Update Available")
         msgBox.buttons(("yes", "no"))
         msgBox.setDefaultButton(msgBox.Yes)
-        return msgBox.exec_() == msgBox.Yes
-    
+        # Connect signals to handle user response
+        msgBox.buttonClicked.connect(self.handleUserDownloadChoice)
+        msgBox.open()  # This opens the message box without blocking the event loop
 
     def promptUserForUpdate(self) -> bool:
         msgBox = MessageBox()
@@ -198,8 +209,28 @@ class MainWindow(QMainWindow):
         msgBox.title("Update Available")
         msgBox.buttons(("yes", "no"))
         msgBox.setDefaultButton(msgBox.Yes)
-        return msgBox.exec_() == msgBox.Yes
+        # Connect signals to handle user response
+        msgBox.buttonClicked.connect(self.handleUserUpdateChoice)
+        msgBox.open()  # This opens the message box without blocking the event loop
     
+    def handleUserDownloadChoice(self, button):
+        # Handle the user's response
+        if button.text() == "&Yes":
+            self.userWantsToDownload.emit()  # Emit signal if 'Yes' is clicked
+            return True
+        else:
+            # Do something if 'No' is clicked, or handle no download action
+            return False
+        
+    def handleUserUpdateChoice(self, button):
+        # Handle the user's response
+        if button.text() == "&Yes":
+            self.userWantsToUpdateNow.emit()  # Emit signal if 'Yes' is clicked
+            return True
+        else:
+            # Do something if 'No' is clicked, or handle no download action
+            return False
+
     def warnForRestart(self):
         msgBox = MessageBox()
         msgBox.level("warning")

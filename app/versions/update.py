@@ -25,6 +25,10 @@ class VersionUpdater:
         except Exception as e:
             raise RuntimeError(f"Unexpected error: {e}")
         
+    def restart_app(self, app_path: str):
+        import sys
+        os.execl(app_path, sys.executable, sys.executable, *sys.argv)
+        
     def update_app(self, app_name_str: str, binary_download_path: str):
         if not os.path.exists(binary_download_path) or not os.path.isdir(binary_download_path):
             raise RuntimeError("Invalid binary download path")
@@ -43,6 +47,11 @@ class VersionUpdater:
             raise
         finally:
             self.backup_manager.clean_up_backup()
+            # now restart the app
+            app_path = self.backup_manager.get_where_application_is_installed(app_name_str) # get app path again
+            if not os.path.exists(app_path):
+                raise RuntimeError("Failed to restart app")
+            self.restart_app(app_path)
 
 if __name__ == "__main__":
     # script shall be executed as subprocess

@@ -27,7 +27,7 @@ from app.config.renderer import ViewController
 
 
 class ExploreAsset(QFrame):
-    def __init__(self, connection: MongoClient, parent=None):
+    def __init__(self, connection: MongoClient, async_tasks: list, parent=None):
         super(ExploreAsset, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "exploreAsset.ui"))
         if os.path.exists(path):
@@ -36,6 +36,8 @@ class ExploreAsset(QFrame):
             raise FileNotFoundError(f"{path} not found")
         
         self.connection = connection
+
+        self.async_tasks = async_tasks
 
         self.symbols = [symbol for symbol in symbolList]
         self.assetPreviews: list[AssetPreview] = []
@@ -51,7 +53,7 @@ class ExploreAsset(QFrame):
 
         self.initUI()
         QTimer.singleShot(Schedule.NO_DELAY, self.syncGetAllData)
-        QTimer.singleShot(Schedule.BATCH_ASSETS_JOBS_DELAY, self.startLazyLoad)
+        QTimer.singleShot(Schedule.ASSET_JOB_START_DELAY, self.startLazyLoad)
 
     def initUI(self):
         adjustForDPI(self)
@@ -63,7 +65,7 @@ class ExploreAsset(QFrame):
         self.setWindowFlags(Qt.FramelessWindowHint)
 
     def connectSlots(self):
-        self.close_.clicked.connect(self.close)
+        self.close_.clicked.connect(self.hide) # only hide to preserve state
         self.searchEdit.textChanged.connect(self.onSearchTextChanged)
 
     def setupLayout(self):
@@ -106,7 +108,7 @@ class ExploreAsset(QFrame):
             tasks.append(task)
             self.currentIndex += 1
 
-        asyncio.ensure_future(asyncio.gather(*tasks))
+        self.async_tasks.extend(tasks)
 
     @asyncSlot()
     async def task(self, allData: List[Dict], symbol: str, row: int, col: dict):
@@ -174,7 +176,7 @@ class ExploreAsset(QFrame):
         return self.allData
 
     def syncGetAllData(self):
-        return asyncio.ensure_future(self.getAllData())
+        self.async_tasks.append(self.getAllData())
 
     async def loopRun(self, excutor: Any, func: Callable):
         loop = asyncio.new_event_loop()
