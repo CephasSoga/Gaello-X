@@ -35,16 +35,16 @@ class Help(QFrame):
         self.contributeButton.clicked.connect(self.contributeToProject)
 
     def readDocs(self):
-        link = "https://github.com/cepha/GaelloX"
+        link = "https://www.gaello.io/docs"
         browse(link)
     def viewDemo(self):
-        link = "https://github.com/cepha/GaelloX"
+        link = "https://www.gaello.io/home"
         browse(link)
 
     def giveFeedback(self):
-        link = "https://github.com/cepha/GaelloX"
+        link = "https://github.com/CephasSoga/Gaello-X"
         browse(link)
 
     def contributeToProject(self):
-        link = "https://github.com/cepha/GaelloX"
+        link = "https://github.com/CephasSoga/Gaello-X"
         browse(link)

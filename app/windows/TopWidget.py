@@ -78,8 +78,8 @@ class Header(QMainWindow):
         
         self.connection = connection
 
-        self.aboutUsUrl = 'example.com'
-        self.demoUrl =  'example.com'
+        self.aboutUsUrl = 'https://www.gaello.io'
+        self.demoUrl =  'https://www.gaello.io'
 
         self.initUI()
         msDelay = 1000

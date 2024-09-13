@@ -99,8 +99,8 @@ class Bottom(QMainWindow):
             raise FileNotFoundError(f"{path} not found")
         
         self.connection = connection
-        self.exploreProjectUrl = 'https://www.janine.ai'
-        self.kickstartUrl = 'https://www.janine.ai/start'
+        self.exploreProjectUrl = 'https://www.cube.ai'
+        self.kickstartUrl = 'https://www.gaello.io/docs'
 
         self.initUI()
         msDelay = 2000
