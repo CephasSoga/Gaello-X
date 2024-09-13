@@ -4,8 +4,9 @@ from pathlib import Path
 
 from PyQt5 import  uic
 from PyQt5.QtCore import QEvent, Qt
-from PyQt5.QtWidgets import QFrame, QMessageBox
+from PyQt5.QtWidgets import QFrame
 
+from app.windows.MessageBox import MessageBox
 from app.windows.AccountPlanChangeFrame import AccountPlanChange
 from app.windows.AccountDeletionFrame import AccountDeleteTrigger
 from app.windows.LoginFrame import SignInFrame
@@ -81,7 +82,7 @@ class AccountMenu(QFrame):
                     self.planLabel.setAlignment(Qt.AlignCenter)
                 
         except FileNotFoundError:
-            sign_in = SignInFrame()
+            sign_in = SignInFrame(connection=self.connection)
             showWindow(sign_in)
             
     def connectSlots(self):
@@ -96,6 +97,8 @@ class AccountMenu(QFrame):
         )
         targetFile = Path(getFileSystemPath(pathOnSystem))
 
+        messageBox = MessageBox()
+
         if targetFile.exists():
             try:
                 targetFile.unlink()
@@ -103,14 +106,25 @@ class AccountMenu(QFrame):
                 try: 
                     os.remove(targetFile)
                 except Exception:
-                    QMessageBox.critical(None, "Error", "Failed to delete credentials. Please try again later.")
-
-            QMessageBox.information(None, "Logged Out", "You have been logged out.\nOptionally restart the app to make the logout effective.")
+                    messageBox.level("critical")
+                    messageBox.title("Error")
+                    messageBox.message("Failed to delete credentials. Please try again later.")
+                    messageBox.buttons(("ok",))
+                    messageBox.exec_()
+                    return
+            messageBox.level("information")
+            messageBox.title("Logged Out")
+            messageBox.message("You have been logged out.\nOptionally restart the app to make the logout effective.")
+            messageBox.buttons(("ok",))
+            messageBox.exec_()
             _delayAfterLogout = 0.5
             time.sleep(_delayAfterLogout) # sleep to make sure operation was completed
         else:
-            QMessageBox.information(None, "Not Logged In", "You are already logged out.")
-
+            messageBox.level("information")
+            messageBox.title("Not Logged In")
+            messageBox.message("You are already logged out.")
+            messageBox.buttons(("ok",))
+            messageBox.exec_()
 
     def changePlan(self):
         parent = self.parent() # Stands for TopWidget widget

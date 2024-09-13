@@ -7,9 +7,10 @@ from typing import Callable
 
 from PyQt5 import  uic
 from PyQt5.QtCore import QEvent, Qt
-from PyQt5.QtWidgets import QFrame, QMessageBox
+from PyQt5.QtWidgets import QFrame
 from pymongo import MongoClient
 
+from app.windows.MessageBox import MessageBox
 from app.windows.PaymentForm import PaymentForm
 from app.handlers.AuthHandler import sync_read_user_cred_file
 from app.windows.NewAccountPlan import NewAccountPlan
@@ -114,15 +115,14 @@ class AccountPlanChange(QFrame):
         await self.proceedForAdvanced()
     
     async def proceedForStandard(self):
-        messageBox = QMessageBox()
+        messageBox = MessageBox()
         userCreds: dict = await ThreadRun(sync_read_user_cred_file)
         userEmail = userCreds.get("email", "")
         if not userEmail:
-            messageBox.setIcon(QMessageBox.Critical)
-            messageBox.setWindowTitle("Critical: Credentials Error.")
-            messageBox.setText("Please login to proceed.")
-            messageBox.setStandardButtons(QMessageBox.Ok)
-            messageBox.setStyleSheet(msgBoxStyleSheet)
+            messageBox.level("critical")
+            messageBox.title("Critical: Credentials Error.")
+            messageBox.message("Please login to proceed.")
+            messageBox.buttons(("ok",))
             messageBox.exec_()
             return
         
@@ -134,13 +134,12 @@ class AccountPlanChange(QFrame):
         acessToken = getenv("ACCESS_TOKEN")
         if not subscriptionId or userLevel == 0:
             # User is on free tier
-            messageBox.setIcon(QMessageBox.Information)
-            messageBox.setWindowTitle("Web payment form")
-            messageBox.setText("A Web payment form will be opened  in your default browser. Please add your payment method and complete the payment.")
-            messageBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-            messageBox.setStyleSheet(msgBoxStyleSheet)
+            messageBox.level("information")
+            messageBox.title("Web payment form")
+            messageBox.message("A Web payment form will be opened  in your default browser. Please add your payment method and complete the payment.")
+            messageBox.buttons(("ok", "cancel"))
             result = messageBox.exec_()
-            if result == QMessageBox.Ok:
+            if result == messageBox.Ok:
                 accountPlan = AccountUpgradeFromFree(connection=self.connection, parent=self)
                 accountPlan.submitStandardTier()
                 self.hide()
@@ -150,40 +149,37 @@ class AccountPlanChange(QFrame):
                 return
 
         elif userEmail and userLevel > 0 and subscriptionId and acessToken:
-            messageBox.setIcon(QMessageBox.Information)
-            messageBox.setWindowTitle("Accont Plan Change")
-            messageBox.setText("Are you sure you want to change your plan to Standard Tier?")
-            messageBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-            messageBox.setStyleSheet(msgBoxStyleSheet)
+            messageBox.level("question")
+            messageBox.title("Accont Plan Change")
+            messageBox.message("Are you sure you want to change your plan to Standard Tier?")
+            messageBox.buttons(("yes", "no"))
             result = messageBox.exec_()
-            if result == QMessageBox.Yes:
+            if result == messageBox.Yes:
                 await self.toStandardTier(userEmail,userLevel, subscriptionId, acessToken)
                 return
-            elif result == QMessageBox.No:
+            elif result == messageBox.No:
                 self.close()
                 return
             else:
                 return
 
         else:
-            messageBox.setIcon(QMessageBox.Warning)
-            messageBox.setWindowTitle("Warning: Plan Change")
-            messageBox.setText("We could not proceess your request. Please try again.")
-            messageBox.setStandardButtons(QMessageBox.Ok)
-            messageBox.setStyleSheet(msgBoxStyleSheet)
+            messageBox.level("warning")
+            messageBox.title("Warning: Plan Change")
+            messageBox.message("We could not proceess your request. Please try again.")
+            messageBox.buttons(("ok",))
             messageBox.exec_()
             self.close()
             
     async def proceedForAdvanced(self):
-        messageBox = QMessageBox()
+        messageBox = MessageBox()
         userCreds: dict = await ThreadRun(sync_read_user_cred_file)
         userEmail = userCreds.get("email", "")
         if not userEmail:
-            messageBox.setIcon(QMessageBox.Critical)
-            messageBox.setWindowTitle("Critical: Credentials Error.")
-            messageBox.setText("Please login to proceed.")
-            messageBox.setStandardButtons(QMessageBox.Ok)
-            messageBox.setStyleSheet(msgBoxStyleSheet)
+            messageBox.level("critical")
+            messageBox.title("Critical: Credentials Error.")
+            messageBox.message("Please login to proceed.")
+            messageBox.buttons(("ok",))
             messageBox.exec_()
             return
         
@@ -195,13 +191,12 @@ class AccountPlanChange(QFrame):
         acessToken = getenv("ACCESS_TOKEN")
         if not subscriptionId or userLevel == 0:
            # User is on free tier
-            messageBox.setIcon(QMessageBox.Information)
-            messageBox.setWindowTitle("Web payment form")
-            messageBox.setText("A Web payment form will be opened  in your default browser. Please add your payment method and complete the payment.")
-            messageBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-            messageBox.setStyleSheet(msgBoxStyleSheet)
+            messageBox.level("information")
+            messageBox.title("Web payment form")
+            messageBox.message("A Web payment form will be opened  in your default browser. Please add your payment method and complete the payment.")
+            messageBox.buttons(("ok", "cancel"))
             result = messageBox.exec_()
-            if result == QMessageBox.Ok:
+            if result == messageBox.Ok:
                 accountPlan = AccountUpgradeFromFree(connection=self.connection, parent=self)
                 accountPlan.submitAdvancedTier()
                 self.hide()
@@ -211,37 +206,34 @@ class AccountPlanChange(QFrame):
                 return
 
         elif userEmail and userLevel > 0 and subscriptionId and acessToken:
-            messageBox.setIcon(QMessageBox.Information)
-            messageBox.setWindowTitle("Accont Plan Change")
-            messageBox.setText("Are you sure you want to change your plan to Advanced Tier?")
-            messageBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-            messageBox.setStyleSheet(msgBoxStyleSheet)
+            messageBox.level("question")
+            messageBox.title("Accont Plan Change")
+            messageBox.message("Are you sure you want to change your plan to Advanced Tier?")
+            messageBox.buttons(("yes", "no"))
             result = messageBox.exec_()
-            if result == QMessageBox.Yes:
+            if result == messageBox.Yes:
                 await self.toAdvancedTier(userEmail, userLevel, subscriptionId, acessToken)
                 return
-            elif result == QMessageBox.No:
+            elif result == messageBox.No:
                 self.close()
                 return
             else:
                 return
         else:
-            messageBox.setIcon(QMessageBox.Warning)
-            messageBox.setWindowTitle("Warning: Plan Change")
-            messageBox.setText("We could not proceess your request. Please try again.")
-            messageBox.setStandardButtons(QMessageBox.Ok)
-            messageBox.setStyleSheet(msgBoxStyleSheet)
+            messageBox.level("warning")
+            messageBox.title("Warning: Plan Change")
+            messageBox.message("We could not proceess your request. Please try again.")
+            messageBox.buttons(("ok",))
             messageBox.exec_()
             self.close()
     
     async def toStandardTier(self, email: str, userLevel: int, subscriptionId: str, accessToken: str, mode: str = "live"):
         if userLevel == 2:
-            messageBox = QMessageBox()
-            messageBox.setIcon(QMessageBox.Warning)
-            messageBox.setWindowTitle("Warning")
-            messageBox.setText("You are already on Standard Tier.")
-            messageBox.setStandardButtons(QMessageBox.Ok)
-            messageBox.setStyleSheet(msgBoxStyleSheet)
+            messageBox = MessageBox()
+            messageBox.level("warning")
+            messageBox.title("Warning")
+            messageBox.message("You are already on Standard Tier.")
+            messageBox.buttons(("ok",))
             messageBox.exec_()
         else:
             planId  = getenv("STANDARD_PLAN_ID")
@@ -250,12 +242,11 @@ class AccountPlanChange(QFrame):
 
     async def toAdvancedTier(self, email: str, userLevel: int, subscriptionId: str, accessToken: str, mode: str = "live"):
         if userLevel == 3:
-            messageBox = QMessageBox()
-            messageBox.setIcon(QMessageBox.Warning)
-            messageBox.setWindowTitle("Warning")
-            messageBox.setText("You are already on Advanced Tier.")
-            messageBox.setStandardButtons(QMessageBox.Ok)
-            messageBox.setStyleSheet(msgBoxStyleSheet)
+            messageBox = MessageBox()
+            messageBox.level("warning")
+            messageBox.title("Warning")
+            messageBox.message("You are already on Advanced Tier.")
+            messageBox.buttons(("ok",))
             messageBox.exec_()
         else:
             planId  = getenv("ADVANCED_PLAN_ID")

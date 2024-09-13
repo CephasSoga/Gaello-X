@@ -7,9 +7,10 @@ from PyQt5 import uic
 
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QEvent
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QFrame, QMessageBox
+from PyQt5.QtWidgets import QFrame
 from pymongo import MongoClient
 
+from app.windows.MessageBox import MessageBox
 from app.config.fonts import RobotoBold, FontSizePoint
 from app.windows.NewAccountOk import AccountAllSet, AccountInitFailure
 from utils.appHelper import setRelativeToMainWindow
@@ -73,11 +74,14 @@ class PaymentForm(QFrame):
         else:
             self.email = cached_credentials.get("email", "")
             if not self.email:
-                QMessageBox.warning(
-                    self, 
-                    "Unable to find user credentials", 
-                    "Credentials Json file might be missing or corrupted. Please, try again."
-                )
+                messageBox = MessageBox()
+                messageBox.level("warning")
+                messageBox.title("Unable to find user credentials")
+                messageBox.message("Unable to find user credentials.\nCredentials Json file might be missing or corrupted.\nPlease, try again.")
+                messageBox.buttons(("ok",))
+                messageBox.exec_()
+                return None
+            return self.email
 
     def validatePayment(self) -> bool:
         if not self.email:
@@ -161,7 +165,12 @@ class PaymentForm(QFrame):
                     text=True
                 )
             except Exception as e:
-                QMessageBox.warning(self, "Server Error", f"Unable to start server. Error: {str(e)}")
+                messageBox = MessageBox()
+                messageBox.level("critical")
+                messageBox.title("Server Error")
+                messageBox.message(f"Unable to start server. Error: {str(e)}")
+                messageBox.buttons(("ok",))
+                messageBox.exec_()
                 self.close()
                 return
             finally:
@@ -170,14 +179,23 @@ class PaymentForm(QFrame):
 
     def stop_node_server(self):
         if self.nodeProcess is not None:
+            messageBox = MessageBox()
             try:
                 self.nodeProcess.send_signal(signal.SIGTERM)
                 self.nodeProcess.wait()
                 self.nodeProcess = None
                 killPortProcess(PORT) # free port then
-                QMessageBox.information(self, 'Info', 'Node.js server stopped')
+                messageBox.level("information")
+                messageBox.title("Server stopped")
+                messageBox.message("Node.js server stopped")
+                messageBox.buttons(("ok",))
+                messageBox.exec_()
             except Exception as e:
-                QMessageBox.warning(self, "Server Error", f"Unable to stop server. Error: {str(e)}")
+                messageBox.level("critical")
+                messageBox.title("Server Error")
+                messageBox.message(f"Unable to stop server. Error: {str(e)}")
+                messageBox.buttons(("ok",))
+                messageBox.exec_()
             finally:
                 self.nodeProcess = None
     

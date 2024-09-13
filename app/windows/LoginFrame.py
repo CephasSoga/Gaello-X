@@ -8,8 +8,9 @@ from pymongo.mongo_client import MongoClient
 from PyQt5 import uic
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMainWindow, QLineEdit, QMessageBox, QLayout
+from PyQt5.QtWidgets import QMainWindow, QLineEdit, QLayout
 
+from app.windows.MessageBox import MessageBox
 from utils.paths import getFrozenPath, getFileSystemPath
 from utils.envHandler import getenv
 from utils.appHelper import setRelativeToMainWindow, showWindow
@@ -59,10 +60,11 @@ class SignInFrame(QMainWindow):
     def login(self):
         email = self.emailEdit.text().strip()
         password = self.passwordEdit.text().strip()
+        messageBox = MessageBox()
 
         try:
             if not email or not password:
-                QMessageBox.warning(self,"Empty field(s)","Please enter your email and password.")
+                
                 return
 
             persistentSessionKey = self.readPersistentSessionManager()
@@ -70,27 +72,46 @@ class SignInFrame(QMainWindow):
                 #TODO: ...
                 if self.userAuth.login(email, password):
                     #TODO: Allow access to restricted windows:  Cleared!
-                    QMessageBox.information(self, "Success", "You are now logged in. \nRestart this appliaction to make login effective ")
-
+                    messageBox.level("information")
+                    messageBox.title("Success")
+                    messageBox.message("You are now logged in. \nRestart this appliaction to make login effective ")
+                    messageBox.buttons(("ok",))
+                    messageBox.exec_()
                     # Recreate persistent login file
                     self.retreiveAndSave(email)
                     self.close()
 
                 else:
-                    QMessageBox.warning(self, "Credentials issue", "Wrong user credentials have been provided.")
+                    messageBox.level("warning")
+                    messageBox.title("Credentials issue")
+                    messageBox.message("Wrong user credentials have been provided.")
+                    messageBox.buttons(("ok",))
+                    messageBox.exec_()
                     return
 
             elif  persistentSessionKey == email:
                 if self.userAuth.login(email, password):
                     #TODO: Allow access to restricted windows
-                    QMessageBox.information(self, "Success", "You are now logged in.")
+                    messageBox.level("information")
+                    messageBox.title("Success")
+                    messageBox.message("You are now logged in. \nRestart this appliaction to make login effective ")
+                    messageBox.buttons(("ok",))
+                    messageBox.exec_()
                     self.close()
                 else:
-                    QMessageBox.warning(self, "Credentials issue", "Wrong user credentials have been provided.")
+                    messageBox.level("warning")
+                    messageBox.title("Credentials issue")
+                    messageBox.message("Wrong user credentials have been provided.")
+                    messageBox.buttons(("ok",))
+                    messageBox.exec_()
                     return
 
             else:
-                QMessageBox.warning(self,"Credentials issue","Wrong user credentials have been provided.")
+                messageBox.level("warning")
+                messageBox.title("Credentials issue")
+                messageBox.message("Wrong user credentials have been provided.")
+                messageBox.buttons(("ok",))
+                messageBox.exec_()
                 return
 
         finally:

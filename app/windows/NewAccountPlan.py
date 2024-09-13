@@ -5,9 +5,10 @@ from PyQt5 import uic
 
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QFrame, QMessageBox
+from PyQt5.QtWidgets import QFrame
 from pymongo import MongoClient
 
+from app.windows.MessageBox import MessageBox
 from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.databases import mongoUpdate
 from utils.paths import getFrozenPath
@@ -50,13 +51,20 @@ class NewAccountPlan(QFrame):
         self.advancedTierButton.clicked.connect(self.submitAdvancedTier)
 
     def getEmail(self):
-        email: str = sync_read_user_cred_file().get("email", "")
+        try:
+            email: str = sync_read_user_cred_file().get("email", None)
+        except FileNotFoundError:
+            email = None
+            pass
+        except Exception:
+            raise
         if not email:
-            QMessageBox.warning(
-                None, 
-                "Unable to find user credentials", 
-                "Credentials Json file might be missing or corrupted. Please, try again."
-            )
+            messageBox = MessageBox()
+            messageBox.level("warning")
+            messageBox.title("Missing Credentials")
+            messageBox.message("Unable to find user credentials.\nCredentials Json file might be missing or corrupted.\nPlease, try again.")
+            messageBox.buttons(("ok",))
+            messageBox.exec_()
             return None
         return email
 
@@ -82,8 +90,12 @@ class NewAccountPlan(QFrame):
                 setRelativeToMainWindow(paymentFailed, parent, 'center')
                 self.close()
         else:
-            QMessageBox.warning(None, "Missing Credentials", "Close this App and retry creating an account.")
-        
+            messageBox = MessageBox()
+            messageBox.level("warning")
+            messageBox.title("Missing Credentials")
+            messageBox.message("Close this App and retry creating an account.")
+            messageBox.buttons(("ok",))
+            messageBox.exec_()        
 
     def submitStandardTier(self):
         parent = self.parent()

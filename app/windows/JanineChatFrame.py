@@ -6,10 +6,11 @@ from typing import List, Union
 
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QEvent, pyqtSlot, QTimer, pyqtSignal
-from PyQt5.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QFileDialog
 from pymongo import MongoClient
 from qasync import asyncSlot, QApplication, QEventLoop
 
+from app.windows.MessageBox import MessageBox
 from app.windows.Spinner import Spinner, Worker
 from app.windows.Messages import *
 from app.windows.Types import Recorder
@@ -82,7 +83,7 @@ class JanineChat(QFrame):
         self.attachmentLayout = QVBoxLayout()
         self.chatWidget = QWidget()
         self.historyWidget = QWidget()
-        self.messageBox = QMessageBox()
+        self.messageBox = MessageBox()
 
         self.basePath = getFileSystemPath(getenv("APP_BASE_PATH"))
 
@@ -256,9 +257,11 @@ class JanineChat(QFrame):
         else: 
             text = self.message.toPlainText()
             if len(text) == 0 and not self.fileLoaded: 
-                self.messageBox.information(
-                    self, "Invalid Text Message", "No message input found.",
-                )
+                self.messageBox.level("warning")
+                self.messageBox.title("Invalid Text Message")
+                self.messageBox.message("No message input found.")
+                self.messageBox.buttons(("Ok", ))
+                self.messageBox.exec_()
                 return
         message = TextMessage(text,  origin=origin)
         messageStr = message.toString()
@@ -300,9 +303,11 @@ class JanineChat(QFrame):
     async def voiceMailFunc(self, path: Path, origin:str="User"):
         duration = getAudioLength(path)
         if duration == 0:
-            self.messageBox.information(
-                self, "Invalid Voice Message", "No voice input found.",
-            )
+            self.messageBox.level("warning")
+            self.messageBox.title("Invalid Voice Message")
+            self.messageBox.message("No voice input found.")
+            self.messageBox.buttons(("Ok", ))
+            self.messageBox.exec_()
             return
         voicemail = VoiceMail(model=self.janine, filePath=path, origin=origin)
         voicemailStr = await voicemail.toString()

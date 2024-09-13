@@ -5,9 +5,10 @@ from PyQt5 import uic
 
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QFrame, QLayout, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QFrame, QLayout, QLineEdit
 from pymongo import MongoClient
 
+from app.windows.MessageBox import MessageBox
 from app.config.fonts import RobotoRegular, FontSizePoint
 from app.windows.NewAccountPlan import NewAccountPlan
 from utils.appHelper import setRelativeToMainWindow, showWindow, adjustForDPI
@@ -120,15 +121,25 @@ class NewAccountSetup(QFrame):
         email = self.emailEdit.text()
         tempPassword = self.passwordEdit.text()
         confirmedPassword = self.confirmPasswordEdit.text()
+        
+        messageBox = MessageBox()
 
         if not all([firstName, lastName, email, tempPassword, confirmedPassword]):
-            QMessageBox.warning(self, "Missing fields", "Please fill in all fields")
+            messageBox.level("warning")
+            messageBox.title("Missing fields")
+            messageBox.message("Please fill in all fields")
+            messageBox.buttons(("ok",))
+            messageBox.exec_()
             return
 
         if tempPassword == confirmedPassword:
             password = tempPassword
         else:
-            QMessageBox.warning(self, "Passwords do not match", "Please confirm your password")
+            messageBox.level("warning")
+            messageBox.title("Passwords do not match")
+            messageBox.message("Please confirm your password")
+            messageBox.buttons(("ok",))
+            messageBox.exec_()
             return
         
         companyName = self.companyNameEdit.text()
@@ -141,7 +152,11 @@ class NewAccountSetup(QFrame):
         companyAccount = self.companyAccountRadioButton.isChecked()
 
         if not pesonalAccount and not companyAccount:
-            QMessageBox.warning(self, "Invalid Account Type", "Please select an account type")
+            messageBox.level("warning")
+            messageBox.title("Invalid Account Type")
+            messageBox.message("Please select an account type")
+            messageBox.buttons(("ok",))
+            messageBox.exec_()
             return
 
         prospected = False

@@ -10,8 +10,9 @@ from pymongo.mongo_client import MongoClient
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer, pyqtSlot
-from PyQt5.QtWidgets import QWidget, QMessageBox, QMainWindow, QApplication, QVBoxLayout, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QMainWindow, QApplication, QVBoxLayout, QSizePolicy
 
+from app.windows.MessageBox import MessageBox
 from app.config.scheduler import Schedule
 from app.windows.LoginFrame import SignInFrame
 from app.windows.MenuFrame import AccountMenu
@@ -181,34 +182,31 @@ class MainWindow(QMainWindow):
         return await controller.check_for_update(screen_resolution=screen_resource, connection=connection)
     
     def promptUserForDownload(self) -> bool:
-        msgBox = QMessageBox()
-        msgBox.setIcon(QMessageBox.Question)
-        msgBox.setText("New version available. Would you like to download it?")
-        msgBox.setWindowTitle("Update Available")
-        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        msgBox.setDefaultButton(QMessageBox.Yes)
-        msgBox.setStyleSheet(msgBoxStyleSheet)
-        return msgBox.exec_() == QMessageBox.Yes
+        msgBox = MessageBox()
+        msgBox.level("question")
+        msgBox.message("New version available. Would you like to download it?")
+        msgBox.title("Update Available")
+        msgBox.buttons(("yes", "no"))
+        msgBox.setDefaultButton(msgBox.Yes)
+        return msgBox.exec_() == msgBox.Yes
     
 
     def promptUserForUpdate(self) -> bool:
-        msgBox = QMessageBox()
-        msgBox.setIcon(QMessageBox.Question)
-        msgBox.setText("Would you like to update now?")
-        msgBox.setWindowTitle("Update Available")
-        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        msgBox.setDefaultButton(QMessageBox.Yes)
-        msgBox.setStyleSheet(msgBoxStyleSheet)
-        return msgBox.exec_() == QMessageBox.Yes
+        msgBox = MessageBox()
+        msgBox.level("question")
+        msgBox.message("Would you like to update now?")
+        msgBox.title("Update Available")
+        msgBox.buttons(("yes", "no"))
+        msgBox.setDefaultButton(msgBox.Yes)
+        return msgBox.exec_() == msgBox.Yes
     
     def warnForRestart(self):
-        msgBox = QMessageBox()
-        msgBox.setIcon(QMessageBox.Warning)
-        msgBox.setText(f"Application will restart now for the update to take effect.")
-        msgBox.setWindowTitle("Update Downloaded")
-        msgBox.setStandardButtons(QMessageBox.Ok)
-        msgBox.setDefaultButton(QMessageBox.Ok)
-        msgBox.setStyleSheet(msgBoxStyleSheet)
+        msgBox = MessageBox()
+        msgBox.level("warning")
+        msgBox.message("Application will restart now for the update to take effect.")
+        msgBox.title("Update Downloaded")
+        msgBox.buttons(("ok", ))
+        msgBox.setDefaultButton(msgBox.Ok)
         self.closedBeforeUpdateTimeout.emit()
         msgBox.exec_()
 

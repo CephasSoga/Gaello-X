@@ -95,7 +95,7 @@ class NotificationExpand(QFrame):
     
     def setContents(self):
         self.titleLabel.setText(self.message.title)
-        self.contentTextEdit.setPlainText(self.message.content)
+        self.contentTextEdit.setPlainText(self.message.content.replace("\t", ""))
         self.contentTextEdit.verticalScrollBar().setStyleSheet(chatScrollBarStyle)  
         self.contentTextEdit.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.dateLabel.setText(self.message.date)
