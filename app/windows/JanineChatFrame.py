@@ -34,7 +34,7 @@ HISTORY_LIMIT = 100
 
 class JanineChat(QFrame):
     gatheredChats = pyqtSignal(list)
-    def __init__(self, connection: MongoClient, parent=None):
+    def __init__(self, connection: MongoClient, async_tasks: list[asyncio.Task], parent=None):
         super(JanineChat, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "chat_.ui"))
         if os.path.exists(path):
@@ -43,6 +43,7 @@ class JanineChat(QFrame):
             raise FileNotFoundError(f"{path} not found")
 
         self.connection = connection
+        self.async_tasks = async_tasks
         self.waiter = Waiter()
 
         self.initUI()
@@ -342,10 +343,10 @@ class JanineChat(QFrame):
         await self.voiceMailFunc(response, origin="Janine")
 
     def constructMessage(self):
-        asyncio.ensure_future(self.constructMessageFunc())
+        self.async_tasks.append(self.constructMessageFunc())
 
     def constructVoiceMail(self):
-        asyncio.ensure_future(self.constructVoiceMailFunc())
+        self.async_tasks.append(self.constructVoiceMailFunc())
 
 
     async def spawnWaiter(self):

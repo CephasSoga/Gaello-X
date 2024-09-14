@@ -20,6 +20,7 @@ class ForexItem(QFrame):
     def __init__(self,
                 #symbol: str, 
                 connection: MongoClient,
+                async_tasks: list[asyncio.Task],
                 flag1Pixmap: Optional[QPixmap], 
                 flag2Pixmap: Optional[QPixmap], 
                 pair: str, 
@@ -36,6 +37,7 @@ class ForexItem(QFrame):
 
         #self.symbol = symbol
         self.connection = connection
+        self.async_tasks = async_tasks
         self.flag1Pixmap = flag1Pixmap
         self.flag2Pixmap = flag2Pixmap
         self.pair = pair
@@ -94,7 +96,7 @@ class ForexItem(QFrame):
         self.tagLabel.setFont(tinyFont)
 
     def connectSlots(self):
-        self.clicked.connect(lambda: asyncio.ensure_future(handleAuth(self.connection, 2, self.spawnFocus)))
+        self.clicked.connect(lambda: self.async_tasks.append(handleAuth(self.connection, 2, self.spawnFocus)))
 
     def spawnFocus(self):
         ancestorWidget = self.parent().parent().parent().parent() #Stands for ExploreMarket widget

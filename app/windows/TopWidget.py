@@ -25,17 +25,18 @@ from app.config.fonts import QuicksandBold, RobotoBold, RobotoRegular, FontSizeP
 from utils.paths import getFrozenPath
 
 class PressChatFrame(QFrame):
-    def __init__(self, connection: MongoClient, frame: QFrame, parent=None):
+    def __init__(self, connection: MongoClient, async_tasks: list[asyncio.Task], frame: QFrame, parent=None):
         super().__init__(parent)
         self.frame = frame
         self.janineWindow = None
         self.connection = connection
+        self.async_tasks = async_tasks
         self.frame.installEventFilter(self)
 
     def openChat(self):
         if not self.janineWindow:
-            self.janineWindow = JanineChat(connection=self.connection, parent=self.parent())
-            asyncio.ensure_future(handleAuth(self.connection, 1, stackOnCurrentWindow, self.janineWindow))
+            self.janineWindow = JanineChat(connection=self.connection, async_tasks=self.async_tasks, parent=self.parent())
+            self.async_tasks.append(handleAuth(self.connection, 1, stackOnCurrentWindow, self.janineWindow))
         else:
             self.janineWindow = None
 
@@ -46,17 +47,18 @@ class PressChatFrame(QFrame):
         return super().eventFilter(obj, event)
         
 class PressExploreFrame(QFrame):
-    def __init__(self, connection: MongoClient, frame: QFrame, parent=None):
+    def __init__(self, connection: MongoClient, async_tasks: list[asyncio.Task], frame: QFrame, parent=None):
         super().__init__(parent)
         self.frame = frame
         self.summaryWindow = None
         self.connection = connection
+        self.async_tasks = async_tasks
         self.frame.installEventFilter(self)
     
     def openExploreArea(self):
         if not self.summaryWindow:
-            self.summaryWindow = MarketSummary(connection=self.connection, parent=self.parent())
-            asyncio.ensure_future(handleAuth(self.connection, 1, stackOnCurrentWindow, self.summaryWindow))
+            self.summaryWindow = MarketSummary(connection=self.connection, async_tasks=self.async_tasks, parent=self.parent())
+            self.async_tasks.append(handleAuth(self.connection, 1, stackOnCurrentWindow, self.summaryWindow))
         else:
             self.summaryWindow = None
 
@@ -122,19 +124,19 @@ class Header(QMainWindow):
         stocktMovie.start()
 
     def connectSlots(self):
-        self.chatFrame = PressChatFrame(connection=self.connection, frame=self.chat)
-        self.summaryFrame = PressExploreFrame(connection=self.connection, frame=self.explore)
+        self.chatFrame = PressChatFrame(connection=self.connection, async_tasks=self.async_tasks, frame=self.chat)
+        self.summaryFrame = PressExploreFrame(connection=self.connection, async_tasks=self.async_tasks, frame=self.explore)
 
         assets = ExploreAsset(connection=self.connection, async_tasks=self.async_tasks, parent=self)
         assets.hide()
         self.assetButton.clicked.connect(
-            lambda: asyncio.ensure_future(handleAuth(self.connection, 1, stackOnCurrentWindow, assets))
+            lambda: self.async_tasks.append(handleAuth(self.connection, 1, stackOnCurrentWindow, assets))
         )
 
         market = ExploreMarket(connection=self.connection, async_tasks=self.async_tasks, parent=self)
         market.hide()
         self.marketButton.clicked.connect(
-            lambda: asyncio.ensure_future(handleAuth(self.connection, 1, stackOnCurrentWindow, market))
+            lambda: self.async_tasks.append(handleAuth(self.connection, 1, stackOnCurrentWindow, market))
         )
 
         self.docWebEngineView = DocWebEngineView()

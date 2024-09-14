@@ -216,6 +216,7 @@ class ExploreMarket(QFrame):
         def func_3(forexPair: str, price: float, growth: float, flag1: QPixmap, flag2: QPixmap, chartPixmap: QPixmap):
             item = ForexItem(
                 connection=self.connection,
+                async_tasks=self.async_tasks,
                 flag1Pixmap=flag1, 
                 flag2Pixmap=flag2, 
                 pair=forexPair, 
@@ -278,6 +279,7 @@ class ExploreMarket(QFrame):
         def func_2(indexSymbol, indexName, currentPrice, growth, chartPixmap):
             item = IndexItem(
                 connection=self.connection,
+                async_tasks=self.async_tasks,
                 symbol=indexSymbol, 
                 name=indexName, 
                 price=currentPrice, 
@@ -320,6 +322,7 @@ class ExploreMarket(QFrame):
         def func_2(cryptoSymbol, cryptoName, price, growth, imagePixmap, chartPixmap):
             item = CryptoItem(
                 connection=self.connection,
+                async_tasks=self.async_tasks,
                 symbol=cryptoSymbol, 
                 name=cryptoName, 
                 price=price, 
@@ -387,7 +390,8 @@ class ExploreMarket(QFrame):
         
         def func_2(commoditySymbol, comName, price, growth):
             item = CommodityItem(
-                connection=self.connection, 
+                connection=self.connection,
+                async_tasks=self.async_tasks, 
                 symbol=commoditySymbol, 
                 name=comName, 
                 price=price, 

@@ -34,7 +34,7 @@ class Insight:
 
 class JanineInsights(QWidget):
     gatheredInsights = pyqtSignal(list)
-    def __init__(self, connection: MongoClient, parent=None):
+    def __init__(self, connection: MongoClient, async_tasks: list[asyncio.Task], parent=None):
         super(JanineInsights, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI" , "insightsWidget.ui"))
         if os.path.exists(path):
@@ -43,6 +43,8 @@ class JanineInsights(QWidget):
             raise FileNotFoundError(f"{path} not found")
         
         self.connection = connection
+
+        self.async_tasks = async_tasks
 
         self.initUI()
         QTimer.singleShot(10, self.syncSetContents)
@@ -129,7 +131,7 @@ class JanineInsights(QWidget):
 
     @pyqtSlot()
     def syncSetContents(self):
-        asyncio.ensure_future(self.setContents())
+        self.async_tasks.append(self.setContents())
 
 
     def setFonts(self):

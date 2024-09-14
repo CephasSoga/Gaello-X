@@ -26,7 +26,7 @@ class MarketSummary(QFrame):
     dataFetched = pyqtSignal(str, list)
     updateFocus = pyqtSignal()
 
-    def __init__(self, connection: MongoClient, parent=None):
+    def __init__(self, connection: MongoClient, async_tasks: list[asyncio.Task], parent=None):
         super(MarketSummary, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "marketSummary.ui"))
         if os.path.exists(path):
@@ -35,6 +35,8 @@ class MarketSummary(QFrame):
             raise FileNotFoundError(f"{path} not found")
         
         self.connection = connection
+
+        self.async_tasks = async_tasks
 
         self.outliner = MarketOutliner(connection)
         self.initUI()
@@ -103,7 +105,7 @@ class MarketSummary(QFrame):
             self.addSectorPerformances(items)
 
     def handleNewsFetched(self):
-        asyncio.ensure_future(self.setFocus())
+        self.async_tasks.append(self.setFocus())
 
     def addGainers(self, gainers):
         title = OutlineTitle(self)

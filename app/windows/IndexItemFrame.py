@@ -16,7 +16,7 @@ from utils.paths import getFrozenPath
 
 class IndexItem(QFrame):
     clicked = pyqtSignal()
-    def __init__(self, connection: MongoClient, symbol: str, name: str, price: float, growth: float, historicalPixmap: Optional[QPixmap], parent=None):
+    def __init__(self, connection: MongoClient, async_tasks: list[asyncio.Task], symbol: str, name: str, price: float, growth: float, historicalPixmap: Optional[QPixmap], parent=None):
         super(IndexItem, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "indexItem.ui"))
         if os.path.exists(path):
@@ -25,6 +25,7 @@ class IndexItem(QFrame):
             raise FileNotFoundError(f"{path} not found")
 
         self.connection = connection
+        self.async_tasks = async_tasks
         self.symbol = symbol
         self.name = name
         self.price = price
@@ -74,7 +75,7 @@ class IndexItem(QFrame):
         self.tagLabel.setFont(tinyFont)
 
     def connectSlots(self):
-         self.clicked.connect(lambda: asyncio.ensure_future(handleAuth(self.connection, 2, self.spawnFocus)))
+         self.clicked.connect(lambda: self.async_tasks.append(handleAuth(self.connection, 2, self.spawnFocus)))
 
     def spawnFocus(self):
         ancestorWidget = self.parent().parent().parent().parent() #Stands for ExploreMarket widget

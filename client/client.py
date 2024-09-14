@@ -10,7 +10,7 @@ from app.windows.MainWindow import MainWindow
 from app.config.scheduler import Schedule
 from app.windows.WarningFrame import Warning
 from utils.connection import deviceIsConnected
-from utils.envHandler import getenv
+from utils.logs import Logger
 
 INIT_TIMEOUT = 3
 SLEEP_SEC = 1
@@ -49,7 +49,10 @@ class Client(QObject):
     The main client class that initializes the application, handles connection errors, and starts the worker thread.
     """
     async_tasks = []
-    old_len = 0 
+    old_len = 0
+    accumulated_tasks_cont = 0 
+
+    logger = Logger("Client")
 
     def __init__(self, connection: MongoClient):
         super().__init__()
@@ -93,6 +96,13 @@ class Client(QObject):
         result = self.checkForNewTasks()
         if result:
             diff, start_pos, end_pos = result
+            self.accumulated_tasks_cont += diff
+            if self.accumulated_tasks_cont >= Schedule.ACCUMULATED_TASKS:
+                self.logger.log(
+                    "info", 
+                    f"Completing {self.accumulated_tasks_cont} tasks | Parallel Execution > [completed: {self.accumulated_tasks_cont - diff}] [pending: {diff}]"
+                )
+                self.accumulated_tasks_cont = 0
             news_tasks = self.async_tasks[start_pos:end_pos]
             try:
                 await asyncio.gather(*news_tasks, return_exceptions=True)

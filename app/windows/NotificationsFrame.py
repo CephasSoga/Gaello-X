@@ -116,7 +116,7 @@ class NotificationItem(QFrame):
 
     isExpanded = pyqtSignal()
 
-    def __init__(self, connection: MongoClient, message: Unread | Read, parent=None):
+    def __init__(self, connection: MongoClient, async_tasks: list[asyncio.Task], message: Unread | Read, parent=None):
         super(NotificationItem, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI" , "notificationItem.ui"))
         if os.path.exists(path):
@@ -125,6 +125,7 @@ class NotificationItem(QFrame):
             raise FileNotFoundError(f"{path} not found")
 
         self.connection = connection
+        self.async_tasks = async_tasks
         self.message = message
 
         self.dbName = 'notifications'
@@ -174,7 +175,7 @@ class NotificationItem(QFrame):
         QTimer.singleShot(Schedule.DEFAULT_DELAY, self.syncMongoUpdate)
 
     def syncMongoUpdate(self):
-        asyncio.ensure_future(self.updateMessageStatus())
+        self.async_tasks.append(self.updateMessageStatus())
 
     async def updateMessageStatus(self):
         print(f"Updating status for message ID: {self.message._id}")
@@ -278,11 +279,11 @@ class Notifications(QFrame):
 
         # Add new items to layouts
         for unread in unreads:
-            item = NotificationItem(connection=self.connection, message=unread)
+            item = NotificationItem(connection=self.connection, async_tasks=self.async_tasks, message=unread)
             self.unreadsLayout.addWidget(item)
 
         for read in reads:
-            item = NotificationItem(connection=self.connection, message=read)
+            item = NotificationItem(connection=self.connection, async_tasks=self.async_tasks, message=read)
             self.readsLayout.addWidget(item)
 
     @pyqtSlot()

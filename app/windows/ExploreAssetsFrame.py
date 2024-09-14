@@ -164,7 +164,7 @@ class ExploreAsset(QFrame):
                 imagePixmap=imagePixmap, 
                 chartPixmap=chartPixmap, 
                 parent=self)
-            item.clicked.connect(lambda: asyncio.ensure_future(handleAuth(self.connection, 2, self.expand, item, symbol)))
+            item.clicked.connect(lambda: self.async_tasks.append(handleAuth(self.connection, 2, self.expand, item, symbol)))
             self.scrollLayout.addWidget(item, row, col)
             self.assetPreviews.append(item)
 
