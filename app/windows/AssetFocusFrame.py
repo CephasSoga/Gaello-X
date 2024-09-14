@@ -19,6 +19,9 @@ from utils.workers import spinnerWork
 from utils.paths import getFrozenPath
 from app.config.renderer import ViewController
 
+# import resources
+import app.config.resources
+
 class AssetFocusItem(QFrame):
     def __init__(self, parent=None):
         super(AssetFocusItem, self).__init__(parent)

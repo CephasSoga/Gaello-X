@@ -9,6 +9,9 @@ from app.config.fonts import RobotoRegular, FontSizePoint
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
+# import resources
+import app.config.resources
+
 class JanineCommunity(QWidget):
     def __init__(self, parent=None):
         super(JanineCommunity, self).__init__(parent)

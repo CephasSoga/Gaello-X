@@ -15,6 +15,9 @@ from utils.logs import Logger
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
+# import resources
+import app.config.resources
+
 class MarketOutliner:
     def __init__(self, connection: MongoClient) -> None:
         self.logger = Logger("Market-Outlines")

@@ -30,6 +30,9 @@ from utils.time import now
 from app.windows.AttachmentFrame import Attachment
 from app.config.renderer import ViewController
 
+# import resources
+import app.config.resources
+
 HISTORY_LIMIT = 100
 
 class JanineChat(QFrame):

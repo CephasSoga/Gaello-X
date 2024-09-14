@@ -26,6 +26,9 @@ from app.versions.control import VersionController
 from app.versions.download import VersionDownloadManager
 from app.versions.info import Version
 
+# import resources
+import app.config.resources
+
 class MainWindow(QMainWindow):
     finishedLoading = pyqtSignal()
     closedBeforeUpdateTimeout = pyqtSignal() # handle cases where user closes app before update timeout

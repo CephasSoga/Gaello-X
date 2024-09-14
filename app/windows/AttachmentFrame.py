@@ -10,6 +10,9 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
+# import resources
+import app.config.resources
+
 class Attachment(QFrame):
     isDeleted = pyqtSignal()
     def __init__(self, filePath: Union[str, Path], parent=None):

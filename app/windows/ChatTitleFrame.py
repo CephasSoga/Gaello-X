@@ -9,6 +9,9 @@ from PyQt5.QtWidgets import QFrame, QDialog
 from utils.paths import getFrozenPath
 from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 
+# import resources
+import app.config.resources
+
 class ChatTitleSelector(QFrame):
     titleSet = pyqtSignal(str)
     def __init__(self, parent = None):

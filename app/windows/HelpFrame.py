@@ -4,9 +4,11 @@ from PyQt5 import uic
 from PyQt5.QtCore import QEvent
 from PyQt5.QtWidgets import QFrame
 
-
 from utils.paths import getFrozenPath
 from utils.appHelper  import browse
+
+# import resources
+import app.config.resources
 
 class Help(QFrame):
     def __init__(self, parent=None):

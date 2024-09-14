@@ -10,6 +10,9 @@ from app.config.fonts import RobotoSemiBold, FontSizePoint
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
+# import resources
+import app.config.resources
+
 class AssetPreview(QFrame):
     clicked = pyqtSignal()
     def __init__(self,

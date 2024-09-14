@@ -16,6 +16,9 @@ from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI, setRelativeToMainWindow
 from utils.asyncJobs import quickFetchBytes
 
+# import resources
+import app.config.resources
+
 @dataclass
 class Insight:
     title: str

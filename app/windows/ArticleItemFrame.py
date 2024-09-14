@@ -10,6 +10,9 @@ from app.windows.ArticleExpandFrame import ArticleExpand
 from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.paths import getFrozenPath
 
+# import resources
+import app.config.resources
+
 class ArticleItem(QFrame):
     clicked = pyqtSignal()
     def __init__(self,

@@ -21,6 +21,9 @@ from utils.appHelper import adjustForDPI, moveWidget, clearLayout, stackOnCurren
 from utils.asyncJobs import asyncWrap
 from app.handlers.AuthHandler import sync_read_user_cred_file
 
+# import resources
+import app.config.resources
+
 @dataclass
 class Unread:
     _id: bson.ObjectId # to help easily manipulate message througout classes

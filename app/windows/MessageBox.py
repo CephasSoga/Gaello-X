@@ -5,6 +5,9 @@ from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import pyqtSignal, QThread, QMetaObject, Qt
 from app.windows.Styles import msgBoxStyleSheet
 
+# import resources
+import app.config.resources
+
 class MessageBox(QMessageBox):
     def __init__(self, title: str = None, message: str = None, level: str = None, buttons: tuple[str, str] | tuple[str] = None, parent=None):
         super().__init__(parent)

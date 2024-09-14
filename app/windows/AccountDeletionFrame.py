@@ -17,6 +17,8 @@ from utils.envHandler import getenv
 from utils.asyncJobs import asyncWrap, ThreadRun
 from utils.databases  import mongoUpdate, mongoGet, mongoDeleteOne
 
+# import resources
+import app.config.resources
 
 class AccountDeleteCompletion(QFrame):
     def __init__(self, parent=None):

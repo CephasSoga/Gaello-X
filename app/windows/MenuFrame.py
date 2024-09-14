@@ -17,6 +17,8 @@ from utils.paths import getFrozenPath, getFileSystemPath
 from utils.envHandler import getenv
 from utils.databases import mongoGet
 
+# import resources
+import app.config.resources
 
 class Menu(QFrame):
     def __init__(self, parent=None):

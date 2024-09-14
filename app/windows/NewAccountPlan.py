@@ -17,6 +17,8 @@ from app.windows.PaymentForm import PaymentForm
 from app.windows.NewAccountOk import AccountAllSet,  AccountInitFailure
 from app.handlers.AuthHandler import sync_read_user_cred_file
 
+# import resources
+import app.config.resources
 
 class NewAccountPlan(QFrame):
     def __init__(self, connection: MongoClient, parent=None):

@@ -11,6 +11,9 @@ from app.windows.Styles import chatScrollBarStyle
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
+# import resources
+import app.config.resources
+
 class ArticleExpand(QFrame):
     def __init__(self,
         title: str = None,

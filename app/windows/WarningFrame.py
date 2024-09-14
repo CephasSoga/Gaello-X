@@ -7,6 +7,8 @@ from PyQt5.QtWidgets import QFrame
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
+# import resources
+import app.config.resources
 
 class Warning(QFrame):
     def __init__(self, parent=None):

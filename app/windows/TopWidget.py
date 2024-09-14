@@ -24,6 +24,9 @@ from app.windows.MenuFrame import Menu
 from app.config.fonts import QuicksandBold, RobotoBold, RobotoRegular, FontSizePoint
 from utils.paths import getFrozenPath
 
+# import resources
+import app.config.resources
+
 class PressChatFrame(QFrame):
     def __init__(self, connection: MongoClient, async_tasks: list[asyncio.Task], frame: QFrame, parent=None):
         super().__init__(parent)

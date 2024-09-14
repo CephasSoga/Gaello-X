@@ -2,6 +2,9 @@ import os
 from PyQt5 import uic
 from utils.paths import getFrozenPath
 
+# import resources
+import app.config.resources
+
 class GaelloUI:
     
     def loadFromFile(item, ui_file: str):

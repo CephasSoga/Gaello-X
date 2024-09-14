@@ -15,6 +15,9 @@ from utils.appHelper import setRelativeToMainWindow, showWindow, adjustForDPI
 from utils.paths import getFrozenPath
 from databases.mongodb.UsersAuth import UserCredentials, UserAuthentification
 
+# import resources
+import app.config.resources
+
 class NewAccountSetup(QFrame):
     def __init__(self, connection: MongoClient, parent=None):
         super(NewAccountSetup, self).__init__(parent)

@@ -20,6 +20,9 @@ from utils.system import restoreSystemPath, killPortProcess
 from utils.paths import getFrozenPath, resourcePath
 from models.reader.cache import cached_credentials
 
+# import resources
+import app.config.resources
+
 PORT = 8888
 IP = 'http://localhost'
 

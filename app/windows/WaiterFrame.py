@@ -7,6 +7,9 @@ from PyQt5 import uic
 from utils.paths import getFrozenPath, resourcePath
 from utils.appHelper import adjustForDPI
 
+# import resources
+import app.config.resources
+
 class Waiter(QFrame):
     def __init__(self, parent=None):
         super(Waiter, self).__init__(parent)

@@ -20,6 +20,9 @@ from app.windows.PlusWidget import ProjectHome
 from utils.paths import getFrozenPath
 from app.config.renderer import ViewController
 
+# import resources
+import app.config.resources
+
 # ffmpeg binaries at assets\binaries\w64\ffmpeg\bin
 ffmpeg_path = resourcePath(os.path.join('assets', 'binaries', 'w64', 'ffmpeg', 'bin'))
 os.environ['PATH'] = ffmpeg_path + os.pathsep + os.environ['PATH']

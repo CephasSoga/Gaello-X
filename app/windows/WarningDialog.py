@@ -9,6 +9,9 @@ from app.config.fonts import RobotoBold, FontSizePoint
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
+# import resources
+import app.config.resources
+
 class Warning(QDialog):
     def __init__(self, title: str, message: str,  parent=None):
         super().__init__(parent)

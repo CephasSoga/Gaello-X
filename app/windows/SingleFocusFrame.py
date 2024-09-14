@@ -20,6 +20,8 @@ from utils.appHelper import clearLayout, adjustForDPI
 from utils.paths import getFrozenPath
 from app.config.renderer import ViewController
 
+# import resources
+import app.config.resources
 
 class SingleFocus(QWidget):
     def __init__(self, connection: MongoClient, symbol:str, targetCollection: str, parent=None):

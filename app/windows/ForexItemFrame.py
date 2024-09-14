@@ -14,6 +14,8 @@ from app.windows.SingleFocusFrame import SingleFocus
 from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.paths import getFrozenPath
 
+# import resources
+import app.config.resources
 
 class ForexItem(QFrame):
     clicked = pyqtSignal()

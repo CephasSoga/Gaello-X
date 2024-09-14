@@ -23,6 +23,8 @@ from utils.envHandler import getenv
 from utils.asyncJobs import asyncWrap, ThreadRun
 from utils.databases  import mongoGet, mongoUpdate
 
+# import resources
+import app.config.resources
 
 class UpgradePaymentForm(PaymentForm):
     def __init__(self, connection: MongoClient, nodeAppPath: Path | str, execPath: Path | str = ".", parent=None):

@@ -11,6 +11,9 @@ from app.config.fonts import RobotoRegular, FontSizePoint
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
+# import resources
+import app.config.resources
+
 # Load the UI file into a QUiLoader object
 class ProjectHome(QWidget):
     def __init__(self, parent=None):

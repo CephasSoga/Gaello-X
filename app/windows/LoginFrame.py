@@ -20,6 +20,8 @@ from app.windows.NewAccountSetup import NewAccountSetup
 from databases.mongodb.UsersAuth import UserCredentials, userAuthInstance
 from utils.databases import mongoGet
 
+# import resources
+import app.config.resources
 
 class SignInFrame(QMainWindow):
     def __init__(self, connection: MongoClient, parent=None):

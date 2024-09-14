@@ -14,6 +14,9 @@ from app.windows.SingleFocusFrame import SingleFocus
 from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 from utils.paths import getFrozenPath
 
+# import resources
+import app.config.resources
+
 class IndexItem(QFrame):
     clicked = pyqtSignal()
     def __init__(self, connection: MongoClient, async_tasks: list[asyncio.Task], symbol: str, name: str, price: float, growth: float, historicalPixmap: Optional[QPixmap], parent=None):

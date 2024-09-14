@@ -21,6 +21,9 @@ from utils.asyncJobs import asyncWrap, enumerate_async
 from app.config.balancer import BatchBalance
 from app.config.renderer import ViewController
 
+# import resources
+import app.config.resources
+
 @dataclass
 class Insight:
     title: str

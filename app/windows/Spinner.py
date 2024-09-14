@@ -5,6 +5,8 @@ from PyQt5.QtCore import pyqtSignal, QThread, Qt
 from pyqtspinner.spinner import WaitingSpinner
 from typing import Callable, Optional
 
+# import resources
+import app.config.resources
 
 class Worker(QThread):
     started = pyqtSignal()

@@ -15,6 +15,9 @@ from app.windows.Styles import userMessageBackground, chatScrollBarStyle
 from app.config.fonts import RobotoRegular, Exo2Light, FontSizePoint
 from utils.appHelper import adjustForDPI
 
+# import resources
+import app.config.resources
+
 class ChatTextMessage(QFrame):
     def __init__(self, message:Message, parent=None):
         super(ChatTextMessage, self).__init__(parent)

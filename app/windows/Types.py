@@ -16,6 +16,9 @@ from utils .envHandler import getenv
 
 APP_BASE_PATH = getFileSystemPath(getenv('APP_BASE_PATH'))
 
+# import resources
+import app.config.resources
+
 class TextMessage:
     """
     A class representing a text message.

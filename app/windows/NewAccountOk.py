@@ -10,6 +10,8 @@ from app.config.fonts import RobotoRegular, FontSizePoint
 from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 
+# import resources
+import app.config.resources
 
 class AccountAllSet(QFrame):
     def __init__(self, parent=None):

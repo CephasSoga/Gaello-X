@@ -25,6 +25,8 @@ from app.config.scheduler import Schedule
 from app.config.balancer import BatchBalance
 from app.config.renderer import ViewController
 
+# import resources
+import app.config.resources
 
 class ExploreAsset(QFrame):
     def __init__(self, connection: MongoClient, async_tasks: list, parent=None):

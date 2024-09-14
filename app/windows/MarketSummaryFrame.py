@@ -22,6 +22,9 @@ from utils.paths import getFrozenPath
 from utils.appHelper import adjustForDPI
 from app.config.renderer import ViewController
 
+# import resources
+import app.config.resources
+
 class MarketSummary(QFrame):
     dataFetched = pyqtSignal(str, list)
     updateFocus = pyqtSignal()

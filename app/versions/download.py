@@ -71,6 +71,7 @@ class VersionDownloadManager(QWidget):
                                     # check if download is complete
                                     if percentage >= 100:
                                         self.completed.emit()
+                                        self.close()
                                         break
                                 return True
                         except Exception as e:
