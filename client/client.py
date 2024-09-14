@@ -86,8 +86,6 @@ class Client(QObject):
             start_pos = self.old_len
             end_pos = async_tasks_len
             self.old_len = async_tasks_len
-            print("Total tasks: ", async_tasks_len)
-            print("New tasks: ", diff)
             return diff, start_pos, end_pos
             
         
@@ -103,7 +101,7 @@ class Client(QObject):
 
     def activelyCompleteNewTasks(self):
         self.timer = QTimer()
-        self.timer.setInterval(Schedule.LONG_WAITING_DELAY) 
+        self.timer.setInterval(Schedule.NO_DELAY) 
         self.timer.timeout.connect(lambda: asyncio.ensure_future(self.completeNewTasks()))
         self.timer.start()
 

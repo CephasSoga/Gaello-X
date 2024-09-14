@@ -115,7 +115,7 @@ class ExploreAsset(QFrame):
         symbol:str = symbol.symbol
         data = [data for data in allData if data.get("symbol") == symbol]
         if not data or len(data) == 0:
-            print(f'{symbol} Not Found.')
+            print(f'> symbol not found: {symbol} | [Not in database] ')
             return
         
         _ = await self.processData(data, symbol, row, col)

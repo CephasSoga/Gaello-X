@@ -29,13 +29,6 @@ from app.versions.info import Version
 class MainWindow(QMainWindow):
     finishedLoading = pyqtSignal()
     closedBeforeUpdateTimeout = pyqtSignal() # handle cases where user closes app before update timeout
-    downloadFinished = pyqtSignal()
-    updateAvailable = pyqtSignal()
-    userWantsToDownload = pyqtSignal()
-    userWantsToUpdateNow = pyqtSignal()
-
-
-    new_version = None
 
     def __init__(self, connection: MongoClient, async_tasks: list[asyncio.Task], parent=None):
         super(MainWindow, self).__init__()
@@ -50,8 +43,8 @@ class MainWindow(QMainWindow):
         
         self.initUI()
         QTimer.singleShot(
-            Schedule.NO_DELAY, 
-            self.proceedWithUpdate
+            Schedule.STRICT_DELAY, 
+            self.scheduleUpdate
         )
 
     def initUI(self):
@@ -152,22 +145,28 @@ class MainWindow(QMainWindow):
     def reduceWindow(self):
         self.showMinimized()  # This keeps the window in a reduced state (icon in taskbar)
     
-    def proceedWithUpdate(self):
+    def scheduleUpdate(self):
+        self.async_tasks.append(self.proceedWithUpdate())
+
+    async def proceedWithUpdate(self):
         path_to_store_binary = getFileSystemPath(os.path.join("C:", "Program Files", "Gaello X", "updates", "gaello.exe"))
         target_screen_resolution = (1920, 1080)
-        self.async_tasks.append(self.checkForUpdate(target_screen_resolution, self.connection))
-
-        # connect updateAvailable & userWantsToDownload signals
-        self.updateAvailable.connect(self.promptUserForDownload)
-        self.userWantsToDownload.connect(
-            lambda: self.async_tasks.append(self.download(path_to_store_binary, self.new_version))
-        )
-
-        # connect downloadFinished & userWantsToUpdateNow signals
-        self.downloadFinished.connect(self.promptUserForUpdate)
-        self.userWantsToUpdateNow.connect(self.makeUpadte)
+        new_version_available = await self.checkForUpdate(target_screen_resolution, self.connection)
+        if not new_version_available:
+            return
         
-    def makeUpadte(self):
+        permission = self.promptUserForDownload()
+        if not permission:
+            return
+
+        download = await self.download(path_to_store_binary, new_version_available)
+        if not download:
+            return
+
+        user_wants_to_update_now = self.promptUserForUpdate()
+        if not user_wants_to_update_now:
+            return
+
         # if app was closed before timeout
         self.closedBeforeUpdateTimeout.connect(self.execUpdateScript)
         self.warnForRestart()
@@ -178,19 +177,12 @@ class MainWindow(QMainWindow):
         downloader = VersionDownloadManager(path_to_store_binary=path_to_store_binary)
         moveWidget(downloader, parent=self, x="left", y="bottom")
         stackOnCurrentWindow(downloader)
-        result = await downloader.download_new_binary(version)
-        if result:
-            self.downloadFinished.emit()
-        return result
+        return await downloader.download_new_binary(version)
 
     async def checkForUpdate(self, screen_resource: tuple[int, int], connection: MongoClient):
         controller = VersionController()
-        result = await controller.check_for_update(screen_resolution=screen_resource, connection=connection)
-        if result:
-            self.new_version = result
-            self.updateAvailable.emit()
-        return result
-
+        return await controller.check_for_update(screen_resolution=screen_resource, connection=connection)
+    
     def promptUserForDownload(self) -> bool:
         msgBox = MessageBox()
         msgBox.level("question")
@@ -198,9 +190,8 @@ class MainWindow(QMainWindow):
         msgBox.title("Update Available")
         msgBox.buttons(("yes", "no"))
         msgBox.setDefaultButton(msgBox.Yes)
-        # Connect signals to handle user response
-        msgBox.buttonClicked.connect(self.handleUserDownloadChoice)
-        msgBox.open()  # This opens the message box without blocking the event loop
+        return msgBox.exec_() == msgBox.Yes
+    
 
     def promptUserForUpdate(self) -> bool:
         msgBox = MessageBox()
@@ -209,27 +200,17 @@ class MainWindow(QMainWindow):
         msgBox.title("Update Available")
         msgBox.buttons(("yes", "no"))
         msgBox.setDefaultButton(msgBox.Yes)
-        # Connect signals to handle user response
-        msgBox.buttonClicked.connect(self.handleUserUpdateChoice)
-        msgBox.open()  # This opens the message box without blocking the event loop
+        return msgBox.exec_() == msgBox.Yes
     
-    def handleUserDownloadChoice(self, button):
-        # Handle the user's response
-        if button.text() == "&Yes":
-            self.userWantsToDownload.emit()  # Emit signal if 'Yes' is clicked
-            return True
-        else:
-            # Do something if 'No' is clicked, or handle no download action
-            return False
-        
-    def handleUserUpdateChoice(self, button):
-        # Handle the user's response
-        if button.text() == "&Yes":
-            self.userWantsToUpdateNow.emit()  # Emit signal if 'Yes' is clicked
-            return True
-        else:
-            # Do something if 'No' is clicked, or handle no download action
-            return False
+    def warnForRestart(self):
+        msgBox = MessageBox()
+        msgBox.level("warning")
+        msgBox.message("Application will restart now for the update to take effect.")
+        msgBox.title("Update Downloaded")
+        msgBox.buttons(("ok", ))
+        msgBox.setDefaultButton(msgBox.Ok)
+        self.closedBeforeUpdateTimeout.emit()
+        msgBox.exec_()
 
     def warnForRestart(self):
         msgBox = MessageBox()
