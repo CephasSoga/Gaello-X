@@ -22,9 +22,16 @@ def getAudioLength(file_path):
         >>> getAudioLength("path/to/audio.mp3")
         123.456
     """
-    with audioread.audio_open(file_path) as f:
-        duration = f.duration
-        return duration
+    try:
+        with audioread.audio_open(file_path) as f:
+            duration = f.duration
+            return duration
+    except (audioread.NoBackendError, audioread.DecodeError) as e:
+        print(f"Error decoding audio file at path {file_path}: {e}")
+        return 1.0
+    except Exception as e:
+        print(f"Error processing audio file at path {file_path}: {e}")
+        raise e # raise every other error
 
 def hideFolder(folder_path):
     """

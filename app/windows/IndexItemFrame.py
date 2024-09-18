@@ -56,16 +56,32 @@ class IndexItem(QFrame):
         self.growthLabel.setAlignment(Qt.AlignRight)
 
         self.nameLabel.setText(self.name)
-        self.priceLabel.setText(f"{self.price:.3f}")
+        self.priceLabel.setText(f"{self.price:.2f}")
 
         self.chartLabel.setPixmap(self.historicalPixmap)
 
         if self.growth >= 0:
-            self.growthLabel.setText(f"+{self.growth:.3f}%")
-            self.growthLabel.setStyleSheet("color: green; border: none; border-radius: 0;")
+            self.growthLabel.setText(f"+{self.growth:.2f}%")
+            self.growthLabel.setStyleSheet(f"""
+            color: green; 
+            background: none;
+            border: none;
+            border-style: solid;
+            border-width: 2px;
+        border-color: rgba(0, 0, 0, 0);
+            border-bottom-color: rgb(0, 200, 0);
+            """)
         else:
-            self.growthLabel.setText(f"{self.growth:.3f}%")
-            self.growthLabel.setStyleSheet("color: red; border: none; border-radius: 0;")
+            self.growthLabel.setText(f"{self.growth:.2f}%")
+            self.growthLabel.setStyleSheet(f"""
+            color: red; 
+            background: none;
+            border: none;
+            border-style: solid;
+            border-width: 2px;
+            border-color: rgba(0, 0, 0, 0);
+            border-bottom-color: rgb(200, 0, 0);
+            """)
 
     def setFonts(self):
         size = FontSizePoint

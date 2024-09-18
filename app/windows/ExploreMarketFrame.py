@@ -201,7 +201,7 @@ class ExploreMarket(QFrame):
             price = quoteTarget[0]["price"]
             growth = quoteTarget[0]["changesPercentage"]
 
-            historicalTarget = forexData[0]["price"]["historical"]["quotes"]
+            historicalTarget = forexData[0]["price"]["historical"]["quotes"][::-1] # reverse to get a descending order (based on date)
 
             # only for testing
             chartVoidInputs = (list(range(1000)), [random.randrange(200, 420) for _ in range(1000)])
@@ -312,7 +312,7 @@ class ExploreMarket(QFrame):
             price = quoteTarget["price"]
             growth = quoteTarget["changesPercentage"]
 
-            historicalTarget = cryptoData[0]['historicalData']["daily"]["historical"]
+            historicalTarget = cryptoData[0]['historicalData']["daily"]["historical"][::-1] # reverse to get a descending order (based on date)
             chartInputs = ([point["date"] for point in historicalTarget], [point["adjClose"] for point in historicalTarget])
             chartOutput = chartWithSense(chartInputs[0], chartInputs[1], self.chartDisplayWidth, self.chartDisplayHeigth)
             chartPixmap = QPixmap(str(chartOutput))

@@ -30,6 +30,11 @@ class Insight:
     labels: list[str]
     tags: list[str]
 
+    def __post_init__(self):
+        # remove duplicates
+        self.labels = set(self.labels)
+        self.tags = set(self.tags)
+
 class InsightExpand(QFrame):
     def __init__(self, insight: Insight, parent=None):
         

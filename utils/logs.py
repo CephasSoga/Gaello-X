@@ -83,42 +83,45 @@ class Logger(object):
 
 
 import time
+from functools import wraps
 
-def timer(func):
-    """
-    A decorator that logs the time taken to execute a synchronous function.
+# Define the timer decorator that accepts a logger
+def timer(logger=None):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            start_time = time.time()  # Record the start time
+            result = func(*args, **kwargs)  # Call the function
+            end_time = time.time()  # Record the end time
+            execution_time = end_time - start_time  # Calculate execution time
 
-    Args:
-        func: The function to be timed.
+            # Log the execution time using the provided logger
+            if logger:
+                logger.log("info", f"> Function(s): '[{func.__name__}]'. Runtime: [<OK> in {execution_time:.4f} seconds]. Mode [Sync]. Environment: [{func.__module__}].")
+            else:
+                print("No logger provided. Execution time will not be logged.")
+                print(f"Function '{func.__name__}' executed in {execution_time:.4f} seconds")
+            
+            return result
+        return wrapper
+    return decorator
 
-    Returns:
-        The result of the function.
-    """
+def async_timer(logger=None):
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            start_time = time.time()  # Record the start time
+            result = await func(*args, **kwargs)  # Await the async function
+            end_time = time.time()  # Record the end time
+            execution_time = end_time - start_time  # Calculate execution time
 
-    def wrapper(*args, **kwargs):
-        start = time.perf_counter()
-        result = func(*args, **kwargs)
-        end = time.perf_counter()
-        print(f"\n*** Runtime check: {func.__name__} took: {end - start:.4f} seconds to complete.\n")
-        return result
-    return wrapper
-
-
-def async_timer(func):
-    """
-    A decorator that logs the time taken to execute an asynchronous function.
-
-    Args:
-        func: The async function to be timed.
-
-    Returns:
-        The result of the function.
-    """
-
-    async def wrapper(*args, **kwargs):
-        start = time.perf_counter()
-        result = await func(*args, **kwargs)
-        end = time.perf_counter()
-        print(f"{func.__name__} took: {end - start:.4f} seconds to complete.\n")
-        return result
-    return wrapper
+            # Log the execution time using the provided logger
+            if logger:
+                logger.log("info", f"> Function(s): '[{func.__name__}]'. Runtime: [<OK> in {execution_time:.4f} seconds]. Mode [Async]. Environment: [{func.__module__}].")
+            else:
+                print("No logger provided. Execution time will not be logged.")
+                print(f"Async function '{func.__name__}' executed in {execution_time:.4f} seconds")
+            
+            return result
+        return wrapper
+    return decorator

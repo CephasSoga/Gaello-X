@@ -15,3 +15,5 @@ class Schedule:
     LONG_WAITING_DELAY = 3000
 
     ACCUMULATED_TASKS = 100
+
+    CHANGE_DELAY = 2000

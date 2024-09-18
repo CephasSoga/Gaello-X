@@ -146,7 +146,7 @@ class JanineChat(QFrame):
     def connectSlots(self):
         self.recorder.recorded.connect(self.whileRecording)
         self.recorder.progress.connect(self.timer)
-        self.close_.clicked.connect(lambda: self.close())
+        self.close_.clicked.connect(lambda: self.hide()) # on <close_> click, hide to preserve state
         self.voicemail.clicked.connect(self.constructVoiceMail)
         self.attach.clicked.connect(self.loadMedia)
         self.send.clicked.connect(self.constructMessage)
@@ -461,7 +461,7 @@ class JanineChat(QFrame):
                 if path:
                     textMsg +=  str(path) + '\n' + text  
                 else:
-                    textMsg += text
+                    textMsg += text or '' # in case text is None
                 msg = TextMessage(text=textMsg,
                     origin=message['origin'],
                     date=message['date'],
@@ -471,25 +471,31 @@ class JanineChat(QFrame):
         finally:
             self.db.chatHistory = self.db.database[collection] #switch to current collection to handle how messages are distributed accross chat
             # show that focus has changed
-            for chat in self.chatTitleList:
-                if chat.title == collection:
-                    chat.setStyleSheet(
-                    """
-                    background-color: rgba(10, 10, 10, 180);
-                    border-style: solid;
-                    border-width: 2px;
-                    border-radius: 12px;
-                    border-color: rgb(200, 200, 200);
-                    """)
-                else:
-                    chat.setStyleSheet(
-                    """
-                    background-color: rgba(0, 0, 0, 0);
-                    border-style: dotted;
-                    border-width: 2px;
-                    border-radius: 12px;
-                    border-color: rgb(200, 200, 200);
-                    """)
+            try: # try the follwing (it raises an error if all chats have been deleted)
+                for chat in self.chatTitleList:
+                    if chat.title == collection:
+                        chat.setStyleSheet(
+                        """
+                        background-color: rgba(10, 10, 10, 180);
+                        border-style: solid;
+                        border-width: 2px;
+                        border-radius: 12px;
+                        border-color: rgb(200, 200, 200);
+                        """)
+                    else:
+                        chat.setStyleSheet(
+                        """
+                        background-color: rgba(0, 0, 0, 0);
+                        border-style: dotted;
+                        border-width: 2px;
+                        border-radius: 12px;
+                        border-color: rgb(200, 200, 200);
+                        """)
+            except RuntimeError:
+                pass # main exception to expect (error text: 'wrapped C/C++ object of type ChatTitle has been deleted')
+
+            except Exception:
+                raise # if the exception is not expected, re-raise it
 
     def topLevelHistoryRendering(self, collections: list[str]):
         if not collections or self.db.chatHistory is None:

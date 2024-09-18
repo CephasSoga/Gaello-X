@@ -114,6 +114,7 @@ class ChatTitle(QFrame):
 
     def editChatTitle(self):
         titleSelector = ChatTitleSelector()
+        titleSelector.chatTitleEdit.setPlaceholderText("Enter a new title here for your chat") 
         setRelativeToMainWindow(titleSelector, self.parent_, "center")
         titleSelector.titleSet.connect(self.editTitle)
         titleSelector.show()

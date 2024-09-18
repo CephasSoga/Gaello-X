@@ -51,7 +51,7 @@ main_logger = Logger("Main")
 main_logger.log("info", "Starting the application...")
 main_logger.log("info", f"Current working directory: {_cwd}")
 
-@timer
+@timer(logger=main_logger)
 def system_check(resolution_check_enabled: bool = True):
     BASE_DPI = 144
     BASE_PROPS = 1920, 1080
@@ -72,7 +72,7 @@ def system_check(resolution_check_enabled: bool = True):
         else:
             main_logger.log("info", "The optimal requirements for the application's DPI or screen resolution are met. No adjustments needed.")
 
-@timer
+@timer(logger=main_logger)
 def create_mongo_connection():
     uri = getenv("MONGO_URI")
 
@@ -88,7 +88,7 @@ def create_mongo_connection():
         main_logger.log("error", "MongoDB connection attempt failed", e)
         return None
 
-@timer
+@timer(logger=main_logger)
 def binary_exec():
     subprocess.Popen([r".\binary.bat"], shell=True)
 
@@ -117,7 +117,7 @@ def exec_api():
     except Exception as e:
         main_logger.log("error", "Failed to start the API", e)
 
-@timer
+@timer(logger=main_logger)
 def exec_all():
     try:
         system_check(resolution_check_enabled=False)
