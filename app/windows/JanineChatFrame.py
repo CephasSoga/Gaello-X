@@ -233,6 +233,7 @@ class JanineChat(QFrame):
 
     @asyncSlot()
     async def attachMultimediaFile(self):
+        self.disableAllActions() # disablee all buttons first
         await self.attachFileFunc()
         await self.completeMutimediaMessage()
         self.resetMessageField()
@@ -248,14 +249,23 @@ class JanineChat(QFrame):
         self.removeWaiter()
         self.resetMessageField()
 
+    def disableAllActions(self):
+        self.attach.setEnabled(False)
+        self.voicemail.setEnabled(False)
+        self.send.setEnabled(False)
+
     def resetMessageField(self):
         self.fileLoaded = False
         self.attachments.clear()
         clearLayout(self.attachmentLayout)
         self.loadedFilePath = ""
         self.message.clear()
+        self.attach.setEnabled(True)
+        self.voicemail.setEnabled(True)
+        self.send.setEnabled(True)
 
     async def textMessageFunc(self, message:str=None, origin:str="User"):
+        self.disableAllActions() # disablee all buttons first
         if message:
             text = message
         else: 
@@ -305,6 +315,7 @@ class JanineChat(QFrame):
         self.timerLabel.setText("00:00")
 
     async def voiceMailFunc(self, path: Path, origin:str="User"):
+        self.disableAllActions() # disablee all buttons first
         duration = getAudioLength(path)
         if duration == 0:
             self.messageBox.level("warning")

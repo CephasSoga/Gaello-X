@@ -16,7 +16,7 @@ from app.handlers.ShortLiveSeries import Series
 from app.handlers.ExportAssets import symbolList
 from app.windows.AssetPreviewFrame import AssetPreview
 from app.windows.AssetFocusFrame import AssetFocus
-from utils.appHelper import setRelativeToMainWindow, adjustForDPI
+from utils.appHelper import clearLayout, setRelativeToMainWindow, adjustForDPI
 from utils.databases import mongoGet
 from utils.asyncJobs import quickFetchBytes, asyncWrap, ThreadRun
 from utils.graphics import chartWithSense
@@ -55,7 +55,7 @@ class ExploreAsset(QFrame):
 
         self.initUI()
         QTimer.singleShot(Schedule.NO_DELAY, self.syncGetAllData)
-        QTimer.singleShot(Schedule.ASSET_JOB_START_DELAY, self.startLazyLoad)
+        QTimer.singleShot(Schedule.ASSET_JOB_START_DELAY, self.hotReload)
 
     def initUI(self):
         adjustForDPI(self)
@@ -80,6 +80,18 @@ class ExploreAsset(QFrame):
         self.scrollWidget.setLayout(self.scrollLayout)
         self.searchScroll.setWidget(self.scrollWidget)
 
+
+    def hotReload(self):
+        def clearAndReLoad():
+            clearLayout(self.scrollLayout)
+            self.startLazyLoad()
+        reloadTimer = QTimer()
+        reloadTimer.timeout.connect(clearAndReLoad)
+        reloadTimer.setInterval(Schedule.STRICT_DELAY)
+        # start lazy loading manually at epoch 0
+        self.startLazyLoad()
+        # then start timer to continue relaoding henceforth
+        reloadTimer.start()
 
     def startLazyLoad(self):
         self.lazyLoadTimer = QTimer()

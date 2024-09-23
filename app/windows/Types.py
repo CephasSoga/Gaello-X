@@ -452,7 +452,7 @@ class Multimedia:
                 framePaths = [str(x) for x in framePaths]
                 return framePaths
             except Exception as e:
-                print(f"Error creating  video frames {e}")
+                print(f"Error creating  video frames: {e}")
                 return []
             
     async def handleTranscript(self):

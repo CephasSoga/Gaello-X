@@ -354,7 +354,7 @@ class ChatMultimedia(QWidget):
             self.play.setIconSize(QSize(side, side))
         else:
             iconPath = getFrozenPath(os.path.join("assets",  "icons", "play2.png"))
-            icon = QtGui.QIcon(r"icons/play2.png")
+            icon = QtGui.QIcon(iconPath)
             self.play.setIcon(icon)
             self.play.setIconSize(QSize(side, side))
 
