@@ -8,3 +8,4 @@ class ViewController:
     MIN_DISPLAY_ROWS = 2
     DISPLAY_COLUMNS = ...
     DISPLAY_PADDING = 10
+    STRING_CUT = 120

@@ -1,5 +1,7 @@
 import os
+import re
 import asyncio
+import markdown
 from io import BytesIO
 from pathlib import Path
 from typing import Union
@@ -10,10 +12,11 @@ from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QFrame
 
+from app.config.renderer import ViewController
 from app.windows.Styles import chatScrollBarStyle
 from app.config.fonts import QuicksandBold, QuicksandRegular, RobotoBold, FontSizePoint
 from utils.paths import getFrozenPath
-from utils.appHelper import adjustForDPI, setRelativeToMainWindow
+from utils.appHelper import adjustForDPI, setChildRelativeToParentVisibleArea
 from utils.asyncJobs import quickFetchBytes
 
 # import resources
@@ -27,13 +30,10 @@ class Insight:
     content: str
     image: bytes
     urls: list[str]
-    labels: list[str]
-    tags: list[str]
+    labels: set[str]
+    tags: set[str]
 
-    def __post_init__(self):
-        # remove duplicates
-        self.labels = set(self.labels)
-        self.tags = set(self.tags)
+
 
 class InsightExpand(QFrame):
     def __init__(self, insight: Insight, parent=None):
@@ -74,7 +74,8 @@ class InsightExpand(QFrame):
                 self.imageLabel.setText("No Image")
             self.imageLabel.setPixmap(fallbackPixmap)
 
-        self.titleEdit.setHtml(self.insight.title)
+        titleToHtml = markdown.markdown(self.insight.title) 
+        self.titleEdit.setHtml(titleToHtml)
         self.titleEdit.setWordWrapMode(True)
         self.titleEdit.verticalScrollBar().setStyleSheet(chatScrollBarStyle)  
         self.titleEdit.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -90,7 +91,8 @@ class InsightExpand(QFrame):
         self.tagsEdit.verticalScrollBar().setStyleSheet(chatScrollBarStyle)  
         self.tagsEdit.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-        self.contentEdit.setHtml(self.insight.content)
+        contentToHtml = markdown.markdown(self.insight.content)
+        self.contentEdit.setHtml(contentToHtml)
         self.contentEdit.setWordWrapMode(True)
         self.contentEdit.verticalScrollBar().setStyleSheet(chatScrollBarStyle)  
         self.contentEdit.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -200,10 +202,15 @@ class InsightItem(QFrame):
     def setWFlags(self):
         self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.FramelessWindowHint)
 
+    def clean_markdown(self, text: str):
+        return re.sub(r'[^A-Za-z0-9 ]+', '', text)
+
     def setContents(self):
         #self.insightImage.setPixmap(imagePath)
-        self.insightTitle.setText(self.title)
-        self.insightPreview.setText(self.text)
+        title = self.clean_markdown(self.title)
+        text = self.clean_markdown(self.text[:ViewController.STRING_CUT])
+        self.insightTitle.setText(title)
+        self.insightPreview.setText(f'{text}...')
 
     def setFonts(self):
         size = FontSizePoint
@@ -221,4 +228,4 @@ class InsightItem(QFrame):
             self.insight
         )
         
-        setRelativeToMainWindow(expandItem, parent_, 'center')
+        setChildRelativeToParentVisibleArea(expandItem, parent_, "center", "bottom")

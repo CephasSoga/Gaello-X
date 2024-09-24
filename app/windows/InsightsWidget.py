@@ -123,8 +123,8 @@ class JanineInsights(QWidget):
                 "content": doc["content"],
                 "image": doc["image"],
                 "urls": doc["urls"],
-                "labels": doc["labels"],
-                "tags": doc["tags"],
+                "labels": set([label.lower() for label in doc["labels"]]),
+                "tags": set([tag.lower() for tag in doc["tags"]]),
 
             }
     

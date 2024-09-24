@@ -1,6 +1,8 @@
+import time
 import logging
 from typing import Any
 from pathlib import Path
+from functools import wraps
 
 from utils.paths import getFileSystemPath
 from utils.envHandler import getenv
@@ -79,11 +81,6 @@ class Logger(object):
             log_method(f"{message}\n\n")
         else:
             self.logger.error(f"Invalid log level: {level}. Message: {message}")
-
-
-
-import time
-from functools import wraps
 
 # Define the timer decorator that accepts a logger
 def timer(logger=None):

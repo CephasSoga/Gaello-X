@@ -85,6 +85,7 @@ class Header(QMainWindow):
 
         self.async_tasks = async_tasks
 
+        self.docsUrl = 'https://www.gaello.io/docs'
         self.aboutUsUrl = 'https://www.gaello.io'
         self.demoUrl =  'https://www.gaello.io'
 
@@ -144,7 +145,7 @@ class Header(QMainWindow):
 
         self.docWebEngineView = DocWebEngineView()
         self.docs.clicked.connect(
-            lambda: showWindow(self.docWebEngineView.web)
+            lambda: browse(self.docsUrl)
         )
 
         self.aboutUs.clicked.connect(

@@ -330,3 +330,46 @@ def adjustForDPI(widget: QWidget) -> Tuple[int, int]:
             int(widget.height() * h_factor)
         )
     return _CURRENT_W, _CURRENT_H
+
+def setChildRelativeToParentVisibleArea(widget: QWidget, parent: QWidget, x: str = 'center', y: str = 'center'):
+    """
+    Positions the given widget relative to the visible area of the parent widget based on the provided x and y coordinates.
+    
+    Parameters:
+    - widget (QWidget): The widget to be positioned.
+    - parent (QWidget): The parent widget of which the visible area is used for positioning.
+    - x (str): The x-coordinate position. It can be either 'left', 'right' or 'center'. Default is 'center'.
+    - y (str): The y-coordinate position. It can be either 'top', 'bottom' or 'center'. Default is 'center'.
+    
+    Raises:
+    - ValueError: If the provided x or y coordinates are not valid.
+    
+    Returns:
+    - None
+    """
+
+
+    widget.setParent(parent)
+    
+    visibleParentArea = parent.visibleRegion().boundingRect()
+    if x == 'left':
+        new_x = visibleParentArea.x()
+    elif x == 'right':
+        new_x = visibleParentArea.x() + visibleParentArea.width() - widget.width()
+    elif x == 'center':
+        new_x = visibleParentArea.x() + (visibleParentArea.width() - widget.width()) // 2
+    else:
+        raise ValueError(f'Invalid x value: {x}')
+
+
+    if y == 'top':
+        new_y = visibleParentArea.y()
+    elif y == 'bottom':
+        new_y = visibleParentArea.y() + visibleParentArea.height() - widget.height()
+    elif y == 'center':
+        new_y = visibleParentArea.y() + (visibleParentArea.height() - widget.height()) // 2
+    else:
+        raise ValueError(f'Invalid y value: {y}')
+
+    widget.move(new_x, new_y)
+    widget.show()
