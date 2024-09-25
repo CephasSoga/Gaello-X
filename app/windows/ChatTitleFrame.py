@@ -6,6 +6,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt, pyqtSignal, QEvent
 from PyQt5.QtWidgets import QFrame, QDialog
 
+from app.windows.MessageBox import MessageBox
 from utils.paths import getFrozenPath
 from utils.appHelper import setRelativeToMainWindow, adjustForDPI
 
@@ -43,7 +44,7 @@ class ChatTitleSelector(QFrame):
             self.titleSet.emit(title)
             self.close()
         else:
-            raise ValueError("Title cannot be empty")
+            MessageBox().level("critical").title("Error").message("Chat title cannot be empty.").buttons(("ok",)).exec_()
         
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseButtonPress:
@@ -113,6 +114,7 @@ class ChatTitle(QFrame):
         self.db['metadata'].delete_one({'chat.title': self.title})
         self.userConfirmedDeletion.emit()
         self.deleteLater()
+        # **NOTE**: See app/windows/AttachmentFrame.py: line 47-51 for more details
 
     def editChatTitle(self):
         titleSelector = ChatTitleSelector()

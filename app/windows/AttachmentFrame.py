@@ -44,4 +44,10 @@ class Attachment(QFrame):
     
     def selfDelete(self):
         self.isDeleted.emit()
-        self.deleteLater()
+        # calling self.deleteLater() makes following attachment impossible #
+        # as they will raise RuntimeError(C++ wrapped object has been deleted)
+        # it will be commented out from now on
+        # deletion will now be handled by clearing the attachment list in the chat widget
+        # and updating the attachment layout.
+        # **NOTE**: See app/windows/JanineChatFrame.py for more details 
+        #self.deleteLater()

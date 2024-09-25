@@ -206,15 +206,27 @@ class JanineChat(QFrame):
         if filePath:
             self.loadedFilePath = filePath
             self.fileLoaded = True
-            attachment = Attachment(filePath, self)
-            attachment.isDeleted.connect(lambda: self.attach.setEnabled(True))
-            self.attachments.append(attachment)
-            self.showAttachments()
-            if len(self.attachments) >= 1:
-                self.attach.setEnabled(False)
+            try:
+                attachment = Attachment(filePath, self)
+                attachment.isDeleted.connect(self.clearAttachments)
+                self.attachments.append(attachment)
+                self.showAttachments()
+                if len(self.attachments) >= 1:
+                    self.attach.setEnabled(False)
+            except RuntimeError: # (C++ wrapped object has been deleted)
+                MessageBox().level("critical").title("Error").message("Failed to load attachment. Please try again later.").buttons(("ok",)).exec_()
+                pass
+            except Exception as e: # for any other exceptions
+                MessageBox().level("critical").title("Error").message(f"{e}").buttons(("ok",)).exec_()
+                pass 
         else:
             pass
 
+    def clearAttachments(self):
+        self.attachments.clear()
+        self.attach.setEnabled(True)
+        clearLayout(self.attachmentLayout)
+        self.pathContainer.update()
 
     def showAttachments(self):
         for attachment in self.attachments:
@@ -395,7 +407,7 @@ class JanineChat(QFrame):
                 func=self.showFullChat, 
                 parent=self,
             )
-            chatTitle.userConfirmedDeletion.connect(lambda: clearLayout(self.chatLayout))
+            chatTitle.userConfirmedDeletion.connect(self.deleteChat)
             chatTitle.setStyleSheet(
                 "background-color: rgba(10, 10, 10, 200);"
             )
@@ -450,13 +462,17 @@ class JanineChat(QFrame):
                 func=self.showFullChat, 
                 parent=self,
             )
-            chat.userConfirmedDeletion.connect(lambda: clearLayout(self.chatLayout))
+            chat.userConfirmedDeletion.connect(self.deleteChat)
             self.historyLayout.addWidget(chat)
             self.historyWidget.setLayout(self.historyLayout)
             self.historyScrollArea.setWidget(self.historyWidget)
             self.historyWidget.installEventFilter(chat)
 
             self.chatTitleList.append(chat)
+
+    def deleteChat(self):
+        clearLayout(self.chatLayout)
+        
 
     def showFullChat(self, collection: str):
         try:
@@ -505,10 +521,14 @@ class JanineChat(QFrame):
                         border-color: rgb(200, 200, 200);
                         """)
             except RuntimeError:
+                MessageBox().level("critical").title("Error").message("Chat title has been deleted.").buttons(("ok",)).exec_()
                 pass # main exception to expect (error text: 'wrapped C/C++ object of type ChatTitle has been deleted')
 
-            except Exception:
+            except Exception as e:
+                MessageBox().level("critical").title("Error").message(f"{e}").buttons(("ok",)).exec_()
                 raise # if the exception is not expected, re-raise it
+                # re-raising helps with debugging in development.
+                # but, all uncaught exceptions should have been handled by deployment date
 
     def topLevelHistoryRendering(self, collections: list[str]):
         if not collections or self.db.chatHistory is None:

@@ -34,6 +34,7 @@ class MessageBox(QMessageBox):
         }.get(tuple(option.lower() for option in options))
         if buttons is not None:
             self.setStandardButtons(buttons)
+            return self
         else:
             raise ValueError("Invalid buttons provided")
         
@@ -48,20 +49,24 @@ class MessageBox(QMessageBox):
         
         if level is not None:
             self.setIcon(level)
+            return self
         else:
             raise ValueError("Invalid level provided")
         
     def title(self, title: str):
         self.setWindowTitle(title)
+        return self
 
     def message(self, message: str):
         self.setText(message)
+        return self
 
     def exec_on_thread(self):
         self.worker = MessageBoxWorker(self)
         self.worker.result_signal.connect(self.return_result)
         self.worker.finished.connect(self.worker.deleteLater)
         self.worker.start()
+        return self
 
 
     def return_result(self, result: int):
