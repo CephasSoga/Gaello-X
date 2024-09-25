@@ -10,13 +10,11 @@ from pymongo.errors import ConnectionFailure, CollectionInvalid
 from databases.mongodb.Operations import *
 from utils.envHandler import getenv
 from utils.logs import Logger
-from utils.time import now
 from models.reader.cache import cached_credentials
+from models.config.args import ModelsArgs
 
 connectionStr = getenv("MONGO_URI")
 logger = Logger("MongoDB-Janine")
-MAX_DOCS = 50
-MAX_COLLECTIONS = 50
 ID = cached_credentials.get("id", None)
 EMAIL = cached_credentials.get("email", None)
 if not ID or not EMAIL:
@@ -97,7 +95,7 @@ class JanineMongoDatabase:
         except Exception as e:
             logger.log("error", "Failed to create metadata index", e)
     
-    def getSortedCollections(self, limit: int = MAX_COLLECTIONS):
+    def getSortedCollections(self, limit: int = ModelsArgs.MAX_CHAT_COLLECTIONS):
         metadataCollection = self.database['metadata']
         recentCollections = metadataCollection.find().sort('chat.createdAt', -1).limit(limit)
         # Extract collection names
@@ -140,7 +138,7 @@ class JanineMongoDatabase:
         else:
             return []
     
-    def deleteExcess(self, max:int=MAX_DOCS):
+    def deleteExcess(self, max:int=ModelsArgs.MAX_CHAT_DOCS):
         """Chat context up to specified max chat items. Delete the excess."""
         if self.chatHistory is None:
             raise Exception("Chat history collection not initialized")

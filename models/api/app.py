@@ -6,14 +6,14 @@ from waitress import serve
 #from app.windows.AuthHandler import read_user_id
 from utils.logs import Logger
 from models.reader.cache import cached_credentials
+from models.config.args import EndpointsArgs
 
 
 app = Flask("Janine-Endpoint")
 
 logger = Logger("Janine-Endpoint")
 
-MAX_QUEUE_SIZE = 1000
-successfulRequetsQueue = deque(maxlen=MAX_QUEUE_SIZE)
+successfulRequetsQueue = deque(maxlen=EndpointsArgs.MAX_QUEUE_SIZE)
 ID = cached_credentials.get('id', '')
 EMAIL = cached_credentials.get('email', '')
 
@@ -96,4 +96,9 @@ class Application:
 
 
 if __name__ == "__main__":
-    Application.run(host='0.0.0.0', port=19220, debug=True)
+    Application.run(
+        host=EndpointsArgs.HOST, 
+        port=EndpointsArgs.PORT,
+        threaded=EndpointsArgs.THREADED, 
+        debug=EndpointsArgs.DEBUG
+    )

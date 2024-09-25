@@ -3,13 +3,11 @@ import aiohttp
 from typing import Any, List, Dict
 
 from models.reader.cache import cached_credentials
+from models.config.args import EndpointsArgs
 from utils.logs import Logger
 
 logger = Logger("Request-Manager")
 
-PROTOCOL = 'http'
-IP = '127.0.0.1'
-PORT = '5000'
 ID = cached_credentials.get('id', '')
 EMAIL = cached_credentials.get('email', '')
 if not ID or not EMAIL:
@@ -88,7 +86,13 @@ class RequestManager:
         Sends a GET request to the specified URL, retrieves the response data,
         and returns the last item in the data.
     """
-    def __init__(self, protocol:str=PROTOCOL, ip:str=IP, port:str=PORT, path:str=PATH):
+    def __init__(
+            self, 
+            protocol:str=EndpointsArgs.REQ_PROTOCOL, 
+            ip:str=EndpointsArgs.REQ_HOST, 
+            port:str=EndpointsArgs.REQ_PORT, 
+            path:str=PATH
+        ):
         """
         Constructs all the necessary attributes for the RequestManager object.
 
