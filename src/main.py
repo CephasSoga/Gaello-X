@@ -22,7 +22,7 @@ from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtGui import QGuiApplication
 #4 - Dispatched imports from janine
-from janine import RichText, RichAudio, RichFile, RichVision, BaseRemote, BaseUtility
+from janine.models import RichText, RichAudio, RichFile, RichVision, BaseRemote, BaseUtility
 #5 - Dispatched imports from utils
 from utils.logs import Logger
 #6- Dispatched imports from databases

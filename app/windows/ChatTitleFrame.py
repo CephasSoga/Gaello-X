@@ -54,6 +54,7 @@ class ChatTitleSelector(QFrame):
 
 class ChatTitle(QFrame):
     isClicked = pyqtSignal()
+    userConfirmedDeletion = pyqtSignal()
     def __init__(self, title: str, db: Database, func: Optional[Callable[[str], None]] = None, parent = None, gdparent = None):
         super(ChatTitle, self).__init__(parent)
         path = getFrozenPath(os.path.join("assets", "UI", "chatTitle.ui"))
@@ -110,6 +111,7 @@ class ChatTitle(QFrame):
     def deleteSelf(self):
         self.db.drop_collection(self.title)
         self.db['metadata'].delete_one({'chat.title': self.title})
+        self.userConfirmedDeletion.emit()
         self.deleteLater()
 
     def editChatTitle(self):

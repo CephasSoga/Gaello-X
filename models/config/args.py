@@ -1,0 +1,2 @@
+class ModelsArgs:
+    MIN_TOKENS_COUNT_FOR_CONTEXT = 24

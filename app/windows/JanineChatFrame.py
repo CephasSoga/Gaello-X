@@ -77,7 +77,7 @@ class JanineChat(QFrame):
 
         self.db = JanineMongoDatabase(connection=self.connection)
         self.recorder = Recorder()
-        self.janine = Janine(self.db)
+        self.janine = Janine(client=self.connection, database=self.db)
 
         self.outputFile = None
         self.isRecording = False
@@ -395,6 +395,7 @@ class JanineChat(QFrame):
                 func=self.showFullChat, 
                 parent=self,
             )
+            chatTitle.userConfirmedDeletion.connect(lambda: clearLayout(self.chatLayout))
             chatTitle.setStyleSheet(
                 "background-color: rgba(10, 10, 10, 200);"
             )
@@ -449,6 +450,7 @@ class JanineChat(QFrame):
                 func=self.showFullChat, 
                 parent=self,
             )
+            chat.userConfirmedDeletion.connect(lambda: clearLayout(self.chatLayout))
             self.historyLayout.addWidget(chat)
             self.historyWidget.setLayout(self.historyLayout)
             self.historyScrollArea.setWidget(self.historyWidget)

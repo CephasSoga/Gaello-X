@@ -1,10 +1,12 @@
 from typing import Optional, List, Dict, Any
 
-from janine.RichText import TextCompletion
-from janine.RichAudio import AudioStreamCompletion
-from janine.RichVision import VisionCompletion
-from janine.RichFile import FileCompletion
+from pymongo import MongoClient
 
+from janine.models.RichText import TextCompletion
+from janine.models.RichAudio import AudioStreamCompletion
+from janine.models.RichVision import VisionCompletion
+from janine.models.RichFile import FileCompletion
+from models.config.args import ModelsArgs
 from models.api.requests import RequestManager
 from databases.mongodb.JanineDB import JanineMongoDatabase
 from utils.logs import Logger
@@ -16,7 +18,7 @@ class Janine(TextCompletion, AudioStreamCompletion, VisionCompletion, FileComple
     A class that integrates various completion capabilities for different message types.
     It inherits from TextCompletion, AudioStreamCompletion, VisionCompletion, and FileCompletion.
     """
-    def __init__(self, database: JanineMongoDatabase):
+    def __init__(self, client: MongoClient, database: JanineMongoDatabase):
         """
         Initializes a new instance of the Janine class, inheriting from TextCompletion, 
         AudioStreamCompletion, VisionCompletion, and FileCompletion. It sets up the 
@@ -28,10 +30,10 @@ class Janine(TextCompletion, AudioStreamCompletion, VisionCompletion, FileComple
         Returns:
             None
         """
-        TextCompletion.__init__(self)
-        AudioStreamCompletion.__init__(self)
-        VisionCompletion.__init__(self)
-        FileCompletion.__init__(self)
+        TextCompletion.__init__(self, client=client)
+        AudioStreamCompletion.__init__(self, client=client)
+        VisionCompletion.__init__(self, client=client)
+        FileCompletion.__init__(self, client=client)
 
         self.requestManager = RequestManager()
         self.database = database
@@ -60,6 +62,7 @@ class Janine(TextCompletion, AudioStreamCompletion, VisionCompletion, FileComple
             return await self.textCompletion(
                 history=history,
                 textInput=textInput,
+                min_tokens_count_for_context=ModelsArgs.MIN_TOKENS_COUNT_FOR_CONTEXT
             )
 
         elif messageType == "image":
@@ -75,6 +78,7 @@ class Janine(TextCompletion, AudioStreamCompletion, VisionCompletion, FileComple
                 history=history,
                 transcription = transcription,
                 textInput=textInput,
+                min_tokens_count_for_context=ModelsArgs.MIN_TOKENS_COUNT_FOR_CONTEXT
             )
             return await self.textToAudioFile(textResponse)
 
