@@ -25,7 +25,7 @@ from utils.paths import rawPathStr, getFrozenPath, getFileSystemPath
 from app.config.fonts import  QuicksandBold, Exo2Medium, FontSizePoint
 from app.windows.WaiterFrame import Waiter
 from app.windows.ChatTitleFrame import ChatTitleSelector, ChatTitle
-from utils.appHelper import setRelativeToMainWindow, clearLayout, adjustForDPI
+from utils.appHelper import setRelativeToMainWindow, clearLayout, adjustForDPI, isEmptyLayout
 from utils.time import now
 from app.windows.AttachmentFrame import Attachment
 from app.config.renderer import ViewController
@@ -472,7 +472,8 @@ class JanineChat(QFrame):
 
     def deleteChat(self):
         clearLayout(self.chatLayout)
-        
+        if isEmptyLayout(self.historyLayout):
+            self.disableAllActions()
 
     def showFullChat(self, collection: str):
         try:

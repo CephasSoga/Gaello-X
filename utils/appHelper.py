@@ -252,6 +252,33 @@ def clearLayout(layout: QVBoxLayout | QHBoxLayout | QGridLayout):
     # Ensure the layout is fully cleared
     layout.update()
 
+def isEmptyLayout(layout: QVBoxLayout | QHBoxLayout | QGridLayout, mode: str = 'delay') -> bool:
+    # if we are using deleteLater() to remove a widget
+    # chcking layout count right after might unexpectedly return the count before delaetion
+    # take that behavior into account
+    """
+    Checks if the specified layout is empty or not.
+
+    Args:
+        layout (QVBoxLayout|QHBoxLayout|QGridLayout): The layout to check.
+        mode (str): The mode to check in. If 'delay', it will return True if the layout count is 1 or less, 
+            meaning it is likely the layout is being cleared and will be empty soon. If 'no delay', it will return
+            True only if the layout count is exactly 0.
+
+    Returns:
+        bool: True if the layout is empty, False otherwise.
+
+    Raises:
+        ValueError: If mode is not 'delay' or 'no delay'.
+    """
+    if mode == 'delay':
+        return layout.count() <= 1
+    elif mode == 'no delay':
+        return layout.count() == 0
+    else:
+        raise ValueError("mode must be 'delay' or 'no delay'")
+
+
 
 def isFrozen():
     """
